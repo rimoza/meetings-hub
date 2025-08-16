@@ -46,28 +46,29 @@ export function SidebarNav({ onCreateMeeting, onNavigate, activePage }: SidebarN
   return (
     <Sidebar>
       <SidebarHeader>
-        <div className="flex items-center justify-center w-full px-2">
-          <h2 className="text-lg font-semibold text-foreground">Tidy Meets</h2>
+        <div className="flex items-center justify-center w-full px-2 py-2">
+          <h2 className="text-base sm:text-lg font-semibold text-foreground">Tidy Meets</h2>
         </div>
       </SidebarHeader>
 
       <SidebarContent>
         <div className="space-y-1">
-          {/* Create Meeting Button */}
+          {/* Create Meeting Button - Mobile optimized */}
           <div className="px-2 mb-4">
-            <Button onClick={handleCreateMeeting} className="w-full justify-start">
+            <Button onClick={handleCreateMeeting} className="w-full justify-start h-10 text-sm sm:text-base">
               <Plus className="h-4 w-4" />
               <span className="ml-2">New Meeting</span>
             </Button>
           </div>
 
-          {/* Navigation Items */}
+          {/* Navigation Items - Mobile optimized */}
           <SidebarMenu>
             {menuItems.map((item) => (
               <SidebarMenuItem key={item.id}>
                 <SidebarMenuButton
                   isActive={activePage === item.id}
                   onClick={() => handleNavClick(item.id)}
+                  className="h-10 text-sm sm:text-base"
                 >
                   {item.icon}
                   <span>{item.label}</span>

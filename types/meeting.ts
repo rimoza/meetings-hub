@@ -18,7 +18,7 @@ export interface MeetingFilters {
   search: string
   status: "all" | "completed" | "pending"
   priority: "all" | "low" | "medium" | "high"
-  type: "all" | "meeting" | "call" | "interview" | "presentation" // Updated to match Meeting type
+  type: "all" | "meeting" | "call" | "interview" | "presentation"
 }
 
 export type ViewMode = "table" | "card"

@@ -108,52 +108,54 @@ export default function Dashboard() {
       default:
         return (
           <>
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {/* Stats Cards - Mobile First */}
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8">
               {stats.map((stat) => (
                 <Card key={stat.title} className="overflow-hidden">
-                  <CardHeader className="pb-2">
+                  <CardHeader className="p-3 sm:p-4 pb-2">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">{stat.title}</CardTitle>
-                      <div className={`p-2 rounded-lg bg-gradient-to-r ${stat.gradient}`}>
-                        <stat.icon className="h-4 w-4 text-white" />
+                      <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">{stat.title}</CardTitle>
+                      <div className={`p-1.5 sm:p-2 rounded-lg bg-gradient-to-r ${stat.gradient}`}>
+                        <stat.icon className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{stat.value}</div>
+                  <CardContent className="p-3 sm:p-4 pt-0">
+                    <div className="text-xl sm:text-2xl font-bold">{stat.value}</div>
                   </CardContent>
                 </Card>
               ))}
             </div>
 
-            {/* Filters and View Toggle */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-              <div className="flex-1 w-full">
+            {/* Filters and View Toggle - Mobile First */}
+            <div className="flex flex-col gap-3 mb-4 sm:mb-6">
+              <div className="w-full">
                 <MeetingFilters filters={filters} onFiltersChange={setFilters} />
               </div>
-              <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
+              <div className="flex justify-end">
+                <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
+              </div>
             </div>
 
             {/* Meetings Display */}
             {filteredMeetings.length === 0 ? (
-              <Card className="text-center py-12">
+              <Card className="text-center py-8 sm:py-12">
                 <CardContent>
-                  <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No meetings found</h3>
-                  <p className="text-muted-foreground mb-4">
+                  <Calendar className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-3 sm:mb-4" />
+                  <h3 className="text-base sm:text-lg font-semibold mb-2">No meetings found</h3>
+                  <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4 px-2">
                     {filters.search || filters.status !== "all" || filters.priority !== "all" || filters.type !== "all"
-                      ? "Try adjusting your filters to see more meetings."
-                      : "Get started by creating your first meeting."}
+                      ? "Try adjusting your filters."
+                      : "Create your first meeting."}
                   </p>
-                  <Button onClick={handleCreateMeeting}>
+                  <Button onClick={handleCreateMeeting} size="sm" className="sm:size-default">
                     <Plus className="h-4 w-4 mr-2" />
                     Create Meeting
                   </Button>
                 </CardContent>
               </Card>
             ) : viewMode === "card" ? (
-              <div className="grid grid-cols-1 gap-6">
+              <div className="grid grid-cols-1 gap-3 sm:gap-4 md:gap-6">
                 {filteredMeetings.map((meeting) => (
                   <MeetingCard
                     key={meeting.id}
@@ -184,37 +186,53 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
+        {/* Header - Mobile First */}
         <header className="border-b bg-card">
-          <div className="flex items-center px-4 py-4">
-            <SidebarTrigger className="mr-4" />
-            <div className="flex items-center justify-between flex-1">
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">
-                  {currentPage === "dashboard" && "Dashboard"}
-                  {currentPage === "today" && "Today's Meetings"}
-                  {currentPage === "upcoming" && "Upcoming Meetings"}
-                  {currentPage === "settings" && "Settings"}
-                </h1>
-                <p className="text-muted-foreground">
-                  {currentPage === "dashboard" && "Manage your meetings efficiently"}
-                  {currentPage === "today" && "Focus on today's scheduled meetings"}
-                  {currentPage === "upcoming" && "Plan ahead with upcoming meetings"}
-                  {currentPage === "settings" && "Configure your preferences"}
-                </p>
-              </div>
-              <div className="flex items-center space-x-4">
-                <Button onClick={handleCreateMeeting}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  New Meeting
-                </Button>
-                <ThemeToggle />
+          <div className="px-3 py-3 sm:px-4 sm:py-4">
+            <div className="flex items-center gap-2">
+              <SidebarTrigger className="md:hidden" />
+              <div className="flex-1">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground truncate">
+                      {currentPage === "dashboard" && "Dashboard"}
+                      {currentPage === "today" && "Today's Meetings"}
+                      {currentPage === "upcoming" && "Upcoming"}
+                      {currentPage === "settings" && "Settings"}
+                    </h1>
+                    <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
+                      {currentPage === "dashboard" && "Manage your meetings"}
+                      {currentPage === "today" && "Today's scheduled meetings"}
+                      {currentPage === "upcoming" && "Plan ahead"}
+                      {currentPage === "settings" && "Configure preferences"}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 ml-2">
+                    <Button 
+                      onClick={handleCreateMeeting}
+                      size="sm"
+                      className="hidden sm:inline-flex"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      <span className="hidden lg:inline">New Meeting</span>
+                      <span className="lg:hidden">New</span>
+                    </Button>
+                    <Button
+                      onClick={handleCreateMeeting}
+                      size="icon"
+                      className="sm:hidden h-8 w-8"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                    <ThemeToggle />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </header>
 
-        <main className="flex-1 overflow-auto px-6 py-8">{renderPageContent()}</main>
+        <main className="flex-1 overflow-auto px-3 py-4 sm:px-4 sm:py-6 md:px-6 md:py-8">{renderPageContent()}</main>
       </div>
 
       {/* Meeting Form Modal */}

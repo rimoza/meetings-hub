@@ -69,10 +69,13 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: MeetingFormP
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    const now = new Date()
     onSubmit({
       ...formData,
       date: formData.date.toISOString().split("T")[0],
       completed: false,
+      createdAt: now,
+      updatedAt: now,
     })
     onClose()
   }
@@ -96,13 +99,13 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: MeetingFormP
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-[500px] sm:max-w-[600px] max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{meeting ? "Edit Meeting" : "Create New Meeting"}</DialogTitle>
+          <DialogTitle className="text-lg sm:text-xl">{meeting ? "Edit Meeting" : "Create Meeting"}</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 gap-4">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+          <div className="grid grid-cols-1 gap-3 sm:gap-4">
             {/* Title */}
             <div>
               <Label htmlFor="title">Title *</Label>
@@ -127,24 +130,24 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: MeetingFormP
               />
             </div>
 
-            {/* Date and Time */}
-            <div className="grid grid-cols-2 gap-4">
+            {/* Date and Time - Stack on mobile */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <Label>Date *</Label>
+                <Label className="text-sm">Date *</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full justify-start text-left font-normal",
+                        "w-full justify-start text-left font-normal h-9 sm:h-10 text-sm",
                         !formData.date && "text-muted-foreground",
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {formData.date ? format(formData.date, "PPP") : "Pick a date"}
+                      {formData.date ? format(formData.date, "MMM d, yyyy") : "Pick date"}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
+                  <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
                       selected={formData.date}
@@ -156,38 +159,42 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: MeetingFormP
               </div>
 
               <div>
-                <Label htmlFor="time">Time *</Label>
+                <Label htmlFor="time" className="text-sm">Time *</Label>
                 <Input
                   id="time"
                   type="time"
                   value={formData.time}
                   onChange={(e) => setFormData((prev) => ({ ...prev, time: e.target.value }))}
+                  className="h-9 sm:h-10 text-sm"
                   required
                 />
               </div>
             </div>
 
-            {/* Duration, Type, Priority */}
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="duration">Duration (min)</Label>
-                <Input
-                  id="duration"
-                  type="number"
-                  min="15"
-                  step="15"
-                  value={formData.duration}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, duration: Number.parseInt(e.target.value) }))}
-                />
-              </div>
+            {/* Duration - Full width on mobile */}
+            <div>
+              <Label htmlFor="duration" className="text-sm">Duration (minutes)</Label>
+              <Input
+                id="duration"
+                type="number"
+                min="15"
+                step="15"
+                value={formData.duration}
+                onChange={(e) => setFormData((prev) => ({ ...prev, duration: Number.parseInt(e.target.value) }))}
+                className="h-9 sm:h-10 text-sm"
+                placeholder="60"
+              />
+            </div>
 
+            {/* Type and Priority - Stack on mobile */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <Label>Type</Label>
+                <Label className="text-sm">Type</Label>
                 <Select
                   value={formData.type}
                   onValueChange={(value: MeetingType) => setFormData((prev) => ({ ...prev, type: value }))}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-9 sm:h-10 text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -200,12 +207,12 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: MeetingFormP
               </div>
 
               <div>
-                <Label>Priority</Label>
+                <Label className="text-sm">Priority</Label>
                 <Select
                   value={formData.priority}
                   onValueChange={(value: Priority) => setFormData((prev) => ({ ...prev, priority: value }))}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-9 sm:h-10 text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -228,32 +235,33 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: MeetingFormP
               />
             </div>
 
-            {/* Attendees */}
+            {/* Attendees - Mobile optimized */}
             <div>
-              <Label>Attendees</Label>
+              <Label className="text-sm">Attendees</Label>
               <div className="flex gap-2 mb-2">
                 <Input
                   value={attendeeInput}
                   onChange={(e) => setAttendeeInput(e.target.value)}
-                  placeholder="Add attendee email"
+                  placeholder="Add attendee"
+                  className="h-9 sm:h-10 text-sm"
                   onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addAttendee())}
                 />
-                <Button type="button" onClick={addAttendee} variant="outline">
+                <Button type="button" onClick={addAttendee} variant="outline" size="sm" className="h-9 px-3 sm:h-10 sm:px-4">
                   Add
                 </Button>
               </div>
               {formData.attendees.length > 0 && (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {formData.attendees.map((attendee) => (
                     <div
                       key={attendee}
-                      className="flex items-center gap-1 bg-secondary text-secondary-foreground px-2 py-1 rounded-md text-sm"
+                      className="flex items-center gap-1 bg-secondary text-secondary-foreground px-2 py-1 rounded-md text-xs sm:text-sm"
                     >
-                      {attendee}
+                      <span className="truncate max-w-[120px]">{attendee}</span>
                       <button
                         type="button"
                         onClick={() => removeAttendee(attendee)}
-                        className="ml-1 text-muted-foreground hover:text-foreground"
+                        className="ml-1 text-muted-foreground hover:text-foreground text-sm"
                       >
                         ×
                       </button>
@@ -264,11 +272,13 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: MeetingFormP
             </div>
           </div>
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
+          <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+            <Button type="button" variant="outline" onClick={onClose} className="w-full sm:w-auto order-2 sm:order-1">
               Cancel
             </Button>
-            <Button type="submit">{meeting ? "Update Meeting" : "Create Meeting"}</Button>
+            <Button type="submit" className="w-full sm:w-auto order-1 sm:order-2">
+              {meeting ? "Update" : "Create"} Meeting
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
