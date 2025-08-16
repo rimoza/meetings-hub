@@ -1,10 +1,10 @@
 "use client"
 
-import { Calendar, Clock, MapPin, MoreHorizontal, User } from "lucide-react"
+import { Calendar, Clock, MapPin, User, Edit, Trash2, Check, X } from "lucide-react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import type { Meeting } from "@/types/meeting"
 import { format } from "date-fns"
 
@@ -40,22 +40,62 @@ export function MeetingCard({ meeting, onEdit, onDelete, onToggleComplete }: Mee
               {meeting.title}
             </h3>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 shrink-0">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onEdit(meeting)}>Edit</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onToggleComplete(meeting.id)}>
-                {meeting.completed ? "Mark Pending" : "Mark Complete"}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onDelete(meeting.id)} className="text-destructive">
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* Vertical Action Icons */}
+          <TooltipProvider>
+            <div className="flex flex-col gap-1 shrink-0">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-7 w-7 p-0 hover:bg-blue-100 hover:text-blue-600 dark:hover:bg-blue-900/20"
+                    onClick={() => onEdit(meeting)}
+                  >
+                    <Edit className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="left">
+                  <p>Edit meeting</p>
+                </TooltipContent>
+              </Tooltip>
+              
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={`h-7 w-7 p-0 ${
+                      meeting.completed 
+                        ? "hover:bg-orange-100 hover:text-orange-600 dark:hover:bg-orange-900/20" 
+                        : "hover:bg-green-100 hover:text-green-600 dark:hover:bg-green-900/20"
+                    }`}
+                    onClick={() => onToggleComplete(meeting.id)}
+                  >
+                    {meeting.completed ? <X className="h-3.5 w-3.5" /> : <Check className="h-3.5 w-3.5" />}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="left">
+                  <p>{meeting.completed ? "Mark pending" : "Mark complete"}</p>
+                </TooltipContent>
+              </Tooltip>
+              
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-7 w-7 p-0 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/20"
+                    onClick={() => onDelete(meeting.id)}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="left">
+                  <p>Delete meeting</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </TooltipProvider>
         </div>
         <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-2">
           <Badge className={`text-xs ${priorityColors[meeting.priority]}`}>{meeting.priority}</Badge>
