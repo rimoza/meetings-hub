@@ -6,20 +6,20 @@ import { MeetingTable } from "@/components/meeting-table"
 import { ViewToggle } from "@/components/view-toggle"
 import { MeetingFilters } from "@/components/meeting-filters"
 import { useState } from "react"
-import type { Meeting } from "@/types/meeting"
+import type { Meeting, MeetingFilters as MeetingFiltersType } from "@/types/meeting"
 
 interface TodaysMeetingsProps {
   onEditMeeting: (meeting: Meeting) => void
 }
 
-export function TodaysMeetings({ onEditMeeting }: TodaysMeetingsProps) {
-  const { meetings, deleteMeeting, toggleMeetingComplete } = useMeetings()
+export function TodaysMeetings({ onEditMeeting }: Readonly<TodaysMeetingsProps>) {
+  const { meetings, deleteMeeting, toggleMeetingCompletion } = useMeetings()
   const [viewMode, setViewMode] = useState<"card" | "table">("table")
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<MeetingFiltersType>({
     search: "",
-    type: "all" as const,
-    priority: "all" as const,
-    status: "all" as const,
+    type: "all",
+    priority: "all",
+    status: "all",
   })
 
   // Filter meetings for today
@@ -48,7 +48,7 @@ export function TodaysMeetings({ onEditMeeting }: TodaysMeetingsProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Today's Meetings</h1>
+          <h1 className="text-3xl font-bold text-foreground">Today&apos;s Meetings</h1>
           <p className="text-muted-foreground">
             {filteredMeetings.length} meeting{filteredMeetings.length !== 1 ? "s" : ""} scheduled for today
           </p>
@@ -70,7 +70,7 @@ export function TodaysMeetings({ onEditMeeting }: TodaysMeetingsProps) {
               meeting={meeting}
               onEdit={() => onEditMeeting(meeting)}
               onDelete={() => deleteMeeting(meeting.id)}
-              onToggleComplete={() => toggleMeetingComplete(meeting.id)}
+              onToggleComplete={() => toggleMeetingCompletion(meeting.id)}
             />
           ))}
         </div>
@@ -79,7 +79,7 @@ export function TodaysMeetings({ onEditMeeting }: TodaysMeetingsProps) {
           meetings={filteredMeetings}
           onEdit={onEditMeeting}
           onDelete={deleteMeeting}
-          onToggleComplete={toggleMeetingComplete}
+          onToggleComplete={toggleMeetingCompletion}
         />
       )}
     </div>

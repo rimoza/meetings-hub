@@ -6,20 +6,20 @@ import { MeetingTable } from "@/components/meeting-table"
 import { ViewToggle } from "@/components/view-toggle"
 import { MeetingFilters } from "@/components/meeting-filters"
 import { useState } from "react"
-import type { Meeting } from "@/types/meeting"
+import type { Meeting, MeetingFilters as MeetingFiltersType } from "@/types/meeting"
 
 interface UpcomingMeetingsProps {
   onEditMeeting: (meeting: Meeting) => void
 }
 
-export function UpcomingMeetings({ onEditMeeting }: UpcomingMeetingsProps) {
-  const { meetings, deleteMeeting, toggleMeetingComplete } = useMeetings()
+export function UpcomingMeetings({ onEditMeeting }: Readonly<UpcomingMeetingsProps>) {
+  const { meetings, deleteMeeting, toggleMeetingCompletion } = useMeetings()
   const [viewMode, setViewMode] = useState<"card" | "table">("table")
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<MeetingFiltersType>({
     search: "",
-    type: "all" as const,
-    priority: "all" as const,
-    status: "all" as const,
+    type: "all",
+    priority: "all",
+    status: "all",
   })
 
   // Filter meetings for upcoming (after today)
@@ -75,7 +75,7 @@ export function UpcomingMeetings({ onEditMeeting }: UpcomingMeetingsProps) {
               meeting={meeting}
               onEdit={() => onEditMeeting(meeting)}
               onDelete={() => deleteMeeting(meeting.id)}
-              onToggleComplete={() => toggleMeetingComplete(meeting.id)}
+              onToggleComplete={() => toggleMeetingCompletion(meeting.id)}
             />
           ))}
         </div>
@@ -84,7 +84,7 @@ export function UpcomingMeetings({ onEditMeeting }: UpcomingMeetingsProps) {
           meetings={sortedMeetings}
           onEdit={onEditMeeting}
           onDelete={deleteMeeting}
-          onToggleComplete={toggleMeetingComplete}
+          onToggleComplete={toggleMeetingCompletion}
         />
       )}
     </div>
