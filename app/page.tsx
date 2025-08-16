@@ -5,6 +5,7 @@ import { Plus, Calendar, CheckCircle, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { SidebarTrigger } from "@/components/ui/sidebar"
 import { ViewToggle } from "@/components/view-toggle"
 import { MeetingFilters } from "@/components/meeting-filters"
 import { MeetingCard } from "@/components/meeting-card"
@@ -187,8 +188,10 @@ export default function Dashboard() {
         <header className="border-b bg-card">
           <div className="px-6 py-4">
             <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">
+              <div className="flex items-center gap-3">
+                <SidebarTrigger />
+                <div>
+                  <h1 className="text-2xl font-bold text-foreground">
                   {currentPage === "dashboard" && "Dashboard"}
                   {currentPage === "today" && "Today's Meetings"}
                   {currentPage === "upcoming" && "Upcoming Meetings"}
@@ -200,6 +203,7 @@ export default function Dashboard() {
                   {currentPage === "upcoming" && "Plan ahead with upcoming meetings"}
                   {currentPage === "settings" && "Configure your preferences"}
                 </p>
+                </div>
               </div>
               <div className="flex items-center space-x-4">
                 <Button onClick={handleCreateMeeting}>

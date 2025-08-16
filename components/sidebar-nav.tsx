@@ -1,5 +1,5 @@
 "use client"
-import { Calendar, Home, Plus, Settings, Menu, X, Clock } from "lucide-react"
+import { Calendar, Home, Plus, Settings, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { 
   Sidebar, 
@@ -7,8 +7,7 @@ import {
   SidebarContent, 
   SidebarMenu,
   SidebarMenuItem,
-  SidebarMenuButton,
-  useSidebar 
+  SidebarMenuButton
 } from "@/components/ui/sidebar"
 
 interface SidebarNavProps {
@@ -18,9 +17,6 @@ interface SidebarNavProps {
 }
 
 export function SidebarNav({ onCreateMeeting, onNavigate, activePage }: SidebarNavProps) {
-  const { state, toggleSidebar } = useSidebar()
-  const isCollapsed = state === "collapsed"
-
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: <Home className="h-4 w-4" /> },
     { id: "today", label: "Today's Meetings", icon: <Calendar className="h-4 w-4" /> },
@@ -31,11 +27,8 @@ export function SidebarNav({ onCreateMeeting, onNavigate, activePage }: SidebarN
   return (
     <Sidebar>
       <SidebarHeader>
-        <div className="flex items-center justify-between w-full">
-          {!isCollapsed && <h2 className="text-lg font-semibold text-foreground">Tidy Meets</h2>}
-          <Button variant="ghost" size="sm" onClick={toggleSidebar} className="h-8 w-8 p-0">
-            {isCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
-          </Button>
+        <div className="flex items-center justify-center w-full px-2">
+          <h2 className="text-lg font-semibold text-foreground">Tidy Meets</h2>
         </div>
       </SidebarHeader>
 
@@ -43,9 +36,9 @@ export function SidebarNav({ onCreateMeeting, onNavigate, activePage }: SidebarN
         <div className="space-y-1">
           {/* Create Meeting Button */}
           <div className="px-2 mb-4">
-            <Button onClick={onCreateMeeting} className="w-full justify-start" size={isCollapsed ? "sm" : "default"}>
+            <Button onClick={onCreateMeeting} className="w-full justify-start">
               <Plus className="h-4 w-4" />
-              {!isCollapsed && <span className="ml-2">New Meeting</span>}
+              <span className="ml-2">New Meeting</span>
             </Button>
           </div>
 
