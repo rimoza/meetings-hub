@@ -6,6 +6,7 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { SidebarProvider } from "@/components/ui/sidebar"
+import { AuthProvider } from "@/contexts/auth-context"
 
 export const metadata: Metadata = {
   title: "Tidy Meets - Meeting Management",
@@ -31,8 +32,10 @@ html {
       </head>
       <body>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <SidebarProvider>{children}</SidebarProvider>
-          <Toaster />
+          <AuthProvider>
+            <SidebarProvider>{children}</SidebarProvider>
+            <Toaster />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
