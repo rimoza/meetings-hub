@@ -186,12 +186,11 @@ export default function Dashboard() {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <header className="border-b bg-card">
-          <div className="px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <SidebarTrigger />
-                <div>
-                  <h1 className="text-2xl font-bold text-foreground">
+          <div className="flex items-center px-4 py-4">
+            <SidebarTrigger className="mr-4" />
+            <div className="flex items-center justify-between flex-1">
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">
                   {currentPage === "dashboard" && "Dashboard"}
                   {currentPage === "today" && "Today's Meetings"}
                   {currentPage === "upcoming" && "Upcoming Meetings"}
@@ -203,7 +202,6 @@ export default function Dashboard() {
                   {currentPage === "upcoming" && "Plan ahead with upcoming meetings"}
                   {currentPage === "settings" && "Configure your preferences"}
                 </p>
-                </div>
               </div>
               <div className="flex items-center space-x-4">
                 <Button onClick={handleCreateMeeting}>
