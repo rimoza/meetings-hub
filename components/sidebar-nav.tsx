@@ -7,7 +7,8 @@ import {
   SidebarContent, 
   SidebarMenu,
   SidebarMenuItem,
-  SidebarMenuButton
+  SidebarMenuButton,
+  useSidebar
 } from "@/components/ui/sidebar"
 
 interface SidebarNavProps {
@@ -17,12 +18,30 @@ interface SidebarNavProps {
 }
 
 export function SidebarNav({ onCreateMeeting, onNavigate, activePage }: SidebarNavProps) {
+  const { isMobile, setOpenMobile } = useSidebar()
+  
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: <Home className="h-4 w-4" /> },
     { id: "today", label: "Today's Meetings", icon: <Calendar className="h-4 w-4" /> },
     { id: "upcoming", label: "Upcoming Meetings", icon: <Clock className="h-4 w-4" /> },
     { id: "settings", label: "Settings", icon: <Settings className="h-4 w-4" /> },
   ]
+  
+  const handleNavClick = (pageId: string) => {
+    onNavigate(pageId)
+    // Only close sidebar on mobile
+    if (isMobile) {
+      setOpenMobile(false)
+    }
+  }
+  
+  const handleCreateMeeting = () => {
+    onCreateMeeting()
+    // Only close sidebar on mobile
+    if (isMobile) {
+      setOpenMobile(false)
+    }
+  }
 
   return (
     <Sidebar>
@@ -36,7 +55,7 @@ export function SidebarNav({ onCreateMeeting, onNavigate, activePage }: SidebarN
         <div className="space-y-1">
           {/* Create Meeting Button */}
           <div className="px-2 mb-4">
-            <Button onClick={onCreateMeeting} className="w-full justify-start">
+            <Button onClick={handleCreateMeeting} className="w-full justify-start">
               <Plus className="h-4 w-4" />
               <span className="ml-2">New Meeting</span>
             </Button>
@@ -48,7 +67,7 @@ export function SidebarNav({ onCreateMeeting, onNavigate, activePage }: SidebarN
               <SidebarMenuItem key={item.id}>
                 <SidebarMenuButton
                   isActive={activePage === item.id}
-                  onClick={() => onNavigate(item.id)}
+                  onClick={() => handleNavClick(item.id)}
                 >
                   {item.icon}
                   <span>{item.label}</span>
