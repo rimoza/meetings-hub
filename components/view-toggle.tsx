@@ -11,24 +11,24 @@ interface ViewToggleProps {
 
 export function ViewToggle({ viewMode, onViewModeChange }: ViewToggleProps) {
   return (
-    <div className="flex items-center space-x-1 bg-muted p-1 rounded-lg">
+    <div className="inline-flex items-center bg-card/50 backdrop-blur-sm border rounded-lg p-1 shadow-sm">
       <Button
         variant={viewMode === "card" ? "default" : "ghost"}
         size="sm"
         onClick={() => onViewModeChange("card")}
-        className="h-8 px-2 sm:px-3"
+        className="h-8 px-3 transition-all"
       >
-        <LayoutGrid className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-        <span className="sr-only sm:not-sr-only sm:ml-1 hidden sm:inline">Cards</span>
+        <LayoutGrid className="h-4 w-4" />
+        <span className="ml-2 hidden sm:inline">Cards</span>
       </Button>
       <Button
         variant={viewMode === "table" ? "default" : "ghost"}
         size="sm"
         onClick={() => onViewModeChange("table")}
-        className="h-8 px-2 sm:px-3 hidden sm:inline-flex"
+        className="h-8 px-3 transition-all"
       >
-        <Table className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-        <span className="sr-only sm:not-sr-only sm:ml-1 hidden sm:inline">Table</span>
+        <Table className="h-4 w-4" />
+        <span className="ml-2 hidden sm:inline">Table</span>
       </Button>
     </div>
   )

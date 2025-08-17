@@ -144,12 +144,12 @@ export default function Dashboard() {
               ))}
             </div>
 
-            {/* Filters and View Toggle - Mobile First */}
-            <div className="flex flex-col gap-3 mb-4 sm:mb-6">
-              <div className="w-full">
+            {/* Filters and View Controls */}
+            <div className="flex flex-col lg:flex-row gap-4 mb-6">
+              <div className="flex-1">
                 <MeetingFilters filters={filters} onFiltersChange={setFilters} />
               </div>
-              <div className="flex justify-end">
+              <div className="flex justify-end lg:justify-start">
                 <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
               </div>
             </div>
