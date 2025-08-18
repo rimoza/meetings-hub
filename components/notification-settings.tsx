@@ -1,11 +1,9 @@
 "use client"
 
-import { useState } from "react"
 import { Bell, BellOff, Settings } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { useReminders } from "@/hooks/use-reminders"
 
 export function NotificationSettings() {
@@ -55,7 +53,7 @@ export function NotificationSettings() {
                 <div>
                   <p className="text-sm font-medium">Reminders Active</p>
                   <p className="text-xs text-muted-foreground">
-                    You'll receive reminders at 1h, 30min, and 5min before meetings
+                    You&apos;ll receive reminders at 1h, 30min, and 5min before meetings
                   </p>
                 </div>
               </>

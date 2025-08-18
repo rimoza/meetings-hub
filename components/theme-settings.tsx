@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import { Monitor, Moon, Sun, Palette } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useTheme } from "next-themes"
@@ -125,7 +124,7 @@ export function ThemeSettings() {
             <div className="text-sm">
               <p className="font-medium text-foreground mb-1">System Theme</p>
               <p className="text-muted-foreground text-xs">
-                When "System" is selected, the theme will automatically switch based on your device's appearance settings.
+                When &quot;System&quot; is selected, the theme will automatically switch based on your device&apos;s appearance settings.
                 {theme === "system" && (
                   <span className="block mt-1 font-medium">
                     Currently showing: <span className="capitalize">{systemTheme}</span>

@@ -1,13 +1,11 @@
 "use client"
 
-import { useState } from "react"
-import { Bell, BellOff, X, Settings, Calendar } from "lucide-react"
+import { Bell, BellOff, Settings, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { useReminders } from "@/hooks/use-reminders"
 import { useMeetings } from "@/hooks/use-meetings"
 
