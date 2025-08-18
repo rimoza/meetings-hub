@@ -29,6 +29,8 @@ import { SidebarNav } from "@/components/sidebar-nav"
 import { MeetingForm } from "@/components/meeting-form"
 import { ProtectedRoute } from "@/components/protected-route"
 import { NotificationSettings } from "@/components/notification-settings"
+import { ThemeSettings } from "@/components/theme-settings"
+import { AppSettings } from "@/components/app-settings"
 
 export default function Dashboard() {
   const { user, logout } = useAuth()
@@ -127,16 +129,41 @@ export default function Dashboard() {
         return <UpcomingMeetings onEditMeeting={handleEdit} />
       case "settings":
         return (
-          <div className="max-w-2xl mx-auto space-y-6">
+          <div className="max-w-4xl mx-auto space-y-8">
             <div className="text-center mb-8">
               <h2 className="text-2xl font-bold mb-2">Settings</h2>
-              <p className="text-muted-foreground">Configure your meeting preferences</p>
+              <p className="text-muted-foreground">Configure your preferences and view system information</p>
             </div>
             
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Notifications</h3>
-                <NotificationSettings />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Left Column */}
+              <div className="space-y-8">
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 flex items-center">
+                    <span className="w-1 h-6 bg-primary rounded-full mr-3"></span>
+                    Meeting Reminders
+                  </h3>
+                  <NotificationSettings />
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 flex items-center">
+                    <span className="w-1 h-6 bg-primary rounded-full mr-3"></span>
+                    Appearance
+                  </h3>
+                  <ThemeSettings />
+                </div>
+              </div>
+
+              {/* Right Column */}
+              <div className="space-y-8">
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 flex items-center">
+                    <span className="w-1 h-6 bg-primary rounded-full mr-3"></span>
+                    System Information
+                  </h3>
+                  <AppSettings />
+                </div>
               </div>
             </div>
           </div>

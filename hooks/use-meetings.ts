@@ -14,7 +14,7 @@ import {
 
 export function useMeetings() {
   const { user } = useAuth();
-  const { scheduleReminders, isPermissionGranted } = useReminders();
+  const { scheduleReminders, isPermissionGranted, isRemindersEnabled } = useReminders();
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -42,20 +42,20 @@ export function useMeetings() {
       setIsLoading(false);
       
       // Schedule reminders for all meetings when data changes
-      if (isPermissionGranted) {
+      if (isPermissionGranted && isRemindersEnabled) {
         scheduleReminders(meetings);
       }
     });
 
     return () => unsubscribe();
-  }, [user?.uid, isPermissionGranted, scheduleReminders]);
+  }, [user?.uid, isPermissionGranted, isRemindersEnabled, scheduleReminders]);
 
-  // Reschedule reminders when permission is granted
+  // Reschedule reminders when permission is granted or reminders are enabled
   useEffect(() => {
-    if (isPermissionGranted && meetings.length > 0) {
+    if (isPermissionGranted && isRemindersEnabled && meetings.length > 0) {
       scheduleReminders(meetings);
     }
-  }, [isPermissionGranted, meetings, scheduleReminders]);
+  }, [isPermissionGranted, isRemindersEnabled, meetings, scheduleReminders]);
 
   // Filter meetings based on current filters
   const filteredMeetings = useMemo(() => {

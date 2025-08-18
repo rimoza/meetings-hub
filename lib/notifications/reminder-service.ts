@@ -101,10 +101,7 @@ export class ReminderService {
     const reminderDateTime = new Date(meetingDateTime.getTime() - (minutesBefore * 60 * 1000));
     const delayMs = reminderDateTime.getTime() - Date.now();
     
-    console.log(`Meeting: ${meeting.title}`);
-    console.log(`Meeting DateTime: ${meetingDateTime.toLocaleString()}`);
-    console.log(`Reminder DateTime: ${reminderDateTime.toLocaleString()}`);
-    console.log(`Delay (ms): ${delayMs}`);
+    // console.log(`Meeting: ${meeting.title} - Reminder in ${delayMs}ms`);
     
     return delayMs;
   }
@@ -143,8 +140,8 @@ export class ReminderService {
 
     this.reminders.set(reminderId, reminderConfig);
     
-    const reminderDate = new Date(Date.now() + delayMs);
-    console.log(`Reminder scheduled for ${meeting.title} at ${reminderDate.toLocaleString()}`);
+    // const reminderDate = new Date(Date.now() + delayMs);
+    // console.log(`Reminder scheduled for ${meeting.title} at ${reminderDate.toLocaleString()}`);
     
     return reminderId;
   }
