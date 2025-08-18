@@ -49,7 +49,7 @@ export function SidebarNav({ onCreateMeeting, onNavigate, activePage, todayCount
     <Sidebar>
       <SidebarHeader>
         <div className="flex items-center justify-center w-full px-2 py-2">
-          <h2 className="text-base sm:text-lg font-semibold text-foreground">Tidy Meets</h2>
+          <h2 className="text-base sm:text-lg font-semibold text-foreground">Kulan Space</h2>
         </div>
       </SidebarHeader>
 

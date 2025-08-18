@@ -9,7 +9,7 @@ import { SidebarProvider } from "@/components/ui/sidebar"
 import { AuthProvider } from "@/contexts/auth-context"
 
 export const metadata: Metadata = {
-  title: "Tidy Meets - Meeting Management",
+  title: "Kulan Space - Meeting Management",
   description: "Modern meeting management application",
   generator: "v0.app",
 }

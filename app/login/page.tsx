@@ -52,7 +52,7 @@ export default function LoginPage() {
                 <Calendar className="h-8 w-8 text-white" />
               </div>
             </div>
-            <h1 className="text-3xl font-bold tracking-tight">Tidy Meets</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Kulan Space</h1>
             <p className="text-muted-foreground">
               Sign in with your Gmail to manage meetings
             </p>
