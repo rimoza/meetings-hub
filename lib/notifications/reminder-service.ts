@@ -14,15 +14,26 @@ export class ReminderService {
   private reminders: Map<string, ReminderConfig> = new Map();
   private isNotificationSupported: boolean = false;
   private isNotificationGranted: boolean = false;
+  private isRemindersEnabled: boolean = true; // User preference toggle
 
   constructor() {
     this.checkNotificationSupport();
+    this.loadReminderPreference();
   }
 
   private checkNotificationSupport(): void {
     this.isNotificationSupported = 'Notification' in window;
     this.isNotificationGranted = this.isNotificationSupported && 
       Notification.permission === 'granted';
+  }
+
+  private loadReminderPreference(): void {
+    const saved = localStorage.getItem('reminders-enabled');
+    this.isRemindersEnabled = saved !== null ? JSON.parse(saved) : true;
+  }
+
+  private saveReminderPreference(): void {
+    localStorage.setItem('reminders-enabled', JSON.stringify(this.isRemindersEnabled));
   }
 
   async requestNotificationPermission(): Promise<boolean> {
@@ -99,8 +110,8 @@ export class ReminderService {
   }
 
   scheduleReminder(meeting: Meeting, minutesBefore: number): string | null {
-    if (!this.isNotificationGranted) {
-      console.warn('Cannot schedule reminder: notification permission not granted');
+    if (!this.isNotificationGranted || !this.isRemindersEnabled) {
+      console.warn('Cannot schedule reminder: permission not granted or reminders disabled');
       return null;
     }
 
@@ -191,6 +202,24 @@ export class ReminderService {
   }
 
   isNotificationEnabled(): boolean {
+    return this.isNotificationGranted && this.isRemindersEnabled;
+  }
+
+  isRemindersToggleEnabled(): boolean {
+    return this.isRemindersEnabled;
+  }
+
+  setRemindersEnabled(enabled: boolean): void {
+    this.isRemindersEnabled = enabled;
+    this.saveReminderPreference();
+    
+    if (!enabled) {
+      // Clear all reminders when disabled
+      this.clearAllReminders();
+    }
+  }
+
+  hasNotificationPermission(): boolean {
     return this.isNotificationGranted;
   }
 }

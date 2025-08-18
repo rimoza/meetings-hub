@@ -6,10 +6,12 @@ import type { Meeting } from '@/types/meeting';
 
 export function useReminders() {
   const [isPermissionGranted, setIsPermissionGranted] = useState(false);
+  const [isRemindersEnabled, setIsRemindersEnabled] = useState(false);
   const [isRequestingPermission, setIsRequestingPermission] = useState(false);
 
   useEffect(() => {
-    setIsPermissionGranted(reminderService.isNotificationEnabled());
+    setIsPermissionGranted(reminderService.hasNotificationPermission());
+    setIsRemindersEnabled(reminderService.isRemindersToggleEnabled());
   }, []);
 
   const requestPermission = useCallback(async () => {
@@ -23,14 +25,19 @@ export function useReminders() {
     }
   }, []);
 
+  const toggleReminders = useCallback((enabled: boolean) => {
+    reminderService.setRemindersEnabled(enabled);
+    setIsRemindersEnabled(enabled);
+  }, []);
+
   const scheduleReminders = useCallback((meetings: Meeting[]) => {
-    if (!isPermissionGranted) {
-      console.warn('Cannot schedule reminders: permission not granted');
+    if (!isPermissionGranted || !isRemindersEnabled) {
+      console.warn('Cannot schedule reminders: permission not granted or reminders disabled');
       return;
     }
     
     reminderService.rescheduleAllMeetingReminders(meetings);
-  }, [isPermissionGranted]);
+  }, [isPermissionGranted, isRemindersEnabled]);
 
   const clearAllReminders = useCallback(() => {
     reminderService.clearAllReminders();
@@ -38,8 +45,10 @@ export function useReminders() {
 
   return {
     isPermissionGranted,
+    isRemindersEnabled,
     isRequestingPermission,
     requestPermission,
+    toggleReminders,
     scheduleReminders,
     clearAllReminders,
   };

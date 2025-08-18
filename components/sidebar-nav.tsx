@@ -12,6 +12,8 @@ import {
   useSidebar
 } from "@/components/ui/sidebar"
 import { useReminders } from "@/hooks/use-reminders"
+import { useMeetings } from "@/hooks/use-meetings"
+import { NotificationSidebar } from "@/components/notification-sidebar"
 
 interface SidebarNavProps {
   onCreateMeeting: () => void
@@ -23,7 +25,8 @@ interface SidebarNavProps {
 
 export function SidebarNav({ onCreateMeeting, onNavigate, activePage, todayCount = 0, upcomingCount = 0 }: SidebarNavProps) {
   const { isMobile, setOpenMobile } = useSidebar()
-  const { isPermissionGranted } = useReminders()
+  const { isPermissionGranted, isRemindersEnabled } = useReminders()
+  const { upcomingMeetings } = useMeetings()
   
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: <Home className="h-4 w-4" />, count: null },
@@ -51,13 +54,32 @@ export function SidebarNav({ onCreateMeeting, onNavigate, activePage, todayCount
   return (
     <Sidebar>
       <SidebarHeader>
-        <div className="flex items-center justify-center w-full px-2 py-2">
+        <div className="flex items-center justify-between w-full px-2 py-2">
           <div className="flex items-center space-x-2">
             <div className="p-2 bg-primary rounded-lg">
               <Calendar className="h-5 w-5 text-primary-foreground" />
             </div>
             <h2 className="text-base sm:text-lg font-semibold text-foreground">Kulan Space</h2>
           </div>
+          
+          {/* Notification Icon with Badge */}
+          <NotificationSidebar>
+            <Button variant="ghost" size="sm" className="relative p-2">
+              {isPermissionGranted && isRemindersEnabled ? (
+                <Bell className="h-5 w-5 text-primary" />
+              ) : (
+                <Bell className="h-5 w-5 text-muted-foreground" />
+              )}
+              {upcomingMeetings.length > 0 && (
+                <Badge 
+                  className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs min-w-[1.25rem]"
+                  variant={isPermissionGranted && isRemindersEnabled ? "default" : "secondary"}
+                >
+                  {upcomingMeetings.length > 99 ? '99+' : upcomingMeetings.length}
+                </Badge>
+              )}
+            </Button>
+          </NotificationSidebar>
         </div>
       </SidebarHeader>
 
