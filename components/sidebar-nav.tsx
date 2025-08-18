@@ -49,7 +49,12 @@ export function SidebarNav({ onCreateMeeting, onNavigate, activePage, todayCount
     <Sidebar>
       <SidebarHeader>
         <div className="flex items-center justify-center w-full px-2 py-2">
-          <h2 className="text-base sm:text-lg font-semibold text-foreground">Kulan Space</h2>
+          <div className="flex items-center space-x-2">
+            <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
+              <Calendar className="h-5 w-5 text-white" />
+            </div>
+            <h2 className="text-base sm:text-lg font-semibold text-foreground">Kulan Space</h2>
+          </div>
         </div>
       </SidebarHeader>
 

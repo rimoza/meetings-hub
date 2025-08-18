@@ -12,6 +12,15 @@ export const metadata: Metadata = {
   title: "Kulan Space - Meeting Management",
   description: "Modern meeting management application",
   generator: "v0.app",
+  icons: {
+    icon: [
+      {
+        url: '/favicon.svg',
+        type: 'image/svg+xml',
+      },
+    ],
+    shortcut: '/favicon.svg',
+  },
 }
 
 export default function RootLayout({
