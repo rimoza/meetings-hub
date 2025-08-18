@@ -9,8 +9,11 @@ export function useReminders() {
   const [isRemindersEnabled, setIsRemindersEnabled] = useState(false);
   const [isRequestingPermission, setIsRequestingPermission] = useState(false);
   const [reminderService, setReminderService] = useState<ReturnType<typeof getReminderService>>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
+    
     // Initialize reminder service only on client side after mount
     const service = getReminderService();
     setReminderService(service);
@@ -59,8 +62,8 @@ export function useReminders() {
   }, [reminderService]);
 
   return {
-    isPermissionGranted,
-    isRemindersEnabled,
+    isPermissionGranted: isMounted ? isPermissionGranted : false,
+    isRemindersEnabled: isMounted ? isRemindersEnabled : false,
     isRequestingPermission,
     requestPermission,
     toggleReminders,

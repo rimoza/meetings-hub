@@ -24,11 +24,17 @@ export class ReminderService {
   }
 
   private checkNotificationSupport(): void {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || typeof Notification === 'undefined') return;
     
-    this.isNotificationSupported = 'Notification' in window;
-    this.isNotificationGranted = this.isNotificationSupported && 
-      Notification.permission === 'granted';
+    try {
+      this.isNotificationSupported = 'Notification' in window && typeof Notification !== 'undefined';
+      this.isNotificationGranted = this.isNotificationSupported && 
+        Notification.permission === 'granted';
+    } catch (error) {
+      console.warn('Error checking notification support:', error);
+      this.isNotificationSupported = false;
+      this.isNotificationGranted = false;
+    }
   }
 
   private loadReminderPreference(): void {
@@ -45,20 +51,28 @@ export class ReminderService {
   }
 
   async requestNotificationPermission(): Promise<boolean> {
+    if (typeof window === 'undefined' || typeof Notification === 'undefined') {
+      return false;
+    }
+
     if (!this.isNotificationSupported) {
       console.warn('Notifications are not supported in this browser');
       return false;
     }
 
-    if (Notification.permission === 'granted') {
-      this.isNotificationGranted = true;
-      return true;
-    }
+    try {
+      if (Notification.permission === 'granted') {
+        this.isNotificationGranted = true;
+        return true;
+      }
 
-    if (Notification.permission !== 'denied') {
-      const permission = await Notification.requestPermission();
-      this.isNotificationGranted = permission === 'granted';
-      return this.isNotificationGranted;
+      if (Notification.permission !== 'denied') {
+        const permission = await Notification.requestPermission();
+        this.isNotificationGranted = permission === 'granted';
+        return this.isNotificationGranted;
+      }
+    } catch (error) {
+      console.error('Error requesting notification permission:', error);
     }
 
     return false;
@@ -264,5 +278,4 @@ export function getReminderService(): ReminderService | null {
   return reminderServiceInstance;
 }
 
-// Legacy export for backward compatibility - DO NOT USE in SSR components
-export const reminderService = typeof window !== 'undefined' ? getReminderService() : null;
+// Legacy export removed to prevent SSR issues - use getReminderService() instead
