@@ -1,18 +1,23 @@
 "use client"
 
 import { useEffect, useState, useCallback } from 'react';
-import { reminderService } from '@/lib/notifications/reminder-service';
+import { getReminderService } from '@/lib/notifications/reminder-service';
 import type { Meeting } from '@/types/meeting';
 
 export function useReminders() {
   const [isPermissionGranted, setIsPermissionGranted] = useState(false);
   const [isRemindersEnabled, setIsRemindersEnabled] = useState(false);
   const [isRequestingPermission, setIsRequestingPermission] = useState(false);
+  const [reminderService, setReminderService] = useState<ReturnType<typeof getReminderService>>(null);
 
   useEffect(() => {
-    if (reminderService && typeof window !== 'undefined') {
-      setIsPermissionGranted(reminderService.hasNotificationPermission());
-      setIsRemindersEnabled(reminderService.isRemindersToggleEnabled());
+    // Initialize reminder service only on client side after mount
+    const service = getReminderService();
+    setReminderService(service);
+    
+    if (service) {
+      setIsPermissionGranted(service.hasNotificationPermission());
+      setIsRemindersEnabled(service.isRemindersToggleEnabled());
     }
   }, []);
 
@@ -27,14 +32,14 @@ export function useReminders() {
     } finally {
       setIsRequestingPermission(false);
     }
-  }, []);
+  }, [reminderService]);
 
   const toggleReminders = useCallback((enabled: boolean) => {
     if (!reminderService) return;
     
     reminderService.setRemindersEnabled(enabled);
     setIsRemindersEnabled(enabled);
-  }, []);
+  }, [reminderService]);
 
   const scheduleReminders = useCallback((meetings: Meeting[]) => {
     if (!reminderService) return;
@@ -45,13 +50,13 @@ export function useReminders() {
     }
     
     reminderService.rescheduleAllMeetingReminders(meetings);
-  }, [isPermissionGranted, isRemindersEnabled]);
+  }, [reminderService, isPermissionGranted, isRemindersEnabled]);
 
   const clearAllReminders = useCallback(() => {
     if (!reminderService) return;
     
     reminderService.clearAllReminders();
-  }, []);
+  }, [reminderService]);
 
   return {
     isPermissionGranted,

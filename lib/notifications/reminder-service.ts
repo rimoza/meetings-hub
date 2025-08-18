@@ -241,12 +241,28 @@ export class ReminderService {
   }
 }
 
-// Create a proper singleton instance that works with SSR
-let reminderServiceInstance: ReminderService | null = null;
-
-if (typeof window !== 'undefined') {
-  reminderServiceInstance = new ReminderService();
+// Create a client-only reminder service factory
+export function createReminderService(): ReminderService | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+  return new ReminderService();
 }
 
-// Export with a fallback that maintains the interface
-export const reminderService = reminderServiceInstance as ReminderService;
+// Lazy initialization for client-side only
+let reminderServiceInstance: ReminderService | null = null;
+
+export function getReminderService(): ReminderService | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+  
+  if (!reminderServiceInstance) {
+    reminderServiceInstance = new ReminderService();
+  }
+  
+  return reminderServiceInstance;
+}
+
+// Legacy export for backward compatibility - DO NOT USE in SSR components
+export const reminderService = typeof window !== 'undefined' ? getReminderService() : null;
