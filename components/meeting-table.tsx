@@ -1,11 +1,12 @@
 "use client"
 
-import { MoreHorizontal } from "lucide-react"
+import { Calendar, Clock, MapPin, Users, Edit, Trash2, CheckCircle2, XCircle, MoreHorizontal } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DeleteConfirmDialog } from "@/components/ui/confirm-dialog"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import type { Meeting } from "@/types/meeting"
 import { format } from "date-fns"
 
@@ -16,93 +17,252 @@ interface MeetingTableProps {
   onToggleComplete: (id: string) => void
 }
 
-const priorityColors = {
-  low: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-  medium: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
-  high: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
+const priorityConfig = {
+  low: { 
+    color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+    dot: "bg-emerald-500"
+  },
+  medium: { 
+    color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+    dot: "bg-amber-500"
+  },
+  high: { 
+    color: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400",
+    dot: "bg-rose-500"
+  },
 }
 
-const typeColors = {
-  meeting: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
-  call: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
-  conference: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300",
-  interview: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
-  presentation: "bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300",
+const typeIcons = {
+  meeting: Calendar,
+  call: Clock,
+  interview: Users,
+  presentation: MoreHorizontal,
 }
 
 export function MeetingTable({ meetings, onEdit, onDelete, onToggleComplete }: MeetingTableProps) {
   return (
-    <div className="rounded-md border">
+    <div className="rounded-lg border bg-card overflow-hidden">
       <Table>
         <TableHeader>
-          <TableRow>
-            <TableHead>Title</TableHead>
-            <TableHead>Attendees</TableHead>
-            <TableHead>Date</TableHead>
-            <TableHead>Time</TableHead>
-            <TableHead>Location</TableHead>
-            <TableHead>Priority</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="w-[70px]">Actions</TableHead>
+          <TableRow className="bg-muted/50 hover:bg-muted/50">
+            <TableHead className="font-semibold">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                Meeting
+              </div>
+            </TableHead>
+            <TableHead className="font-semibold">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                Date & Time
+              </div>
+            </TableHead>
+            <TableHead className="font-semibold">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-muted-foreground" />
+                Location
+              </div>
+            </TableHead>
+            <TableHead className="font-semibold">
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-muted-foreground" />
+                Attendees
+              </div>
+            </TableHead>
+            <TableHead className="font-semibold text-center">Priority</TableHead>
+            <TableHead className="font-semibold text-center">Status</TableHead>
+            <TableHead className="font-semibold text-center w-[120px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {meetings.map((meeting) => (
-            <TableRow key={meeting.id} className={meeting.completed ? "opacity-75" : ""}>
-              <TableCell className="font-medium">
-                <span className={meeting.completed ? "line-through" : ""}>{meeting.title}</span>
-              </TableCell>
-              <TableCell>
-                <span className="text-sm">
-                  {meeting.attendees && meeting.attendees.length > 0 ? meeting.attendees.join(", ") : "No attendees"}
-                </span>
-              </TableCell>
-              <TableCell>{format(new Date(meeting.date), "MMM dd, yyyy")}</TableCell>
-              <TableCell>{meeting.time}</TableCell>
-              <TableCell>{meeting.location}</TableCell>
-              <TableCell>
-                <Badge className={priorityColors[meeting.priority]}>{meeting.priority}</Badge>
-              </TableCell>
-              <TableCell>
-                <Badge className={typeColors[meeting.type]}>{meeting.type}</Badge>
-              </TableCell>
-              <TableCell>
-                <Badge variant={meeting.completed ? "secondary" : "outline"}>
-                  {meeting.completed ? "Completed" : "Pending"}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => onEdit(meeting)}>Edit</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onToggleComplete(meeting.id)}>
-                      {meeting.completed ? "Mark Pending" : "Mark Complete"}
-                    </DropdownMenuItem>
-                    <DeleteConfirmDialog
-                      itemName={meeting.title}
-                      itemType="meeting"
-                      onConfirm={() => onDelete(meeting.id)}
-                    >
-                      <DropdownMenuItem 
-                        className="text-destructive cursor-pointer"
-                        onSelect={(e) => e.preventDefault()}
-                      >
-                        Delete
-                      </DropdownMenuItem>
-                    </DeleteConfirmDialog>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          ))}
+          {meetings.map((meeting, index) => {
+            const TypeIcon = typeIcons[meeting.type] || Calendar
+            const isLast = index === meetings.length - 1
+            
+            return (
+              <TableRow 
+                key={meeting.id} 
+                className={`group hover:bg-muted/30 transition-colors ${
+                  meeting.completed ? "opacity-60" : ""
+                } ${!isLast ? "border-b" : ""}`}
+              >
+                {/* Meeting Title & Type */}
+                <TableCell className="font-medium">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-1.5 rounded-lg shrink-0 ${
+                      meeting.completed ? "bg-muted" : "bg-primary/10"
+                    }`}>
+                      <TypeIcon className={`h-4 w-4 ${
+                        meeting.completed ? "text-muted-foreground" : "text-primary"
+                      }`} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className={`font-semibold truncate ${
+                        meeting.completed ? "line-through text-muted-foreground" : ""
+                      }`}>
+                        {meeting.title}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="secondary" className="text-xs capitalize">
+                          {meeting.type}
+                        </Badge>
+                        {meeting.description && (
+                          <span className="text-xs text-muted-foreground truncate max-w-[200px]">
+                            {meeting.description}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </TableCell>
+                
+                {/* Date & Time */}
+                <TableCell>
+                  <div className="flex flex-col gap-1">
+                    <span className="font-medium text-sm">
+                      {format(new Date(meeting.date), "MMM d, yyyy")}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {meeting.time} • {meeting.duration} min
+                    </span>
+                  </div>
+                </TableCell>
+                
+                {/* Location */}
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm truncate max-w-[150px]">
+                      {meeting.location}
+                    </span>
+                  </div>
+                </TableCell>
+                
+                {/* Attendees */}
+                <TableCell>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex items-center gap-2 cursor-help">
+                          <Badge variant="outline" className="text-xs">
+                            <Users className="h-3 w-3 mr-1" />
+                            {meeting.attendees?.length || 0}
+                          </Badge>
+                          {meeting.attendees && meeting.attendees.length > 0 && (
+                            <span className="text-xs text-muted-foreground truncate max-w-[100px]">
+                              {meeting.attendees[0]}
+                              {meeting.attendees.length > 1 && ` +${meeting.attendees.length - 1}`}
+                            </span>
+                          )}
+                        </div>
+                      </TooltipTrigger>
+                      {meeting.attendees && meeting.attendees.length > 0 && (
+                        <TooltipContent>
+                          <div className="text-xs">
+                            {meeting.attendees.join(", ")}
+                          </div>
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
+                  </TooltipProvider>
+                </TableCell>
+                
+                {/* Priority */}
+                <TableCell className="text-center">
+                  <Badge 
+                    variant="outline" 
+                    className={`text-xs ${priorityConfig[meeting.priority].color}`}
+                  >
+                    <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${priorityConfig[meeting.priority].dot}`} />
+                    {meeting.priority}
+                  </Badge>
+                </TableCell>
+                
+                {/* Status */}
+                <TableCell className="text-center">
+                  {meeting.completed ? (
+                    <Badge variant="default" className="text-xs bg-emerald-500 hover:bg-emerald-600">
+                      <CheckCircle2 className="h-3 w-3 mr-1" />
+                      Done
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-xs">
+                      <Clock className="h-3 w-3 mr-1" />
+                      Pending
+                    </Badge>
+                  )}
+                </TableCell>
+                
+                {/* Actions */}
+                <TableCell>
+                  <div className="flex items-center justify-center gap-1">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary"
+                            onClick={() => onEdit(meeting)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Edit</TooltipContent>
+                      </Tooltip>
+                      
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            className={`h-8 w-8 p-0 ${
+                              meeting.completed 
+                                ? "hover:bg-amber-100 hover:text-amber-600 dark:hover:bg-amber-900/20" 
+                                : "hover:bg-emerald-100 hover:text-emerald-600 dark:hover:bg-emerald-900/20"
+                            }`}
+                            onClick={() => onToggleComplete(meeting.id)}
+                          >
+                            {meeting.completed ? <XCircle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {meeting.completed ? "Mark pending" : "Mark complete"}
+                        </TooltipContent>
+                      </Tooltip>
+                      
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <DeleteConfirmDialog
+                            itemName={meeting.title}
+                            itemType="meeting"
+                            onConfirm={() => onDelete(meeting.id)}
+                          >
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </DeleteConfirmDialog>
+                        </TooltipTrigger>
+                        <TooltipContent>Delete</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                </TableCell>
+              </TableRow>
+            )
+          })}
         </TableBody>
       </Table>
+      
+      {meetings.length === 0 && (
+        <div className="text-center py-12">
+          <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <p className="text-muted-foreground">No meetings found</p>
+        </div>
+      )}
     </div>
   )
 }
