@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Trash2, AlertTriangle } from "lucide-react"
+import { AlertTriangle } from "lucide-react"
 import {
   Dialog,
   DialogContent,
