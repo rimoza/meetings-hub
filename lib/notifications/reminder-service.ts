@@ -73,24 +73,36 @@ export class ReminderService {
     const timeLabel = this.getTimeLabel(reminderTime);
     const meetingTime = `${meeting.date} at ${meeting.time}`;
     
-    const notification = new Notification(`Meeting Reminder - ${timeLabel}`, {
-      body: `${meeting.title}\n${meetingTime}\nLocation: ${meeting.location}`,
-      icon: '/favicon.svg',
-      badge: '/favicon.svg',
-      tag: `meeting-${meeting.id}-${reminderTime}`,
-      requireInteraction: true
-    });
+    try {
+      const notification = new Notification(`Meeting Reminder - ${timeLabel}`, {
+        body: `${meeting.title}\n${meetingTime}\nLocation: ${meeting.location}`,
+        icon: '/favicon.svg',
+        badge: '/favicon.svg',
+        tag: `meeting-${meeting.id}-${reminderTime}`,
+        requireInteraction: false, // Changed to false for better browser compatibility
+        silent: false
+      });
 
-    // Auto-close notification after 10 seconds
-    setTimeout(() => {
-      notification.close();
-    }, 10000);
+      // Keep notification visible for 30 seconds instead of 10
+      const autoCloseTimeout = setTimeout(() => {
+        notification.close();
+      }, 30000);
 
-    notification.onclick = () => {
-      window.focus();
-      notification.close();
-      // Could navigate to meeting details page here
-    };
+      notification.onclick = () => {
+        window.focus();
+        clearTimeout(autoCloseTimeout);
+        notification.close();
+        // Could navigate to meeting details page here
+      };
+      
+      notification.onclose = () => {
+        clearTimeout(autoCloseTimeout);
+      };
+    } catch (error) {
+      console.error('Failed to show notification:', error);
+      // Fallback to alert if notification fails
+      alert(`Meeting Reminder - ${timeLabel}\n${meeting.title}\n${meetingTime}`);
+    }
   }
 
   private getTimeLabel(minutes: number): string {
@@ -229,5 +241,12 @@ export class ReminderService {
   }
 }
 
-// Export a singleton instance only on client side
-export const reminderService = typeof window !== 'undefined' ? new ReminderService() : ({} as ReminderService);
+// Create a proper singleton instance that works with SSR
+let reminderServiceInstance: ReminderService | null = null;
+
+if (typeof window !== 'undefined') {
+  reminderServiceInstance = new ReminderService();
+}
+
+// Export with a fallback that maintains the interface
+export const reminderService = reminderServiceInstance as ReminderService;
