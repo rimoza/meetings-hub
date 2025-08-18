@@ -7,7 +7,6 @@ import {
   getDocs, 
   query, 
   where, 
-  orderBy, 
   onSnapshot,
   serverTimestamp,
   DocumentData,
@@ -107,13 +106,18 @@ export const getUserMeetings = async (userId: string): Promise<Meeting[]> => {
   try {
     const q = query(
       collection(db, COLLECTION_NAME),
-      where('userId', '==', userId),
-      orderBy('date', 'asc'),
-      orderBy('time', 'asc')
+      where('userId', '==', userId)
     );
     
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(convertDocToMeeting);
+    const meetings = querySnapshot.docs.map(convertDocToMeeting);
+    
+    // Sort on client side
+    return meetings.sort((a, b) => {
+      const dateComparison = a.date.localeCompare(b.date);
+      if (dateComparison !== 0) return dateComparison;
+      return a.time.localeCompare(b.time);
+    });
   } catch (error) {
     console.error('Error fetching meetings:', error);
     throw error;
@@ -131,16 +135,24 @@ export const subscribeMeetings = (
     return () => {}; // Return empty unsubscribe function
   }
   
+  // Simplified query that doesn't require a composite index
   const q = query(
     collection(db, COLLECTION_NAME),
-    where('userId', '==', userId),
-    orderBy('date', 'asc'),
-    orderBy('time', 'asc')
+    where('userId', '==', userId)
   );
 
   return onSnapshot(q, (snapshot) => {
     const meetings = snapshot.docs.map(convertDocToMeeting);
-    callback(meetings);
+    
+    // Sort on client side to avoid needing composite index
+    const sortedMeetings = meetings.sort((a, b) => {
+      // First sort by date, then by time
+      const dateComparison = a.date.localeCompare(b.date);
+      if (dateComparison !== 0) return dateComparison;
+      return a.time.localeCompare(b.time);
+    });
+    
+    callback(sortedMeetings);
   }, (error) => {
     console.error('Error in meetings subscription:', error);
   });
@@ -158,12 +170,14 @@ export const getTodayMeetings = async (userId: string): Promise<Meeting[]> => {
     const q = query(
       collection(db, COLLECTION_NAME),
       where('userId', '==', userId),
-      where('date', '==', today),
-      orderBy('time', 'asc')
+      where('date', '==', today)
     );
     
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(convertDocToMeeting);
+    const meetings = querySnapshot.docs.map(convertDocToMeeting);
+    
+    // Sort by time on client side
+    return meetings.sort((a, b) => a.time.localeCompare(b.time));
   } catch (error) {
     console.error('Error fetching today meetings:', error);
     throw error;
@@ -182,13 +196,18 @@ export const getUpcomingMeetings = async (userId: string): Promise<Meeting[]> =>
     const q = query(
       collection(db, COLLECTION_NAME),
       where('userId', '==', userId),
-      where('date', '>', today),
-      orderBy('date', 'asc'),
-      orderBy('time', 'asc')
+      where('date', '>', today)
     );
     
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(convertDocToMeeting);
+    const meetings = querySnapshot.docs.map(convertDocToMeeting);
+    
+    // Sort by date and time on client side
+    return meetings.sort((a, b) => {
+      const dateComparison = a.date.localeCompare(b.date);
+      if (dateComparison !== 0) return dateComparison;
+      return a.time.localeCompare(b.time);
+    });
   } catch (error) {
     console.error('Error fetching upcoming meetings:', error);
     throw error;
