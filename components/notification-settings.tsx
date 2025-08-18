@@ -66,7 +66,7 @@ export function NotificationSettings() {
                   <div>
                     <p className="text-sm font-medium text-yellow-700">Permission Needed</p>
                     <p className="text-xs text-muted-foreground">
-                      Click "Grant Permission" below to enable reminders
+                      Click &quot;Grant Permission&quot; below to enable reminders
                     </p>
                   </div>
                 </>
