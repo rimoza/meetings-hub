@@ -20,19 +20,32 @@ interface MeetingFormProps {
   meeting?: Meeting
   isOpen: boolean
   onClose: () => void
-  onSubmit: (meeting: Omit<Meeting, "id">) => void
+  onSubmit: (meeting: Omit<Meeting, "id">) => Promise<void>
+}
+
+interface FormData {
+  title: string
+  description: string
+  date: Date
+  time: string
+  duration: number
+  type: MeetingType
+  priority: Priority
+  attendees: string[]
+  location: string
 }
 
 export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: MeetingFormProps) {
-  const [formData, setFormData] = useState({
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formData, setFormData] = useState<FormData>({
     title: "",
     description: "",
     date: new Date(),
     time: "",
     duration: 60,
-    type: "meeting" as MeetingType,
-    priority: "medium" as Priority,
-    attendees: [] as string[],
+    type: "meeting",
+    priority: "medium",
+    attendees: [],
     location: "",
   })
 
@@ -46,8 +59,8 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: MeetingFormP
         date: new Date(meeting.date),
         time: meeting.time,
         duration: meeting.duration,
-        type: meeting.type,
-        priority: meeting.priority,
+        type: meeting.type as MeetingType,
+        priority: meeting.priority as Priority,
         attendees: meeting.attendees,
         location: meeting.location,
       })
@@ -67,17 +80,25 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: MeetingFormP
     }
   }, [meeting, isOpen])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const now = new Date()
-    onSubmit({
-      ...formData,
-      date: formData.date.toISOString().split("T")[0],
-      completed: false,
-      createdAt: now,
-      updatedAt: now,
-    })
-    onClose()
+    setIsSubmitting(true)
+    
+    try {
+      const now = new Date()
+      await onSubmit({
+        ...formData,
+        date: formData.date.toISOString().split("T")[0],
+        completed: false,
+        createdAt: now,
+        updatedAt: now,
+      })
+      // onClose is now handled in the parent component after successful submission
+    } catch (error) {
+      console.error("Error submitting form:", error)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const addAttendee = () => {
@@ -273,11 +294,18 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: MeetingFormP
           </div>
 
           <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
-            <Button type="button" variant="outline" onClick={onClose} className="w-full sm:w-auto order-2 sm:order-1">
+            <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting} className="w-full sm:w-auto order-2 sm:order-1">
               Cancel
             </Button>
-            <Button type="submit" className="w-full sm:w-auto order-1 sm:order-2">
-              {meeting ? "Update" : "Create"} Meeting
+            <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto order-1 sm:order-2">
+              {isSubmitting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  {meeting ? "Updating..." : "Creating..."}
+                </>
+              ) : (
+                `${meeting ? "Update" : "Create"} Meeting`
+              )}
             </Button>
           </DialogFooter>
         </form>

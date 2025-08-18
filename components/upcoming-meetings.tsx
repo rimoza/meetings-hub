@@ -23,12 +23,10 @@ export function UpcomingMeetings({ onEditMeeting }: Readonly<UpcomingMeetingsPro
   })
 
   // Filter meetings for upcoming (after today)
-  const today = new Date()
-  today.setHours(23, 59, 59, 999) // End of today
+  const today = new Date().toISOString().split("T")[0]
 
   const upcomingMeetings = meetings.filter((meeting) => {
-    const meetingDate = new Date(meeting.date)
-    return meetingDate > today
+    return meeting.date > today
   })
 
   // Apply additional filters
@@ -47,7 +45,9 @@ export function UpcomingMeetings({ onEditMeeting }: Readonly<UpcomingMeetingsPro
   })
 
   // Sort by date (earliest first)
-  const sortedMeetings = filteredMeetings.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  const sortedMeetings = filteredMeetings.sort((a, b) => {
+    return a.date.localeCompare(b.date)
+  })
 
   return (
     <div className="space-y-6">

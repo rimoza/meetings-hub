@@ -35,6 +35,7 @@ export function useMeetings() {
     setIsLoading(true);
     
     const unsubscribe = subscribeMeetings(user.uid, (meetings) => {
+      console.log(`Received ${meetings.length} meetings from Firebase`);
       setMeetings(meetings);
       setIsLoading(false);
     });
@@ -71,13 +72,17 @@ export function useMeetings() {
   // Get today's meetings
   const todayMeetings = useMemo(() => {
     const today = new Date().toISOString().split("T")[0];
-    return meetings.filter((meeting) => meeting.date === today);
+    return meetings.filter((meeting) => {
+      return meeting.date === today;
+    });
   }, [meetings]);
 
   // Get upcoming meetings
   const upcomingMeetings = useMemo(() => {
     const today = new Date().toISOString().split("T")[0];
-    return meetings.filter((meeting) => meeting.date > today);
+    return meetings.filter((meeting) => {
+      return meeting.date > today;
+    });
   }, [meetings]);
 
   // Get completed meetings

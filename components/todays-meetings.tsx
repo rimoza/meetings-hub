@@ -25,8 +25,7 @@ export function TodaysMeetings({ onEditMeeting }: Readonly<TodaysMeetingsProps>)
   // Filter meetings for today
   const today = new Date().toISOString().split("T")[0]
   const todaysMeetings = meetings.filter((meeting) => {
-    const meetingDate = new Date(meeting.date).toISOString().split("T")[0]
-    return meetingDate === today
+    return meeting.date === today
   })
 
   // Apply additional filters

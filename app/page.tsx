@@ -59,13 +59,21 @@ export default function Dashboard() {
     setIsFormOpen(true)
   }
 
-  const handleFormSubmit = (meetingData: Omit<Meeting, "id">) => {
-    if (editingMeeting) {
-      updateMeeting(editingMeeting.id, meetingData)
-      toast.success("Meeting updated successfully")
-    } else {
-      createMeeting(meetingData)
-      toast.success("Meeting created successfully")
+  const handleFormSubmit = async (meetingData: Omit<Meeting, "id">) => {
+    try {
+      if (editingMeeting) {
+        await updateMeeting(editingMeeting.id, meetingData)
+        toast.success("Meeting updated successfully")
+      } else {
+        await createMeeting(meetingData)
+        toast.success("Meeting created successfully")
+      }
+      // Close the form immediately after successful submission
+      setIsFormOpen(false)
+      setEditingMeeting(undefined)
+    } catch (error) {
+      // Error handling is already done in the hook functions
+      console.error("Error submitting meeting:", error)
     }
   }
 
