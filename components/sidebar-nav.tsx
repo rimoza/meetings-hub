@@ -24,7 +24,7 @@ export function SidebarNav({ onCreateMeeting, onNavigate, activePage, todayCount
   
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: <Home className="h-4 w-4" />, count: null },
-    { id: "today", label: "Today's Meetings", icon: <Calendar className="h-4 w-4" />, count: todayCount },
+    { id: "today", label: "Today's Meetings", icon: <Calendar className="h-4 w-4 text-blue-500" />, count: todayCount },
     { id: "upcoming", label: "Upcoming Meetings", icon: <Clock className="h-4 w-4" />, count: upcomingCount },
     { id: "settings", label: "Settings", icon: <Settings className="h-4 w-4" />, count: null },
   ]

@@ -167,7 +167,7 @@ export default function Dashboard() {
             {filteredMeetings.length === 0 ? (
               <Card className="text-center py-8 sm:py-12">
                 <CardContent>
-                  <Calendar className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-3 sm:mb-4" />
+                  <Calendar className="h-10 w-10 sm:h-12 sm:w-12 text-blue-500 mx-auto mb-3 sm:mb-4" />
                   <h3 className="text-base sm:text-lg font-semibold mb-2">No meetings found</h3>
                   <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4 px-2">
                     {filters.search || filters.status !== "all" || filters.priority !== "all" || filters.type !== "all"

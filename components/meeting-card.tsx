@@ -112,7 +112,7 @@ export function MeetingCard({ meeting, onEdit, onDelete, onToggleComplete }: Mee
         {/* Date and Time - Most Important Info */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
           <div className="flex items-center space-x-2 text-xs sm:text-sm text-muted-foreground">
-            <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+            <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 text-blue-500" />
             <span className="font-medium">{format(new Date(meeting.date), "MMM d, yyyy")}</span>
           </div>
           <div className="flex items-center space-x-2 text-xs sm:text-sm text-muted-foreground">
