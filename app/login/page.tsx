@@ -36,57 +36,71 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 dark:from-slate-950 dark:via-blue-950 dark:to-indigo-950 relative overflow-hidden">
+      {/* Background decorations */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-32 w-96 h-96 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-32 w-96 h-96 bg-gradient-to-br from-purple-400/20 to-pink-600/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-gradient-to-br from-indigo-400/10 to-blue-600/10 rounded-full blur-3xl"></div>
+      </div>
+
       {/* Header */}
-      <header className="absolute top-0 right-0 p-4">
+      <header className="absolute top-0 right-0 p-6 z-10">
         <ThemeToggle />
       </header>
 
       {/* Main Login Container */}
-      <div className="flex items-center justify-center min-h-screen p-4">
-        <div className="w-full max-w-md space-y-6">
+      <div className="flex items-center justify-center min-h-screen p-4 relative z-10">
+        <div className="w-full max-w-md space-y-8">
           {/* Logo and Branding */}
-          <div className="text-center space-y-2">
-            <div className="flex items-center justify-center space-x-2 mb-4">
-              <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl">
-                <Calendar className="h-8 w-8 text-white" />
+          <div className="text-center space-y-4">
+            <div className="flex items-center justify-center space-x-2 mb-6">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur-lg opacity-30"></div>
+                <div className="relative p-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl shadow-xl">
+                  <Calendar className="h-10 w-10 text-white" />
+                </div>
               </div>
             </div>
-            <h1 className="text-3xl font-bold tracking-tight">Kulan Space</h1>
-            <p className="text-muted-foreground">
-              Sign in with your Gmail to manage meetings
+            <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Kulan Space
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-sm mx-auto leading-relaxed">
+              Your modern meeting management solution
             </p>
           </div>
 
           {/* Login Card */}
-          <Card className="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
-            <CardHeader className="space-y-1 text-center pb-4">
-              <CardTitle className="text-xl">Welcome back</CardTitle>
-              <CardDescription>
-                Enter your Gmail address to continue
+          <Card className="border-0 shadow-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md ring-1 ring-black/5 dark:ring-white/10">
+            <CardHeader className="space-y-3 text-center pb-6">
+              <CardTitle className="text-2xl font-semibold">Welcome back</CardTitle>
+              <CardDescription className="text-base text-muted-foreground">
+                Sign in with Google to continue to your dashboard
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6 px-8 pb-8">
               {/* Firebase Setup Warning */}
               {!firebaseConfigured && (
-                <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <div className="p-5 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-xl">
                   <div className="flex items-start space-x-3">
-                    <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
-                    <div className="text-sm">
-                      <p className="font-medium text-amber-800 dark:text-amber-200 mb-2">
+                    <div className="p-1 bg-amber-100 dark:bg-amber-800/30 rounded-lg">
+                      <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <div className="text-sm flex-1">
+                      <p className="font-semibold text-amber-800 dark:text-amber-200 mb-2">
                         Firebase Setup Required
                       </p>
-                      <p className="text-amber-700 dark:text-amber-300 mb-3">
+                      <p className="text-amber-700 dark:text-amber-300 mb-3 leading-relaxed">
                         To use authentication, you need to set up Firebase. Follow these steps:
                       </p>
-                      <ol className="list-decimal list-inside space-y-1 text-amber-700 dark:text-amber-300 text-xs">
+                      <ol className="list-decimal list-inside space-y-1.5 text-amber-700 dark:text-amber-300 text-xs leading-relaxed">
                         <li>Create a Firebase project at console.firebase.google.com</li>
                         <li>Enable Google Authentication</li>
                         <li>Copy your Firebase config to .env.local</li>
                         <li>Add localhost:3000 to authorized domains</li>
                       </ol>
-                      <p className="text-amber-600 dark:text-amber-400 mt-2 text-xs">
-                        See FIREBASE_SETUP.md for detailed instructions.
+                      <p className="text-amber-600 dark:text-amber-400 mt-3 text-xs font-medium">
+                        📖 See FIREBASE_SETUP.md for detailed instructions.
                       </p>
                     </div>
                   </div>
@@ -95,7 +109,7 @@ export default function LoginPage() {
 
               {/* Error Display */}
               {error && (
-                <div className="p-3 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 rounded-md">
+                <div className="p-4 text-sm text-red-700 bg-red-50 dark:bg-red-900/30 dark:text-red-300 rounded-xl border border-red-200 dark:border-red-800">
                   {error}
                 </div>
               )}
@@ -104,7 +118,7 @@ export default function LoginPage() {
               <Button 
                 onClick={handleGoogleLogin}
                 disabled={isLoading || authLoading || !firebaseConfigured}
-                className="w-full h-12 bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 shadow-sm disabled:opacity-50"
+                className="w-full h-14 bg-white hover:bg-gray-50 text-gray-900 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 font-medium text-base"
                 variant="outline"
               >
                 {!firebaseConfigured ? (
@@ -130,15 +144,15 @@ export default function LoginPage() {
                 )}
               </Button>
 
-              <div className="text-center text-sm text-muted-foreground">
-                Sign in with your Google account to access all features
+              <div className="text-center text-sm text-muted-foreground leading-relaxed">
+                Secure authentication powered by Google
               </div>
             </CardContent>
           </Card>
 
           {/* Footer */}
-          <div className="text-center text-xs text-muted-foreground">
-            <p>By signing in, you agree to our terms of service.</p>
+          <div className="text-center text-sm text-muted-foreground/80">
+            <p>By signing in, you agree to our terms of service and privacy policy.</p>
           </div>
         </div>
       </div>

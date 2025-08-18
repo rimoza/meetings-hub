@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { DeleteConfirmDialog } from "@/components/ui/confirm-dialog"
 import type { Meeting } from "@/types/meeting"
 import { format } from "date-fns"
 
@@ -80,14 +81,19 @@ export function MeetingCard({ meeting, onEdit, onDelete, onToggleComplete }: Mee
               
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="h-7 w-7 p-0 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/20"
-                    onClick={() => onDelete(meeting.id)}
+                  <DeleteConfirmDialog
+                    itemName={meeting.title}
+                    itemType="meeting"
+                    onConfirm={() => onDelete(meeting.id)}
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-7 w-7 p-0 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/20"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </DeleteConfirmDialog>
                 </TooltipTrigger>
                 <TooltipContent side="left">
                   <p>Delete meeting</p>

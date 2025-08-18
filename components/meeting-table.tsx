@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { DeleteConfirmDialog } from "@/components/ui/confirm-dialog"
 import type { Meeting } from "@/types/meeting"
 import { format } from "date-fns"
 
@@ -83,9 +84,18 @@ export function MeetingTable({ meetings, onEdit, onDelete, onToggleComplete }: M
                     <DropdownMenuItem onClick={() => onToggleComplete(meeting.id)}>
                       {meeting.completed ? "Mark Pending" : "Mark Complete"}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onDelete(meeting.id)} className="text-destructive">
-                      Delete
-                    </DropdownMenuItem>
+                    <DeleteConfirmDialog
+                      itemName={meeting.title}
+                      itemType="meeting"
+                      onConfirm={() => onDelete(meeting.id)}
+                    >
+                      <DropdownMenuItem 
+                        className="text-destructive cursor-pointer"
+                        onSelect={(e) => e.preventDefault()}
+                      >
+                        Delete
+                      </DropdownMenuItem>
+                    </DeleteConfirmDialog>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
