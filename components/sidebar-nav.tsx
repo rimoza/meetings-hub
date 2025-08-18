@@ -1,6 +1,7 @@
 "use client"
-import { Calendar, Home, Plus, Settings, Clock } from "lucide-react"
+import { Calendar, Home, Plus, Settings, Clock, Bell } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { 
   Sidebar, 
   SidebarHeader, 
@@ -10,6 +11,7 @@ import {
   SidebarMenuButton,
   useSidebar
 } from "@/components/ui/sidebar"
+import { useReminders } from "@/hooks/use-reminders"
 
 interface SidebarNavProps {
   onCreateMeeting: () => void
@@ -21,6 +23,7 @@ interface SidebarNavProps {
 
 export function SidebarNav({ onCreateMeeting, onNavigate, activePage, todayCount = 0, upcomingCount = 0 }: SidebarNavProps) {
   const { isMobile, setOpenMobile } = useSidebar()
+  const { isPermissionGranted } = useReminders()
   
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: <Home className="h-4 w-4" />, count: null },
@@ -50,8 +53,8 @@ export function SidebarNav({ onCreateMeeting, onNavigate, activePage, todayCount
       <SidebarHeader>
         <div className="flex items-center justify-center w-full px-2 py-2">
           <div className="flex items-center space-x-2">
-            <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
-              <Calendar className="h-5 w-5 text-white" />
+            <div className="p-2 bg-primary rounded-lg">
+              <Calendar className="h-5 w-5 text-primary-foreground" />
             </div>
             <h2 className="text-base sm:text-lg font-semibold text-foreground">Kulan Space</h2>
           </div>
@@ -67,6 +70,16 @@ export function SidebarNav({ onCreateMeeting, onNavigate, activePage, todayCount
               <span className="ml-2">New Meeting</span>
             </Button>
           </div>
+
+          {/* Notification Status Indicator */}
+          {isPermissionGranted && (
+            <div className="px-2 mb-4">
+              <div className="flex items-center justify-center p-2 bg-primary/10 rounded-lg border border-primary/20">
+                <Bell className="h-4 w-4 text-primary mr-2" />
+                <span className="text-sm font-medium text-primary">Reminders Active</span>
+              </div>
+            </div>
+          )}
 
           {/* Navigation Items - Mobile optimized */}
           <SidebarMenu>

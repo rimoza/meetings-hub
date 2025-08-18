@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/contexts/auth-context";
+import { useReminders } from "@/hooks/use-reminders";
 import type { Meeting, MeetingFilters } from "@/types/meeting";
 import {
   subscribeMeetings,
@@ -13,6 +14,7 @@ import {
 
 export function useMeetings() {
   const { user } = useAuth();
+  const { scheduleReminders, isPermissionGranted } = useReminders();
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,10 +40,22 @@ export function useMeetings() {
       console.log(`Received ${meetings.length} meetings from Firebase`);
       setMeetings(meetings);
       setIsLoading(false);
+      
+      // Schedule reminders for all meetings when data changes
+      if (isPermissionGranted) {
+        scheduleReminders(meetings);
+      }
     });
 
     return () => unsubscribe();
-  }, [user?.uid]);
+  }, [user?.uid, isPermissionGranted, scheduleReminders]);
+
+  // Reschedule reminders when permission is granted
+  useEffect(() => {
+    if (isPermissionGranted && meetings.length > 0) {
+      scheduleReminders(meetings);
+    }
+  }, [isPermissionGranted, meetings, scheduleReminders]);
 
   // Filter meetings based on current filters
   const filteredMeetings = useMemo(() => {

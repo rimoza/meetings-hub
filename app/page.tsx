@@ -28,6 +28,7 @@ import { toast } from "sonner"
 import { SidebarNav } from "@/components/sidebar-nav"
 import { MeetingForm } from "@/components/meeting-form"
 import { ProtectedRoute } from "@/components/protected-route"
+import { NotificationSettings } from "@/components/notification-settings"
 
 export default function Dashboard() {
   const { user, logout } = useAuth()
@@ -126,9 +127,18 @@ export default function Dashboard() {
         return <UpcomingMeetings onEditMeeting={handleEdit} />
       case "settings":
         return (
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-bold mb-4">Settings</h2>
-            <p className="text-muted-foreground">Settings page coming soon...</p>
+          <div className="max-w-2xl mx-auto space-y-6">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-bold mb-2">Settings</h2>
+              <p className="text-muted-foreground">Configure your meeting preferences</p>
+            </div>
+            
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Notifications</h3>
+                <NotificationSettings />
+              </div>
+            </div>
           </div>
         )
       default:
