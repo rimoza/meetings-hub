@@ -51,28 +51,38 @@ export class ReminderService {
   }
 
   async requestNotificationPermission(): Promise<boolean> {
+    console.log('🔔 Requesting notification permission...');
+    
     if (typeof window === 'undefined' || typeof Notification === 'undefined') {
+      console.log('❌ Window or Notification API not available');
       return false;
     }
 
     if (!this.isNotificationSupported) {
-      console.warn('Notifications are not supported in this browser');
+      console.warn('❌ Notifications are not supported in this browser');
       return false;
     }
 
     try {
+      console.log('📱 Current permission:', Notification.permission);
+      
       if (Notification.permission === 'granted') {
+        console.log('✅ Permission already granted');
         this.isNotificationGranted = true;
         return true;
       }
 
       if (Notification.permission !== 'denied') {
+        console.log('🤔 Requesting permission from user...');
         const permission = await Notification.requestPermission();
+        console.log('📝 Permission result:', permission);
         this.isNotificationGranted = permission === 'granted';
         return this.isNotificationGranted;
+      } else {
+        console.log('🚫 Permission previously denied');
       }
     } catch (error) {
-      console.error('Error requesting notification permission:', error);
+      console.error('💥 Error requesting notification permission:', error);
     }
 
     return false;

@@ -45,18 +45,32 @@ export function NotificationSettings() {
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between p-3 bg-secondary/30 rounded-lg">
           <div className="flex items-center space-x-3">
-            {isRemindersEnabled && isPermissionGranted ? (
-              <>
-                <div className="p-1 bg-primary/10 rounded">
-                  <Bell className="h-4 w-4 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Reminders Active</p>
-                  <p className="text-xs text-muted-foreground">
-                    You&apos;ll receive reminders at 1h, 30min, and 5min before meetings
-                  </p>
-                </div>
-              </>
+            {isRemindersEnabled ? (
+              isPermissionGranted ? (
+                <>
+                  <div className="p-1 bg-primary/10 rounded">
+                    <Bell className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Reminders Active</p>
+                    <p className="text-xs text-muted-foreground">
+                      You&apos;ll receive reminders at 1h, 30min, and 5min before meetings
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="p-1 bg-yellow-100 rounded">
+                    <Bell className="h-4 w-4 text-yellow-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-yellow-700">Permission Needed</p>
+                    <p className="text-xs text-muted-foreground">
+                      Click "Grant Permission" below to enable reminders
+                    </p>
+                  </div>
+                </>
+              )
             ) : (
               <>
                 <div className="p-1 bg-muted rounded">
@@ -65,7 +79,7 @@ export function NotificationSettings() {
                 <div>
                   <p className="text-sm font-medium">Reminders Disabled</p>
                   <p className="text-xs text-muted-foreground">
-                    {!isPermissionGranted ? "Permission required" : "Turn on to receive reminders"}
+                    Turn on to receive meeting reminders
                   </p>
                 </div>
               </>
@@ -73,7 +87,7 @@ export function NotificationSettings() {
           </div>
           
           <Switch 
-            checked={isRemindersEnabled && isPermissionGranted}
+            checked={isRemindersEnabled}
             onCheckedChange={handleToggleReminders}
             disabled={isRequestingPermission}
           />
