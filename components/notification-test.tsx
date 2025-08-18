@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Bell, TestTube } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { reminderService } from "@/lib/notifications/reminder-service"
+import { getReminderService } from "@/lib/notifications/reminder-service"
 import type { Meeting } from "@/types/meeting"
 
 export function NotificationTest() {
@@ -14,6 +14,13 @@ export function NotificationTest() {
     setIsTestingNotification(true)
     
     try {
+      const reminderService = getReminderService()
+      
+      if (!reminderService) {
+        alert("Reminder service is not available")
+        return
+      }
+
       // Request permission first if needed
       const hasPermission = await reminderService.requestNotificationPermission()
       
