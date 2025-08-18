@@ -15,16 +15,18 @@ interface SidebarNavProps {
   onCreateMeeting: () => void
   onNavigate: (page: string) => void
   activePage: string
+  todayCount?: number
+  upcomingCount?: number
 }
 
-export function SidebarNav({ onCreateMeeting, onNavigate, activePage }: SidebarNavProps) {
+export function SidebarNav({ onCreateMeeting, onNavigate, activePage, todayCount = 0, upcomingCount = 0 }: SidebarNavProps) {
   const { isMobile, setOpenMobile } = useSidebar()
   
   const menuItems = [
-    { id: "dashboard", label: "Dashboard", icon: <Home className="h-4 w-4" /> },
-    { id: "today", label: "Today's Meetings", icon: <Calendar className="h-4 w-4" /> },
-    { id: "upcoming", label: "Upcoming Meetings", icon: <Clock className="h-4 w-4" /> },
-    { id: "settings", label: "Settings", icon: <Settings className="h-4 w-4" /> },
+    { id: "dashboard", label: "Dashboard", icon: <Home className="h-4 w-4" />, count: null },
+    { id: "today", label: "Today's Meetings", icon: <Calendar className="h-4 w-4" />, count: todayCount },
+    { id: "upcoming", label: "Upcoming Meetings", icon: <Clock className="h-4 w-4" />, count: upcomingCount },
+    { id: "settings", label: "Settings", icon: <Settings className="h-4 w-4" />, count: null },
   ]
   
   const handleNavClick = (pageId: string) => {
@@ -70,8 +72,21 @@ export function SidebarNav({ onCreateMeeting, onNavigate, activePage }: SidebarN
                   onClick={() => handleNavClick(item.id)}
                   className="h-10 text-sm sm:text-base"
                 >
-                  {item.icon}
-                  <span>{item.label}</span>
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center">
+                      {item.icon}
+                      <span className="ml-2">{item.label}</span>
+                    </div>
+                    {item.count !== null && (
+                      <span className={`ml-auto text-xs rounded-full px-2 py-0.5 min-w-[1.25rem] h-5 flex items-center justify-center ${
+                        item.count > 0 
+                          ? 'bg-primary text-primary-foreground' 
+                          : 'bg-muted text-muted-foreground'
+                      }`}>
+                        {item.count > 99 ? '99+' : item.count}
+                      </span>
+                    )}
+                  </div>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}

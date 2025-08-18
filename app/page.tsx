@@ -35,6 +35,7 @@ export default function Dashboard() {
     meetings,
     filteredMeetings,
     todayMeetings,
+    upcomingMeetings,
     completedMeetings,
     filters,
     setFilters,
@@ -208,7 +209,13 @@ export default function Dashboard() {
     <ProtectedRoute>
       <div className="flex w-full h-screen">
         {/* Sidebar */}
-        <SidebarNav onCreateMeeting={handleCreateMeeting} onNavigate={handleNavigate} activePage={currentPage} />
+        <SidebarNav 
+          onCreateMeeting={handleCreateMeeting} 
+          onNavigate={handleNavigate} 
+          activePage={currentPage}
+          todayCount={todayMeetings.length}
+          upcomingCount={upcomingMeetings.length}
+        />
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
