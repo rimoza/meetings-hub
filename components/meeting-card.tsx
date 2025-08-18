@@ -1,6 +1,6 @@
 "use client"
 
-import { Calendar, Clock, MapPin, User, Edit, Trash2, Check, X } from "lucide-react"
+import { Calendar, Clock, MapPin, Users, Edit, Trash2, CheckCircle2, XCircle, MoreHorizontal } from "lucide-react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -16,136 +16,204 @@ interface MeetingCardProps {
   onToggleComplete: (id: string) => void
 }
 
-const priorityColors = {
-  low: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-  medium: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
-  high: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
+const priorityConfig = {
+  low: { 
+    color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800",
+    dot: "bg-emerald-500"
+  },
+  medium: { 
+    color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800",
+    dot: "bg-amber-500"
+  },
+  high: { 
+    color: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 border-rose-200 dark:border-rose-800",
+    dot: "bg-rose-500"
+  },
 }
 
-const typeColors = {
-  meeting: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
-  call: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
-  interview: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
-  presentation: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300",
+const typeIcons = {
+  meeting: Calendar,
+  call: Clock,
+  interview: Users,
+  presentation: MoreHorizontal,
 }
 
 export function MeetingCard({ meeting, onEdit, onDelete, onToggleComplete }: MeetingCardProps) {
+  const TypeIcon = typeIcons[meeting.type] || Calendar
+  
+  const borderColorClass = meeting.completed 
+    ? "border-l-muted" 
+    : meeting.priority === "high" 
+      ? "border-l-rose-500" 
+      : meeting.priority === "medium" 
+        ? "border-l-amber-500" 
+        : "border-l-emerald-500"
+  
   return (
-    <Card className={`transition-all hover:shadow-md ${meeting.completed ? "opacity-75" : ""}`}>
-      <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-3">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-start space-x-2 flex-1 min-w-0">
-            <User className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-            <h3 className={`font-semibold text-sm sm:text-base ${meeting.completed ? "line-through" : ""} leading-tight`}>
-              {meeting.title}
-            </h3>
-          </div>
-          {/* Vertical Action Icons */}
-          <TooltipProvider>
-            <div className="flex flex-col gap-1 shrink-0">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="h-7 w-7 p-0 hover:bg-blue-100 hover:text-blue-600 dark:hover:bg-blue-900/20"
-                    onClick={() => onEdit(meeting)}
-                  >
-                    <Edit className="h-3.5 w-3.5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="left">
-                  <p>Edit meeting</p>
-                </TooltipContent>
-              </Tooltip>
+    <Card className={`group transition-all duration-200 hover:shadow-lg border-l-4 ${borderColorClass} ${
+      meeting.completed ? "opacity-60" : ""
+    }`}>
+      <CardHeader className="p-4 sm:p-5">
+        <div className="space-y-3">
+          {/* Header Row with Title and Actions */}
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1 space-y-1">
+              <div className="flex items-center gap-2">
+                <div className={`p-1.5 rounded-lg ${
+                  meeting.completed 
+                    ? "bg-muted" 
+                    : "bg-primary/10"
+                }`}>
+                  <TypeIcon className={`h-4 w-4 ${
+                    meeting.completed 
+                      ? "text-muted-foreground" 
+                      : "text-primary"
+                  }`} />
+                </div>
+                <h3 className={`font-semibold text-base sm:text-lg tracking-tight ${
+                  meeting.completed ? "line-through text-muted-foreground" : ""
+                }`}>
+                  {meeting.title}
+                </h3>
+              </div>
               
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className={`h-7 w-7 p-0 ${
-                      meeting.completed 
-                        ? "hover:bg-orange-100 hover:text-orange-600 dark:hover:bg-orange-900/20" 
-                        : "hover:bg-green-100 hover:text-green-600 dark:hover:bg-green-900/20"
-                    }`}
-                    onClick={() => onToggleComplete(meeting.id)}
-                  >
-                    {meeting.completed ? <X className="h-3.5 w-3.5" /> : <Check className="h-3.5 w-3.5" />}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="left">
-                  <p>{meeting.completed ? "Mark pending" : "Mark complete"}</p>
-                </TooltipContent>
-              </Tooltip>
-              
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <DeleteConfirmDialog
-                    itemName={meeting.title}
-                    itemType="meeting"
-                    onConfirm={() => onDelete(meeting.id)}
-                  >
+              {/* Badges Row */}
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge 
+                  variant="outline" 
+                  className={`text-xs border ${priorityConfig[meeting.priority].color}`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${priorityConfig[meeting.priority].dot}`} />
+                  {meeting.priority} priority
+                </Badge>
+                
+                <Badge variant="secondary" className="text-xs capitalize">
+                  {meeting.type}
+                </Badge>
+                
+                {meeting.completed && (
+                  <Badge variant="default" className="text-xs bg-emerald-500 hover:bg-emerald-600">
+                    <CheckCircle2 className="h-3 w-3 mr-1" />
+                    Completed
+                  </Badge>
+                )}
+              </div>
+            </div>
+            
+            {/* Horizontal Action Buttons */}
+            <TooltipProvider>
+              <div className="flex items-center gap-1 shrink-0">
+                <Tooltip>
+                  <TooltipTrigger asChild>
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="h-7 w-7 p-0 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/20"
+                      className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary transition-colors"
+                      onClick={() => onEdit(meeting)}
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <Edit className="h-4 w-4" />
                     </Button>
-                  </DeleteConfirmDialog>
-                </TooltipTrigger>
-                <TooltipContent side="left">
-                  <p>Delete meeting</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          </TooltipProvider>
-        </div>
-        <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-2">
-          <Badge className={`text-xs ${priorityColors[meeting.priority]}`}>{meeting.priority}</Badge>
-          <Badge className={`text-xs ${typeColors[meeting.type]}`}>{meeting.type}</Badge>
-          {meeting.completed && <Badge variant="secondary" className="text-xs">Done</Badge>}
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Edit meeting</p>
+                  </TooltipContent>
+                </Tooltip>
+                
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className={`h-8 w-8 p-0 transition-colors ${
+                        meeting.completed 
+                          ? "hover:bg-amber-100 hover:text-amber-600 dark:hover:bg-amber-900/20" 
+                          : "hover:bg-emerald-100 hover:text-emerald-600 dark:hover:bg-emerald-900/20"
+                      }`}
+                      onClick={() => onToggleComplete(meeting.id)}
+                    >
+                      {meeting.completed ? <XCircle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{meeting.completed ? "Mark as pending" : "Mark as complete"}</p>
+                  </TooltipContent>
+                </Tooltip>
+                
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <DeleteConfirmDialog
+                      itemName={meeting.title}
+                      itemType="meeting"
+                      onConfirm={() => onDelete(meeting.id)}
+                    >
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </DeleteConfirmDialog>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Delete meeting</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            </TooltipProvider>
+          </div>
         </div>
       </CardHeader>
-      <CardContent className="p-3 sm:p-4 pt-0 space-y-2 sm:space-y-3">
-        {/* Date and Time - Most Important Info */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-          <div className="flex items-center space-x-2 text-xs sm:text-sm text-muted-foreground">
-            <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 text-blue-500" />
-            <span className="font-medium">{format(new Date(meeting.date), "MMM d, yyyy")}</span>
+      <CardContent className="px-4 sm:px-5 pb-4 sm:pb-5 pt-0">
+        <div className="space-y-3">
+          {/* Description */}
+          {meeting.description && (
+            <p className="text-sm text-muted-foreground line-clamp-2">
+              {meeting.description}
+            </p>
+          )}
+          
+          {/* Info Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Date & Time Box */}
+            <div className="flex items-center gap-3 p-2.5 bg-secondary/30 rounded-lg">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-primary" />
+                <div className="text-sm">
+                  <p className="font-medium">{format(new Date(meeting.date), "MMM d, yyyy")}</p>
+                  <p className="text-xs text-muted-foreground">{meeting.time} • {meeting.duration} min</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Location Box */}
+            <div className="flex items-center gap-3 p-2.5 bg-secondary/30 rounded-lg">
+              <MapPin className="h-4 w-4 text-primary shrink-0" />
+              <div className="text-sm truncate">
+                <p className="font-medium truncate">{meeting.location}</p>
+                <p className="text-xs text-muted-foreground">Location</p>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center space-x-2 text-xs sm:text-sm text-muted-foreground">
-            <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
-            <span>{meeting.time}</span>
-          </div>
+          
+          {/* Attendees */}
+          {meeting.attendees && meeting.attendees.length > 0 && (
+            <div className="flex items-center gap-2 p-2.5 bg-secondary/30 rounded-lg">
+              <Users className="h-4 w-4 text-primary shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium">
+                  {meeting.attendees.length} Attendee{meeting.attendees.length !== 1 ? 's' : ''}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {meeting.attendees.length > 3 
+                    ? `${meeting.attendees.slice(0, 3).join(", ")} +${meeting.attendees.length - 3} more`
+                    : meeting.attendees.join(", ")
+                  }
+                </p>
+              </div>
+            </div>
+          )}
         </div>
-        
-        {/* Location */}
-        <div className="flex items-center space-x-2 text-xs sm:text-sm text-muted-foreground">
-          <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
-          <span className="truncate">{meeting.location}</span>
-        </div>
-        
-        {/* Attendees - Collapsible on mobile */}
-        {meeting.attendees && meeting.attendees.length > 0 && (
-          <div className="flex items-start space-x-2 text-xs sm:text-sm text-muted-foreground">
-            <User className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 mt-0.5" />
-            <span className="line-clamp-2">
-              {meeting.attendees.length > 2 
-                ? `${meeting.attendees.slice(0, 2).join(", ")} +${meeting.attendees.length - 2} more`
-                : meeting.attendees.join(", ")
-              }
-            </span>
-          </div>
-        )}
-        
-        {/* Description - Truncated on mobile */}
-        {meeting.description && (
-          <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 sm:line-clamp-none">
-            {meeting.description}
-          </p>
-        )}
       </CardContent>
     </Card>
   )
