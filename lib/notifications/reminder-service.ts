@@ -17,23 +17,31 @@ export class ReminderService {
   private isRemindersEnabled: boolean = true; // User preference toggle
 
   constructor() {
-    this.checkNotificationSupport();
-    this.loadReminderPreference();
+    if (typeof window !== 'undefined') {
+      this.checkNotificationSupport();
+      this.loadReminderPreference();
+    }
   }
 
   private checkNotificationSupport(): void {
+    if (typeof window === 'undefined') return;
+    
     this.isNotificationSupported = 'Notification' in window;
     this.isNotificationGranted = this.isNotificationSupported && 
       Notification.permission === 'granted';
   }
 
   private loadReminderPreference(): void {
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') return;
+    
     const saved = localStorage.getItem('reminders-enabled');
     this.isRemindersEnabled = saved !== null ? JSON.parse(saved) : true;
   }
 
   private saveReminderPreference(): void {
-    localStorage.setItem('reminders-enabled', JSON.stringify(this.isRemindersEnabled));
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('reminders-enabled', JSON.stringify(this.isRemindersEnabled));
+    }
   }
 
   async requestNotificationPermission(): Promise<boolean> {
@@ -221,5 +229,5 @@ export class ReminderService {
   }
 }
 
-// Export a singleton instance
-export const reminderService = new ReminderService();
+// Export a singleton instance only on client side
+export const reminderService = typeof window !== 'undefined' ? new ReminderService() : ({} as ReminderService);
