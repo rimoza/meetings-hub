@@ -12,13 +12,14 @@ import {
   serverTimestamp,
   DocumentData,
   QueryDocumentSnapshot,
-  getFirestore
+  getFirestore,
+  type Firestore
 } from 'firebase/firestore';
-import { app } from './config';
+import { app, isFirebaseConfigured } from '@/lib/firebase/config';
 import type { Meeting } from '@/types/meeting';
 
 const COLLECTION_NAME = 'meetings';
-const db = getFirestore(app);
+const db: Firestore | null = app && isFirebaseConfigured() ? getFirestore(app) : null;
 // Convert Firestore document to Meeting type
 const convertDocToMeeting = (doc: QueryDocumentSnapshot<DocumentData>): Meeting => {
   const data = doc.data();
@@ -44,6 +45,10 @@ export const createMeeting = async (
   userId: string, 
   meetingData: Omit<Meeting, 'id' | 'createdAt' | 'updatedAt'>
 ) => {
+  if (!db) {
+    throw new Error('Firebase is not properly configured');
+  }
+  
   try {
     const docRef = await addDoc(collection(db, COLLECTION_NAME), {
       ...meetingData,
@@ -63,6 +68,10 @@ export const updateMeeting = async (
   meetingId: string, 
   updates: Partial<Omit<Meeting, 'id' | 'createdAt'>>
 ) => {
+  if (!db) {
+    throw new Error('Firebase is not properly configured');
+  }
+  
   try {
     const meetingRef = doc(db, COLLECTION_NAME, meetingId);
     await updateDoc(meetingRef, {
@@ -77,6 +86,10 @@ export const updateMeeting = async (
 
 // Delete a meeting
 export const deleteMeeting = async (meetingId: string) => {
+  if (!db) {
+    throw new Error('Firebase is not properly configured');
+  }
+  
   try {
     await deleteDoc(doc(db, COLLECTION_NAME, meetingId));
   } catch (error) {
@@ -87,6 +100,10 @@ export const deleteMeeting = async (meetingId: string) => {
 
 // Get all meetings for a user
 export const getUserMeetings = async (userId: string): Promise<Meeting[]> => {
+  if (!db) {
+    throw new Error('Firebase is not properly configured');
+  }
+  
   try {
     const q = query(
       collection(db, COLLECTION_NAME),
@@ -108,6 +125,12 @@ export const subscribeMeetings = (
   userId: string, 
   callback: (meetings: Meeting[]) => void
 ) => {
+  if (!db) {
+    console.warn('Firebase not configured, returning empty meetings');
+    callback([]);
+    return () => {}; // Return empty unsubscribe function
+  }
+  
   const q = query(
     collection(db, COLLECTION_NAME),
     where('userId', '==', userId),
@@ -125,6 +148,10 @@ export const subscribeMeetings = (
 
 // Get today's meetings
 export const getTodayMeetings = async (userId: string): Promise<Meeting[]> => {
+  if (!db) {
+    throw new Error('Firebase is not properly configured');
+  }
+  
   const today = new Date().toISOString().split('T')[0];
   
   try {
@@ -145,6 +172,10 @@ export const getTodayMeetings = async (userId: string): Promise<Meeting[]> => {
 
 // Get upcoming meetings
 export const getUpcomingMeetings = async (userId: string): Promise<Meeting[]> => {
+  if (!db) {
+    throw new Error('Firebase is not properly configured');
+  }
+  
   const today = new Date().toISOString().split('T')[0];
   
   try {
@@ -166,6 +197,10 @@ export const getUpcomingMeetings = async (userId: string): Promise<Meeting[]> =>
 
 // Toggle meeting completion
 export const toggleMeetingCompletion = async (meetingId: string, completed: boolean) => {
+  if (!db) {
+    throw new Error('Firebase is not properly configured');
+  }
+  
   try {
     const meetingRef = doc(db, COLLECTION_NAME, meetingId);
     await updateDoc(meetingRef, {

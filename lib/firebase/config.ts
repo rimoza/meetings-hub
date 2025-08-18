@@ -1,5 +1,5 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
+import { initializeApp, type FirebaseApp } from "firebase/app";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -10,11 +10,34 @@ const firebaseConfig = {
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: "970698372590",
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Check if Firebase is properly configured
+export const isFirebaseConfigured = (): boolean => {
+  return !!(
+    firebaseConfig.apiKey && 
+    firebaseConfig.authDomain && 
+    firebaseConfig.projectId &&
+    firebaseConfig.apiKey !== "demo-api-key" &&
+    !firebaseConfig.apiKey?.includes("demo")
+  );
+};
+
+// Initialize Firebase only if properly configured
+let app: FirebaseApp | null = null;
+
+if (isFirebaseConfigured()) {
+  try {
+    app = initializeApp(firebaseConfig);
+  } catch (error) {
+    console.error("Firebase initialization error:", error);
+    app = null;
+  }
+} else {
+  console.warn("Firebase not configured - using demo configuration. Please set up your Firebase project.");
+}
+
 export { app };

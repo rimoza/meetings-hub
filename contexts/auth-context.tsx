@@ -9,12 +9,12 @@ import {
   signInWithPopup,
   getAuth,
 } from 'firebase/auth';
-import { app } from '@/lib/firebase/config';
+import { app, isFirebaseConfigured } from '@/lib/firebase/config';
 import { doc, setDoc, getDoc, serverTimestamp, getFirestore } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 
-const auth = getAuth(app);
-const db = getFirestore(app);
+const auth = app ? getAuth(app) : null;
+const db = app ? getFirestore(app) : null;
 interface User {
   uid: string;
   email: string | null;
@@ -46,6 +46,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Listen to auth state changes
   useEffect(() => {
+    if (!auth || !isFirebaseConfigured()) {
+      setIsLoading(false);
+      return;
+    }
+    
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setIsLoading(true);
       
@@ -53,6 +58,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setFirebaseUser(firebaseUser);
         
         // Get or create user document in Firestore
+        if (!db) {
+          console.warn('Firestore not configured, using basic user data');
+          setUser({
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            name: firebaseUser.displayName,
+            photoURL: firebaseUser.photoURL,
+            emailVerified: firebaseUser.emailVerified,
+            createdAt: new Date(),
+            lastLoginAt: new Date()
+          });
+          setIsLoading(false);
+          return;
+        }
+
         const userDocRef = doc(db, 'users', firebaseUser.uid);
         const userDoc = await getDoc(userDocRef);
         
@@ -104,10 +124,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Google Sign-In (Gmail only)
   const loginWithGoogle = async () => {
+    if (!auth || !isFirebaseConfigured()) {
+      setError('Firebase is not properly configured. Please set up your Firebase project.');
+      return;
+    }
+    
     try {
       setError(null);
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      
+      // Configure provider to only allow Gmail accounts
+      provider.setCustomParameters({
+        hd: 'gmail.com' // Restrict to gmail.com domain
+      });
+      
+      // Add required scopes
+      provider.addScope('email');
+      provider.addScope('profile');
+      
+      const result = await signInWithPopup(auth, provider);
+      
+      // Verify the user has a Gmail address
+      if (result.user.email && !result.user.email.endsWith('@gmail.com')) {
+        await signOut(auth);
+        throw new Error('Only Gmail accounts are allowed');
+      }
+      
       router.push('/');
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -122,6 +164,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Sign Out
   const logout = async () => {
+    if (!auth) {
+      router.push('/login');
+      return;
+    }
+    
     try {
       await signOut(auth);
       router.push('/login');
