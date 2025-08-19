@@ -35,6 +35,10 @@ const convertDocToMeeting = (doc: QueryDocumentSnapshot<DocumentData>): Meeting 
     priority: data.priority,
     type: data.type,
     notes: data.notes || undefined,
+    meetingNotes: data.meetingNotes ? data.meetingNotes.map((note: any) => ({
+      ...note,
+      timestamp: note.timestamp?.toDate() || new Date(note.timestamp)
+    })) : undefined,
     createdAt: data.createdAt?.toDate() || new Date(),
     updatedAt: data.updatedAt?.toDate() || new Date(),
   };
