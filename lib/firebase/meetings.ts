@@ -15,7 +15,7 @@ import {
   type Firestore
 } from 'firebase/firestore';
 import { app, isFirebaseConfigured } from '@/lib/firebase/config';
-import type { Meeting } from '@/types/meeting';
+import type { Meeting, MeetingNote } from '@/types/meeting';
 
 const COLLECTION_NAME = 'meetings';
 const db: Firestore | null = app && isFirebaseConfigured() ? getFirestore(app) : null;
@@ -35,7 +35,7 @@ const convertDocToMeeting = (doc: QueryDocumentSnapshot<DocumentData>): Meeting 
     priority: data.priority,
     type: data.type,
     notes: data.notes || undefined,
-    meetingNotes: data.meetingNotes ? data.meetingNotes.map((note: any) => ({
+    meetingNotes: data.meetingNotes ? data.meetingNotes.map((note: MeetingNote) => ({
       ...note,
       timestamp: note.timestamp?.toDate() || new Date(note.timestamp)
     })) : undefined,
