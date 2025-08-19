@@ -1,6 +1,6 @@
 "use client"
 
-import { Calendar, Clock, MapPin, Users, Edit, Trash2, CheckCircle2, XCircle, MoreHorizontal } from "lucide-react"
+import { Calendar, Clock, MapPin, Users, Edit, Trash2, CheckCircle2, XCircle, MoreHorizontal, AlertCircle } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -78,12 +78,19 @@ export function MeetingTable({ meetings, onEdit, onDelete, onToggleComplete }: M
             const TypeIcon = typeIcons[meeting.type] || Calendar
             const isLast = index === meetings.length - 1
             
+            // Check if meeting is overdue
+            const now = new Date()
+            const meetingDateTime = new Date(`${meeting.date}T${meeting.time}`)
+            const isOverdue = !meeting.completed && meetingDateTime < now
+            
             return (
               <TableRow 
                 key={meeting.id} 
                 className={`group hover:bg-muted/30 transition-colors ${
                   meeting.completed ? "opacity-60" : ""
-                } ${!isLast ? "border-b" : ""}`}
+                } ${!isLast ? "border-b" : ""} ${
+                  isOverdue ? "bg-red-50 dark:bg-red-950/20" : ""
+                }`}
               >
                 {/* Meeting Title & Type */}
                 <TableCell className="font-medium">
@@ -182,6 +189,11 @@ export function MeetingTable({ meetings, onEdit, onDelete, onToggleComplete }: M
                     <Badge variant="default" className="text-xs bg-emerald-500 hover:bg-emerald-600">
                       <CheckCircle2 className="h-3 w-3 mr-1" />
                       Done
+                    </Badge>
+                  ) : isOverdue ? (
+                    <Badge variant="destructive" className="text-xs">
+                      <AlertCircle className="h-3 w-3 mr-1" />
+                      Overdue
                     </Badge>
                   ) : (
                     <Badge variant="outline" className="text-xs">

@@ -1,6 +1,6 @@
 "use client"
 
-import { Calendar, Clock, MapPin, Users, Edit, Trash2, CheckCircle2, XCircle, MoreHorizontal } from "lucide-react"
+import { Calendar, Clock, MapPin, Users, Edit, Trash2, CheckCircle2, XCircle, MoreHorizontal, AlertCircle } from "lucide-react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -41,18 +41,29 @@ const typeIcons = {
 export function MeetingCard({ meeting, onEdit, onDelete, onToggleComplete }: MeetingCardProps) {
   const TypeIcon = typeIcons[meeting.type] || Calendar
   
+  // Check if meeting is overdue
+  const now = new Date()
+  const meetingDateTime = new Date(`${meeting.date}T${meeting.time}`)
+  const isOverdue = !meeting.completed && meetingDateTime < now
+  
   const borderColorClass = meeting.completed 
     ? "border-l-muted" 
-    : meeting.priority === "high" 
-      ? "border-l-rose-500" 
-      : meeting.priority === "medium" 
-        ? "border-l-amber-500" 
-        : "border-l-emerald-500"
+    : isOverdue
+      ? "border-l-red-600"
+      : meeting.priority === "high" 
+        ? "border-l-rose-500" 
+        : meeting.priority === "medium" 
+          ? "border-l-amber-500" 
+          : "border-l-emerald-500"
+  
+  const cardBackgroundClass = isOverdue && !meeting.completed
+    ? "bg-red-50 dark:bg-red-950/20"
+    : ""
   
   return (
     <Card className={`group transition-all duration-200 hover:shadow-lg border-l-4 ${borderColorClass} ${
       meeting.completed ? "opacity-60" : ""
-    }`}>
+    } ${cardBackgroundClass}`}>
       <CardHeader className="p-4 sm:p-5">
         <div className="space-y-3">
           {/* Header Row with Title and Actions */}
@@ -79,6 +90,13 @@ export function MeetingCard({ meeting, onEdit, onDelete, onToggleComplete }: Mee
               
               {/* Badges Row */}
               <div className="flex flex-wrap items-center gap-2">
+                {isOverdue && !meeting.completed && (
+                  <Badge variant="destructive" className="text-xs">
+                    <AlertCircle className="h-3 w-3 mr-1" />
+                    Overdue
+                  </Badge>
+                )}
+                
                 <Badge 
                   variant="outline" 
                   className={`text-xs border ${priorityConfig[meeting.priority].color}`}
