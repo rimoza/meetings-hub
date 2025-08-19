@@ -1,0 +1,24 @@
+{
+  "name": "Meetings Hub",
+  "short_name": "Meetings",
+  "description": "Manage your meetings and get timely reminders",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "business"],
+  "lang": "en",
+  "scope": "/",
+  "permissions": [
+    "notifications"
+  ]
+}

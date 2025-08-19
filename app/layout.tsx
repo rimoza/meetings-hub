@@ -10,7 +10,7 @@ import { AuthProvider } from "@/contexts/auth-context"
 
 export const metadata: Metadata = {
   title: "Kulan Space - Meeting Management",
-  description: "Modern meeting management application",
+  description: "Modern meeting management application with meeting reminders",
   generator: "v0.app",
   icons: {
     icon: [
@@ -45,7 +45,13 @@ export const metadata: Metadata = {
       },
     ],
   },
-  manifest: '/site.webmanifest',
+  manifest: '/manifest.json',
+  other: {
+    'theme-color': '#3b82f6',
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'default',
+    'mobile-web-app-capable': 'yes',
+  },
 }
 
 export default function RootLayout({

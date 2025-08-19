@@ -10,18 +10,66 @@ export function useReminders() {
   const [isRequestingPermission, setIsRequestingPermission] = useState(false);
   const [reminderService, setReminderService] = useState<ReturnType<typeof getReminderService>>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [serviceStatus, setServiceStatus] = useState<any>(null);
 
   useEffect(() => {
-    setIsMounted(true);
+    let isSubscribed = true;
     
-    // Initialize reminder service only on client side after mount
-    const service = getReminderService();
-    setReminderService(service);
+    const initializeService = async () => {
+      if (!isSubscribed) return;
+      
+      setIsMounted(true);
+      
+      // Add a small delay to ensure proper hydration
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      if (!isSubscribed) return;
+      
+      try {
+        // Initialize reminder service only on client side after mount
+        const service = getReminderService();
+        
+        if (!isSubscribed) return;
+        
+        setReminderService(service);
+        
+        if (service) {
+          // Get initial status
+          const status = service.getServiceStatus();
+          setServiceStatus(status);
+          setIsPermissionGranted(service.hasNotificationPermission());
+          setIsRemindersEnabled(service.isRemindersToggleEnabled());
+          
+          // Set up periodic permission check for production environment
+          const permissionCheckInterval = setInterval(() => {
+            if (service && isSubscribed) {
+              const currentPermission = service.hasNotificationPermission();
+              const currentEnabled = service.isRemindersToggleEnabled();
+              
+              setIsPermissionGranted(currentPermission);
+              setIsRemindersEnabled(currentEnabled);
+              
+              // Update service status
+              const updatedStatus = service.getServiceStatus();
+              setServiceStatus(updatedStatus);
+            }
+          }, 5000); // Check every 5 seconds
+          
+          return () => {
+            clearInterval(permissionCheckInterval);
+          };
+        }
+      } catch (error) {
+        console.error('[useReminders] Initialization error:', error);
+      }
+    };
     
-    if (service) {
-      setIsPermissionGranted(service.hasNotificationPermission());
-      setIsRemindersEnabled(service.isRemindersToggleEnabled());
-    }
+    const cleanup = initializeService();
+    
+    return () => {
+      isSubscribed = false;
+      cleanup?.then?.(cleanupFn => cleanupFn?.());
+    };
   }, []);
 
   const requestPermission = useCallback(async () => {

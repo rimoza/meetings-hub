@@ -15,23 +15,120 @@ export class ReminderService {
   private isNotificationSupported: boolean = false;
   private isNotificationGranted: boolean = false;
   private isRemindersEnabled: boolean = true; // User preference toggle
+  private debugMode: boolean = false;
+  private initializationError: string | null = null;
 
   constructor() {
     if (typeof window !== 'undefined') {
-      this.checkNotificationSupport();
-      this.loadReminderPreference();
+      this.debugMode = process.env.NODE_ENV === 'development' || 
+                       localStorage.getItem('reminder-debug') === 'true';
+      this.log('🚀 ReminderService initializing...');
+      
+      try {
+        this.checkNotificationSupport();
+        this.loadReminderPreference();
+        this.checkProductionEnvironment();
+        this.initializeServiceWorker();
+        this.log('✅ ReminderService initialized successfully');
+      } catch (error) {
+        this.initializationError = error instanceof Error ? error.message : 'Unknown initialization error';
+        this.log('❌ ReminderService initialization failed:', this.initializationError);
+      }
+    }
+  }
+
+  private async initializeServiceWorker(): Promise<void> {
+    try {
+      if ('serviceWorker' in navigator) {
+        this.log('🔧 Registering service worker...');
+        
+        const registration = await navigator.serviceWorker.register('/sw.js', {
+          scope: '/'
+        });
+        
+        this.log('✅ Service worker registered successfully:', registration);
+        
+        // Listen for service worker updates
+        registration.addEventListener('updatefound', () => {
+          this.log('🔄 Service worker update found');
+        });
+        
+        // Check if service worker is already active
+        if (registration.active) {
+          this.log('🟢 Service worker is active');
+        }
+        
+      } else {
+        this.log('❌ Service worker not supported in this browser');
+      }
+    } catch (error) {
+      this.logError('💥 Service worker registration failed:', error);
+    }
+  }
+
+  private log(...args: unknown[]): void {
+    if (this.debugMode) {
+      console.log('[ReminderService]', ...args);
+    }
+  }
+
+  private logError(...args: unknown[]): void {
+    console.error('[ReminderService]', ...args);
+  }
+
+  private checkProductionEnvironment(): void {
+    const isProduction = process.env.NODE_ENV === 'production';
+    const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
+    const isLocalhost = typeof window !== 'undefined' && 
+      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    
+    this.log(`🌍 Environment check:`, {
+      isProduction,
+      isHttps,
+      isLocalhost,
+      protocol: typeof window !== 'undefined' ? window.location.protocol : 'unknown',
+      hostname: typeof window !== 'undefined' ? window.location.hostname : 'unknown'
+    });
+
+    if (isProduction && !isHttps && !isLocalhost) {
+      this.logError('⚠️ HTTPS is required for notifications in production environment');
     }
   }
 
   private checkNotificationSupport(): void {
-    if (typeof window === 'undefined' || typeof Notification === 'undefined') return;
+    if (typeof window === 'undefined') {
+      this.log('❌ Window is undefined (SSR context)');
+      return;
+    }
     
+    if (typeof Notification === 'undefined') {
+      this.log('❌ Notification API is not available');
+      return;
+    }
+
     try {
       this.isNotificationSupported = 'Notification' in window && typeof Notification !== 'undefined';
       this.isNotificationGranted = this.isNotificationSupported && 
         Notification.permission === 'granted';
+
+      this.log(`📱 Notification support check:`, {
+        supported: this.isNotificationSupported,
+        permission: typeof Notification !== 'undefined' ? Notification.permission : 'unavailable',
+        granted: this.isNotificationGranted,
+        userAgent: navigator.userAgent
+      });
+
+      // Additional checks for common issues
+      if (this.isNotificationSupported && Notification.permission === 'denied') {
+        this.log('🚫 Notifications were previously denied by user');
+      }
+
+      if (this.isNotificationSupported && Notification.permission === 'default') {
+        this.log('❓ Notification permission not yet requested');
+      }
+
     } catch (error) {
-      console.warn('Error checking notification support:', error);
+      this.logError('💥 Error checking notification support:', error);
       this.isNotificationSupported = false;
       this.isNotificationGranted = false;
     }
@@ -51,46 +148,87 @@ export class ReminderService {
   }
 
   async requestNotificationPermission(): Promise<boolean> {
-    console.log('🔔 Requesting notification permission...');
+    this.log('🔔 Requesting notification permission...');
+    
+    if (this.initializationError) {
+      this.logError('❌ Cannot request permission due to initialization error:', this.initializationError);
+      return false;
+    }
     
     if (typeof window === 'undefined' || typeof Notification === 'undefined') {
-      console.log('❌ Window or Notification API not available');
+      this.logError('❌ Window or Notification API not available');
       return false;
     }
 
     if (!this.isNotificationSupported) {
-      console.warn('❌ Notifications are not supported in this browser');
+      this.logError('❌ Notifications are not supported in this browser');
       return false;
     }
 
     try {
-      console.log('📱 Current permission:', Notification.permission);
+      this.log('📱 Current permission:', Notification.permission);
       
       if (Notification.permission === 'granted') {
-        console.log('✅ Permission already granted');
+        this.log('✅ Permission already granted');
         this.isNotificationGranted = true;
         return true;
       }
 
-      if (Notification.permission !== 'denied') {
-        console.log('🤔 Requesting permission from user...');
-        const permission = await Notification.requestPermission();
-        console.log('📝 Permission result:', permission);
-        this.isNotificationGranted = permission === 'granted';
-        return this.isNotificationGranted;
-      } else {
-        console.log('🚫 Permission previously denied');
+      if (Notification.permission === 'denied') {
+        this.logError('🚫 Permission previously denied - user must manually enable in browser settings');
+        return false;
       }
+
+      // Check if we're in a secure context
+      if (typeof window !== 'undefined' && !window.isSecureContext) {
+        this.logError('🔒 Notifications require a secure context (HTTPS)');
+        return false;
+      }
+
+      this.log('🤔 Requesting permission from user...');
+      
+      // Enhanced permission request with timeout and user interaction check
+      const permissionPromise = Notification.requestPermission();
+      
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise<NotificationPermission>((_, reject) => {
+        setTimeout(() => reject(new Error('Permission request timeout')), 10000);
+      });
+
+      const permission = await Promise.race([permissionPromise, timeoutPromise]);
+      
+      this.log('📝 Permission result:', permission);
+      this.isNotificationGranted = permission === 'granted';
+      
+      if (permission === 'denied') {
+        this.logError('❌ User denied notification permission');
+      } else if (permission === 'default') {
+        this.logError('❌ User dismissed permission dialog');
+      }
+      
+      return this.isNotificationGranted;
     } catch (error) {
-      console.error('💥 Error requesting notification permission:', error);
+      this.logError('💥 Error requesting notification permission:', error);
+      
+      // Try to provide helpful error information
+      if (error instanceof Error) {
+        if (error.message.includes('timeout')) {
+          this.logError('⏰ Permission request timed out - user may need to interact with page first');
+        } else if (error.message.includes('user gesture')) {
+          this.logError('👆 Permission request requires user gesture (click/touch)');
+        }
+      }
     }
 
     return false;
   }
 
   private showNotification(meeting: Meeting, reminderTime: number): void {
+    this.log(`🔔 Attempting to show notification for meeting: ${meeting.title}`);
+    
     if (!this.isNotificationGranted) {
-      console.warn('Notification permission not granted');
+      this.logError('❌ Notification permission not granted');
+      this.showFallbackNotification(meeting, reminderTime);
       return;
     }
 
@@ -98,34 +236,163 @@ export class ReminderService {
     const meetingTime = `${meeting.date} at ${meeting.time}`;
     
     try {
-      const notification = new Notification(`Meeting Reminder - ${timeLabel}`, {
+      // Check if notification API is still available
+      if (typeof Notification === 'undefined') {
+        this.logError('❌ Notification API became unavailable');
+        this.showFallbackNotification(meeting, reminderTime);
+        return;
+      }
+
+      // Re-check permission before showing notification
+      if (Notification.permission !== 'granted') {
+        this.logError('❌ Notification permission was revoked');
+        this.isNotificationGranted = false;
+        this.showFallbackNotification(meeting, reminderTime);
+        return;
+      }
+
+      const notificationOptions: NotificationOptions = {
         body: `${meeting.title}\n${meetingTime}\nLocation: ${meeting.location}`,
         icon: '/favicon.svg',
         badge: '/favicon.svg',
         tag: `meeting-${meeting.id}-${reminderTime}`,
-        requireInteraction: false, // Changed to false for better browser compatibility
-        silent: false
-      });
+        requireInteraction: false,
+        silent: false,
+        // Add additional data for tracking
+        data: {
+          meetingId: meeting.id,
+          reminderTime: reminderTime,
+          meetingTime: meetingTime,
+          timestamp: Date.now()
+        }
+      };
 
-      // Keep notification visible for 30 seconds instead of 10
+      this.log('📱 Creating notification with options:', notificationOptions);
+
+      const notification = new Notification(`Meeting Reminder - ${timeLabel}`, notificationOptions);
+
+      // Enhanced event handlers with logging
+      notification.onshow = () => {
+        this.log('✅ Notification displayed successfully');
+      };
+
+      notification.onerror = (error) => {
+        this.logError('❌ Notification error:', error);
+        this.showFallbackNotification(meeting, reminderTime);
+      };
+
+      // Keep notification visible for 30 seconds
       const autoCloseTimeout = setTimeout(() => {
+        this.log('⏰ Auto-closing notification after 30 seconds');
         notification.close();
       }, 30000);
 
       notification.onclick = () => {
+        this.log('👆 User clicked notification');
         window.focus();
         clearTimeout(autoCloseTimeout);
         notification.close();
-        // Could navigate to meeting details page here
+        
+        // Try to navigate to meeting details if possible
+        this.handleNotificationClick(meeting);
       };
       
       notification.onclose = () => {
+        this.log('🔒 Notification closed');
         clearTimeout(autoCloseTimeout);
       };
+
     } catch (error) {
-      console.error('Failed to show notification:', error);
-      // Fallback to alert if notification fails
-      alert(`Meeting Reminder - ${timeLabel}\n${meeting.title}\n${meetingTime}`);
+      this.logError('💥 Failed to show notification:', error);
+      this.showFallbackNotification(meeting, reminderTime);
+    }
+  }
+
+  private showFallbackNotification(meeting: Meeting, reminderTime: number): void {
+    const timeLabel = this.getTimeLabel(reminderTime);
+    const meetingTime = `${meeting.date} at ${meeting.time}`;
+    const message = `Meeting Reminder - ${timeLabel}\n${meeting.title}\n${meetingTime}`;
+    
+    this.log('📢 Showing fallback notification');
+    
+    // Try multiple fallback methods
+    try {
+      // Method 1: Browser alert (most compatible)
+      if (typeof alert !== 'undefined') {
+        alert(message);
+        return;
+      }
+      
+      // Method 2: Console notification for debugging
+      console.warn('🔔 MEETING REMINDER:', message);
+      
+      // Method 3: Try to show a visual notification in the page
+      this.showInPageNotification(meeting, timeLabel, meetingTime);
+      
+    } catch (error) {
+      this.logError('💥 All notification methods failed:', error);
+    }
+  }
+
+  private showInPageNotification(meeting: Meeting, timeLabel: string, meetingTime: string): void {
+    try {
+      // Create an in-page notification element
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #1f2937;
+        color: white;
+        padding: 16px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        z-index: 9999;
+        max-width: 320px;
+        font-family: system-ui, -apple-system, sans-serif;
+      `;
+      
+      notification.innerHTML = `
+        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+          <span style="margin-right: 8px;">🔔</span>
+          <strong>Meeting Reminder - ${timeLabel}</strong>
+        </div>
+        <div style="font-size: 14px; line-height: 1.4;">
+          <div>${meeting.title}</div>
+          <div style="opacity: 0.8;">${meetingTime}</div>
+          <div style="opacity: 0.8;">Location: ${meeting.location}</div>
+        </div>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      // Auto remove after 10 seconds
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      }, 10000);
+      
+      this.log('📋 In-page notification created');
+      
+    } catch (error) {
+      this.logError('💥 Failed to create in-page notification:', error);
+    }
+  }
+
+  private handleNotificationClick(meeting: Meeting): void {
+    try {
+      // Try to focus the window
+      if (typeof window !== 'undefined' && window.focus) {
+        window.focus();
+      }
+      
+      // Could add navigation to meeting details here
+      // For now, just log the interaction
+      this.log('🎯 Notification clicked for meeting:', meeting.id);
+      
+    } catch (error) {
+      this.logError('💥 Error handling notification click:', error);
     }
   }
 
@@ -151,8 +418,13 @@ export class ReminderService {
   }
 
   scheduleReminder(meeting: Meeting, minutesBefore: number): string | null {
+    this.log(`📅 Scheduling reminder for ${meeting.title} - ${minutesBefore} minutes before`);
+    
     if (!this.isNotificationGranted || !this.isRemindersEnabled) {
-      console.warn('Cannot schedule reminder: permission not granted or reminders disabled');
+      this.logError('❌ Cannot schedule reminder: permission not granted or reminders disabled', {
+        isNotificationGranted: this.isNotificationGranted,
+        isRemindersEnabled: this.isRemindersEnabled
+      });
       return null;
     }
 
@@ -165,29 +437,73 @@ export class ReminderService {
     
     // Don't schedule if the reminder time has already passed
     if (delayMs <= 0) {
-      console.log(`Reminder time has passed for meeting ${meeting.title}`);
+      this.log(`⏰ Reminder time has passed for meeting ${meeting.title} (${delayMs}ms)`);
       return null;
     }
 
-    const timeoutId = setTimeout(() => {
-      this.showNotification(meeting, minutesBefore);
-      this.reminders.delete(reminderId);
-    }, delayMs);
+    this.log(`⏱️ Scheduling reminder in ${delayMs}ms (${Math.round(delayMs / 1000 / 60)} minutes)`);
 
-    const reminderConfig: ReminderConfig = {
-      id: reminderId,
-      meetingId: meeting.id,
-      reminderTime: minutesBefore,
-      isScheduled: true,
-      timeoutId
-    };
-
-    this.reminders.set(reminderId, reminderConfig);
+    // Try to use service worker for more reliable notifications
+    const useServiceWorker = this.tryScheduleWithServiceWorker(meeting, minutesBefore, delayMs, reminderId);
     
-    // const reminderDate = new Date(Date.now() + delayMs);
-    // console.log(`Reminder scheduled for ${meeting.title} at ${reminderDate.toLocaleString()}`);
+    if (!useServiceWorker) {
+      // Fallback to setTimeout
+      const timeoutId = setTimeout(() => {
+        this.log(`🔔 Timeout triggered for reminder: ${reminderId}`);
+        this.showNotification(meeting, minutesBefore);
+        this.reminders.delete(reminderId);
+      }, delayMs);
+
+      const reminderConfig: ReminderConfig = {
+        id: reminderId,
+        meetingId: meeting.id,
+        reminderTime: minutesBefore,
+        isScheduled: true,
+        timeoutId
+      };
+
+      this.reminders.set(reminderId, reminderConfig);
+    } else {
+      // Service worker is handling it
+      const reminderConfig: ReminderConfig = {
+        id: reminderId,
+        meetingId: meeting.id,
+        reminderTime: minutesBefore,
+        isScheduled: true
+      };
+
+      this.reminders.set(reminderId, reminderConfig);
+    }
+    
+    const reminderDate = new Date(Date.now() + delayMs);
+    this.log(`✅ Reminder scheduled for ${meeting.title} at ${reminderDate.toLocaleString()}`);
     
     return reminderId;
+  }
+
+  private tryScheduleWithServiceWorker(meeting: Meeting, reminderTime: number, delayMs: number, reminderId: string): boolean {
+    try {
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        this.log('📡 Using service worker for reminder scheduling');
+        
+        navigator.serviceWorker.controller.postMessage({
+          type: 'SCHEDULE_REMINDER',
+          payload: {
+            meeting,
+            reminderTime,
+            delayMs,
+            reminderId
+          }
+        });
+        
+        return true;
+      }
+    } catch (error) {
+      this.logError('💥 Failed to schedule with service worker:', error);
+    }
+    
+    this.log('⚠️ Falling back to setTimeout for reminder scheduling');
+    return false;
   }
 
   clearReminder(reminderId: string): void {
@@ -243,6 +559,8 @@ export class ReminderService {
   }
 
   isNotificationEnabled(): boolean {
+    // Re-check permission status in case it changed
+    this.refreshPermissionStatus();
     return this.isNotificationGranted && this.isRemindersEnabled;
   }
 
@@ -251,17 +569,63 @@ export class ReminderService {
   }
 
   setRemindersEnabled(enabled: boolean): void {
+    this.log(`🔧 Setting reminders enabled: ${enabled}`);
     this.isRemindersEnabled = enabled;
     this.saveReminderPreference();
     
     if (!enabled) {
-      // Clear all reminders when disabled
+      this.log('🗑️ Clearing all reminders (disabled)');
       this.clearAllReminders();
     }
   }
 
   hasNotificationPermission(): boolean {
+    this.refreshPermissionStatus();
     return this.isNotificationGranted;
+  }
+
+  private refreshPermissionStatus(): void {
+    if (typeof window === 'undefined' || typeof Notification === 'undefined') {
+      return;
+    }
+
+    try {
+      const currentPermission = Notification.permission === 'granted';
+      if (currentPermission !== this.isNotificationGranted) {
+        this.log(`🔄 Permission status changed: ${this.isNotificationGranted} -> ${currentPermission}`);
+        this.isNotificationGranted = currentPermission;
+        
+        if (!currentPermission) {
+          // Permission was revoked, clear all reminders
+          this.log('🚫 Permission revoked, clearing reminders');
+          this.clearAllReminders();
+        }
+      }
+    } catch (error) {
+      this.logError('💥 Error refreshing permission status:', error);
+    }
+  }
+
+  getServiceStatus(): {
+    isSupported: boolean;
+    hasPermission: boolean;
+    isEnabled: boolean;
+    isHttps: boolean;
+    hasServiceWorker: boolean;
+    debugMode: boolean;
+    activeReminders: number;
+    initializationError: string | null;
+  } {
+    return {
+      isSupported: this.isNotificationSupported,
+      hasPermission: this.isNotificationGranted,
+      isEnabled: this.isRemindersEnabled,
+      isHttps: typeof window !== 'undefined' ? window.location.protocol === 'https:' : false,
+      hasServiceWorker: 'serviceWorker' in navigator,
+      debugMode: this.debugMode,
+      activeReminders: this.reminders.size,
+      initializationError: this.initializationError
+    };
   }
 }
 

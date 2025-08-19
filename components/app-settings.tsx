@@ -5,25 +5,29 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { useAuth } from "@/contexts/auth-context"
+import { NotificationDiagnostic } from "@/components/notification-diagnostic"
 
 export function AppSettings() {
   const { user } = useAuth()
 
   return (
-    <Card className="w-full">
-      <CardHeader className="pb-4">
-        <div className="flex items-center space-x-2">
-          <div className="p-2 bg-secondary/50 rounded-lg">
-            <Info className="h-5 w-5 text-foreground" />
+    <div className="space-y-6">
+      <NotificationDiagnostic />
+      
+      <Card className="w-full">
+        <CardHeader className="pb-4">
+          <div className="flex items-center space-x-2">
+            <div className="p-2 bg-secondary/50 rounded-lg">
+              <Info className="h-5 w-5 text-foreground" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">Application Info</CardTitle>
+              <CardDescription>
+                System information and account details
+              </CardDescription>
+            </div>
           </div>
-          <div>
-            <CardTitle className="text-lg">Application Info</CardTitle>
-            <CardDescription>
-              System information and account details
-            </CardDescription>
-          </div>
-        </div>
-      </CardHeader>
+        </CardHeader>
       
       <CardContent className="space-y-6">
         {/* User Information */}
@@ -99,5 +103,6 @@ export function AppSettings() {
         </div>
       </CardContent>
     </Card>
+    </div>
   )
 }
