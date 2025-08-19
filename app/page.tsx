@@ -1,13 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Calendar, CheckCircle, Clock } from "lucide-react"
+import { Plus, Calendar, CheckCircle, Clock, LogOut, User as UserIcon  } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { useAuth } from "@/contexts/auth-context"
-import { LogOut, User as UserIcon } from "lucide-react"
 import { 
   DropdownMenu, 
   DropdownMenuContent, 

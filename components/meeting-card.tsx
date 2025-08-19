@@ -1,11 +1,12 @@
 "use client"
 
-import { Calendar, Clock, MapPin, Users, Edit, Trash2, CheckCircle2, XCircle, MoreHorizontal, AlertCircle } from "lucide-react"
+import { Calendar, Clock, MapPin, Users, Edit, Trash2, CheckCircle2, XCircle, MoreHorizontal, AlertCircle, Eye } from "lucide-react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { DeleteConfirmDialog } from "@/components/ui/confirm-dialog"
+import { useRouter } from "next/navigation"
 import type { Meeting } from "@/types/meeting"
 import { format } from "date-fns"
 
@@ -39,6 +40,7 @@ const typeIcons = {
 }
 
 export function MeetingCard({ meeting, onEdit, onDelete, onToggleComplete }: MeetingCardProps) {
+  const router = useRouter()
   const TypeIcon = typeIcons[meeting.type] || Calendar
   
   // Check if meeting is overdue
@@ -121,6 +123,22 @@ export function MeetingCard({ meeting, onEdit, onDelete, onToggleComplete }: Mee
             {/* Horizontal Action Buttons */}
             <TooltipProvider>
               <div className="flex items-center gap-1 shrink-0">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-8 w-8 p-0 hover:bg-blue-100 hover:text-blue-600 dark:hover:bg-blue-900/20 transition-colors"
+                      onClick={() => router.push(`/meetings/${meeting.id}`)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>View details</p>
+                  </TooltipContent>
+                </Tooltip>
+                
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button 

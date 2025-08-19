@@ -1,11 +1,12 @@
 "use client"
 
-import { Calendar, Clock, MapPin, Users, Edit, Trash2, CheckCircle2, XCircle, MoreHorizontal, AlertCircle } from "lucide-react"
+import { Calendar, Clock, MapPin, Users, Edit, Trash2, CheckCircle2, XCircle, MoreHorizontal, AlertCircle, Eye } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DeleteConfirmDialog } from "@/components/ui/confirm-dialog"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { useRouter } from "next/navigation"
 import type { Meeting } from "@/types/meeting"
 import { format } from "date-fns"
 
@@ -39,6 +40,8 @@ const typeIcons = {
 }
 
 export function MeetingTable({ meetings, onEdit, onDelete, onToggleComplete }: MeetingTableProps) {
+  const router = useRouter()
+  
   return (
     <div className="rounded-lg border bg-card overflow-hidden">
       <Table>
@@ -207,6 +210,20 @@ export function MeetingTable({ meetings, onEdit, onDelete, onToggleComplete }: M
                 <TableCell>
                   <div className="flex items-center justify-center gap-1">
                     <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            className="h-8 w-8 p-0 hover:bg-blue-100 hover:text-blue-600 dark:hover:bg-blue-900/20"
+                            onClick={() => router.push(`/meetings/${meeting.id}`)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>View</TooltipContent>
+                      </Tooltip>
+                      
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button 
