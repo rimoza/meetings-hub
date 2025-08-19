@@ -37,6 +37,7 @@ export function useReminders() {
           // Get initial status
           const status = service.getServiceStatus();
           setServiceStatus(status);
+          console.log(serviceStatus, 'Service status initialized');
           setIsPermissionGranted(service.hasNotificationPermission());
           setIsRemindersEnabled(service.isRemindersToggleEnabled());
           

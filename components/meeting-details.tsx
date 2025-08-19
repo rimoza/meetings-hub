@@ -479,7 +479,7 @@ export function MeetingDetails({ meeting, onBack, onEdit, onDelete, onToggleComp
                       <div className="p-6 bg-secondary/30 rounded-lg text-center">
                         <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                         <p className="text-sm text-muted-foreground">No meeting notes yet</p>
-                        <p className="text-xs text-muted-foreground mt-1">Click "Add Note" to create your first note</p>
+                        <p className="text-xs text-muted-foreground mt-1">Click &quot;Add Note&quot; to create your first note</p>
                       </div>
                     )
                   )}
