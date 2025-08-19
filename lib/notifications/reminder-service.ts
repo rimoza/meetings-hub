@@ -176,6 +176,7 @@ export class ReminderService {
 
       if (Notification.permission === 'denied') {
         this.logError('🚫 Permission previously denied - user must manually enable in browser settings');
+        this.showPermissionInstructions();
         return false;
       }
 
@@ -394,6 +395,136 @@ export class ReminderService {
     } catch (error) {
       this.logError('💥 Error handling notification click:', error);
     }
+  }
+
+  private showPermissionInstructions(): void {
+    try {
+      const instructionsDiv = document.createElement('div');
+      instructionsDiv.id = 'notification-permission-instructions';
+      instructionsDiv.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        color: #111827;
+        padding: 24px;
+        border-radius: 12px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        z-index: 10000;
+        max-width: 480px;
+        font-family: system-ui, -apple-system, sans-serif;
+        border: 1px solid #e5e7eb;
+      `;
+      
+      const browser = this.detectBrowser();
+      const instructions = this.getBrowserInstructions(browser);
+      
+      instructionsDiv.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h3 style="margin: 0; font-size: 18px; font-weight: 600;">Enable Notifications</h3>
+          <button onclick="this.parentElement.parentElement.remove()" style="
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6b7280;
+            padding: 0;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          ">×</button>
+        </div>
+        <div style="margin-bottom: 16px; color: #ef4444; background: #fef2f2; padding: 12px; border-radius: 8px; border: 1px solid #fee2e2;">
+          <strong>⚠️ Notifications are blocked</strong>
+          <p style="margin: 8px 0 0 0; font-size: 14px;">You've previously denied notification permissions. To receive meeting reminders, you need to manually enable them in your browser settings.</p>
+        </div>
+        <div style="background: #f9fafb; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb;">
+          <h4 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600;">How to enable for ${browser}:</h4>
+          ${instructions}
+        </div>
+        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+          <p style="margin: 0; font-size: 14px; color: #6b7280;">
+            After enabling notifications, refresh this page and click the notification button again.
+          </p>
+        </div>
+      `;
+      
+      // Remove any existing instructions
+      const existing = document.getElementById('notification-permission-instructions');
+      if (existing) {
+        existing.remove();
+      }
+      
+      document.body.appendChild(instructionsDiv);
+      
+      // Auto-remove after 30 seconds
+      setTimeout(() => {
+        if (instructionsDiv.parentNode) {
+          instructionsDiv.remove();
+        }
+      }, 30000);
+      
+    } catch (error) {
+      this.logError('Failed to show permission instructions:', error);
+    }
+  }
+
+  private detectBrowser(): string {
+    const userAgent = navigator.userAgent.toLowerCase();
+    if (userAgent.includes('chrome') && !userAgent.includes('edg')) return 'Chrome';
+    if (userAgent.includes('firefox')) return 'Firefox';
+    if (userAgent.includes('safari') && !userAgent.includes('chrome')) return 'Safari';
+    if (userAgent.includes('edg')) return 'Edge';
+    return 'your browser';
+  }
+
+  private getBrowserInstructions(browser: string): string {
+    const instructions: Record<string, string> = {
+      'Chrome': `
+        <ol style="margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6;">
+          <li>Click the lock icon 🔒 in the address bar</li>
+          <li>Click "Site settings"</li>
+          <li>Find "Notifications" and change it to "Allow"</li>
+          <li>Refresh this page</li>
+        </ol>
+      `,
+      'Firefox': `
+        <ol style="margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6;">
+          <li>Click the lock icon 🔒 in the address bar</li>
+          <li>Click the "×" next to "Blocked" under Notifications</li>
+          <li>Refresh this page</li>
+        </ol>
+      `,
+      'Safari': `
+        <ol style="margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6;">
+          <li>Go to Safari → Preferences → Websites</li>
+          <li>Click "Notifications" in the sidebar</li>
+          <li>Find this website and change to "Allow"</li>
+          <li>Refresh this page</li>
+        </ol>
+      `,
+      'Edge': `
+        <ol style="margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6;">
+          <li>Click the lock icon 🔒 in the address bar</li>
+          <li>Click "Permissions for this site"</li>
+          <li>Find "Notifications" and change to "Allow"</li>
+          <li>Refresh this page</li>
+        </ol>
+      `,
+      'your browser': `
+        <ol style="margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6;">
+          <li>Look for a lock icon 🔒 or info icon ⓘ in the address bar</li>
+          <li>Find site settings or permissions</li>
+          <li>Enable notifications for this site</li>
+          <li>Refresh this page</li>
+        </ol>
+      `
+    };
+    
+    return instructions[browser] || instructions['your browser'];
   }
 
   private getTimeLabel(minutes: number): string {
