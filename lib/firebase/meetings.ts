@@ -12,7 +12,8 @@ import {
   DocumentData,
   QueryDocumentSnapshot,
   getFirestore,
-  type Firestore
+  type Firestore,
+  Timestamp
 } from 'firebase/firestore';
 import { app, isFirebaseConfigured } from '@/lib/firebase/config';
 import type { Meeting, MeetingNote } from '@/types/meeting';
@@ -37,10 +38,22 @@ const convertDocToMeeting = (doc: QueryDocumentSnapshot<DocumentData>): Meeting 
     notes: data.notes || undefined,
     meetingNotes: data.meetingNotes ? data.meetingNotes.map((note: MeetingNote) => ({
       ...note,
-      timestamp: note.timestamp?.toDate() || new Date(note.timestamp)
+      timestamp: note.timestamp instanceof Timestamp 
+        ? note.timestamp.toDate() 
+        : note.timestamp instanceof Date 
+          ? note.timestamp
+          : new Date(note.timestamp)
     })) : undefined,
-    createdAt: data.createdAt?.toDate() || new Date(),
-    updatedAt: data.updatedAt?.toDate() || new Date(),
+    createdAt: data.createdAt instanceof Timestamp 
+      ? data.createdAt.toDate() 
+      : data.createdAt instanceof Date 
+        ? data.createdAt 
+        : new Date(),
+    updatedAt: data.updatedAt instanceof Timestamp 
+      ? data.updatedAt.toDate() 
+      : data.updatedAt instanceof Date 
+        ? data.updatedAt 
+        : new Date(),
   };
 };
 

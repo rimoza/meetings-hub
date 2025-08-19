@@ -10,7 +10,11 @@ export function useReminders() {
   const [isRequestingPermission, setIsRequestingPermission] = useState(false);
   const [reminderService, setReminderService] = useState<ReturnType<typeof getReminderService>>(null);
   const [isMounted, setIsMounted] = useState(false);
-  const [serviceStatus, setServiceStatus] = useState<any>(null);
+  const [serviceStatus, setServiceStatus] = useState<{
+    isSupported: boolean;
+    hasPermission: boolean;
+    isEnabled: boolean;
+  } | null>(null);
 
   useEffect(() => {
     let isSubscribed = true;
