@@ -34,6 +34,7 @@ const convertDocToMeeting = (doc: QueryDocumentSnapshot<DocumentData>): Meeting 
     completed: data.completed || false,
     priority: data.priority,
     type: data.type,
+    notes: data.notes || undefined,
     createdAt: data.createdAt?.toDate() || new Date(),
     updatedAt: data.updatedAt?.toDate() || new Date(),
   };

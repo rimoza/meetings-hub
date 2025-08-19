@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from "react"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, LogOut, User as UserIcon  } from "lucide-react"
+import { ArrowLeft, LogOut, User as UserIcon } from "lucide-react"
 import { useMeetings } from "@/hooks/use-meetings"
 import { useAuth } from "@/contexts/auth-context"
 import { MeetingDetails } from "@/components/meeting-details"
@@ -20,7 +20,7 @@ import {
   DropdownMenuLabel
 } from "@/components/ui/dropdown-menu"
 import { ThemeToggle } from "@/components/theme-toggle"
-import type { Meeting } from "@/types/meeting"
+import type { Meeting, MeetingNote } from "@/types/meeting"
 import { toast } from "sonner"
 
 interface MeetingDetailsPageProps {
@@ -29,7 +29,7 @@ interface MeetingDetailsPageProps {
   }>
 }
 
-export default function MeetingDetailsPage({ params }: MeetingDetailsPageProps) {
+export default function MeetingDetailsPage({ params }: Readonly<MeetingDetailsPageProps>) {
   const resolvedParams = use(params)
   const router = useRouter()
   const { user, logout } = useAuth()
@@ -37,6 +37,7 @@ export default function MeetingDetailsPage({ params }: MeetingDetailsPageProps) 
     meetings, 
     todayMeetings,
     upcomingMeetings,
+    createMeeting,
     updateMeeting, 
     deleteMeeting, 
     toggleMeetingCompletion 
@@ -44,6 +45,7 @@ export default function MeetingDetailsPage({ params }: MeetingDetailsPageProps) 
   const [meeting, setMeeting] = useState<Meeting | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [editingMeeting, setEditingMeeting] = useState<Meeting | undefined>()
 
   // Find the meeting by ID
   useEffect(() => {
@@ -64,11 +66,11 @@ export default function MeetingDetailsPage({ params }: MeetingDetailsPageProps) 
   useEffect(() => {
     if (meeting && meetings.length > 0) {
       const updatedMeeting = meetings.find(m => m.id === meeting.id)
-      if (updatedMeeting) {
+      if (updatedMeeting && JSON.stringify(updatedMeeting) !== JSON.stringify(meeting)) {
         setMeeting(updatedMeeting)
       }
     }
-  }, [meetings, meeting])
+  }, [meetings, meeting?.id, meeting])
 
   const handleBack = () => {
     router.push("/")
@@ -90,21 +92,27 @@ export default function MeetingDetailsPage({ params }: MeetingDetailsPageProps) 
 
   const handleEdit = (meeting: Meeting) => {
     console.log("Editing meeting:", meeting)
+    setEditingMeeting(meeting)
     setIsFormOpen(true)
   }
 
   const handleFormSubmit = async (meetingData: Omit<Meeting, "id">) => {
-    if (!meeting) return
-    
     try {
-      // For updates, exclude createdAt and updatedAt as they're handled by Firebase
-      const { createdAt, updatedAt, ...updateData } = meetingData
-      console.log("Submitting meeting update:", createdAt, updatedAt, updateData)
-      await updateMeeting(meeting.id, updateData)
-      toast.success("Meeting updated successfully")
+      if (editingMeeting) {
+        // For updates, exclude createdAt and updatedAt as they're handled by Firebase
+        const { createdAt, updatedAt, ...updateData } = meetingData
+        console.log("Submitting meeting update:", createdAt, updatedAt, updateData)
+        await updateMeeting(editingMeeting.id, updateData)
+        toast.success("Meeting updated successfully")
+      } else {
+        // Creating a new meeting
+        await createMeeting(meetingData)
+        toast.success("Meeting created successfully")
+      }
       
       // Close the form immediately after successful submission
       setIsFormOpen(false)
+      setEditingMeeting(undefined)
     } catch (error) {
       // Error handling is already done in the hook functions
       console.error("Error submitting meeting:", error)
@@ -125,6 +133,34 @@ export default function MeetingDetailsPage({ params }: MeetingDetailsPageProps) 
   const handleToggleComplete = (meetingId: string) => {
     toggleMeetingCompletion(meetingId)
     toast.success("Meeting completion status toggled successfully")
+  }
+
+  const handleEditNotes = async (meetingId: string, notes: string) => {
+    try {
+      await updateMeeting(meetingId, { notes })
+      // The meeting state will be updated automatically through the useEffect that watches meetings array
+    } catch (error) {
+      console.error("Error updating notes:", error)
+      toast.error("Failed to update meeting notes")
+    }
+  }
+
+  const handleAddNote = async (meetingId: string, note: MeetingNote) => {
+    try {
+      const currentMeeting = meetings.find(m => m.id === meetingId)
+      if (!currentMeeting) {
+        throw new Error("Meeting not found")
+      }
+      
+      const existingNotes = currentMeeting.meetingNotes || []
+      const updatedNotes = [...existingNotes, note]
+      
+      await updateMeeting(meetingId, { meetingNotes: updatedNotes })
+      // The meeting state will be updated automatically through the useEffect that watches meetings array
+    } catch (error) {
+      console.error("Error adding note:", error)
+      toast.error("Failed to add meeting note")
+    }
   }
 
   // Show loading state
@@ -249,15 +285,20 @@ export default function MeetingDetailsPage({ params }: MeetingDetailsPageProps) 
               onEdit={handleEdit}
               onDelete={handleDelete}
               onToggleComplete={handleToggleComplete}
+              onEditNotes={handleEditNotes}
+              onAddNote={handleAddNote}
             />
           </main>
         </div>
 
         {/* Meeting Form Modal */}
         <MeetingForm
-          meeting={meeting}
+          meeting={editingMeeting}
           isOpen={isFormOpen}
-          onClose={() => setIsFormOpen(false)}
+          onClose={() => {
+            setIsFormOpen(false)
+            setEditingMeeting(undefined)
+          }}
           onSubmit={handleFormSubmit}
         />
       </div>

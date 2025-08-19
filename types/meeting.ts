@@ -1,3 +1,10 @@
+export interface MeetingNote {
+  id: string
+  content: string
+  timestamp: Date
+  author?: string // Optional field for who added the note
+}
+
 export interface Meeting {
   id: string
   title: string
@@ -10,6 +17,8 @@ export interface Meeting {
   completed: boolean // Changed from isCompleted to completed
   priority: "low" | "medium" | "high"
   type: "meeting" | "call" | "interview" | "presentation" // Updated types
+  notes?: string // Legacy single note field - kept for backward compatibility
+  meetingNotes?: MeetingNote[] // New field for multiple timestamped notes
   createdAt: Date
   updatedAt: Date
 }

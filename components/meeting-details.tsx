@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { 
   Calendar,
   MapPin,
@@ -17,7 +17,11 @@ import {
   Link2,
   Copy,
   Share2,
-  Bell
+  Bell,
+  Save,
+  X,
+  Plus,
+  Clock,
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -25,7 +29,8 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { DeleteConfirmDialog } from "@/components/ui/confirm-dialog"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import type { Meeting } from "@/types/meeting"
+import { Textarea } from "@/components/ui/textarea"
+import type { Meeting, MeetingNote } from "@/types/meeting"
 import { format } from "date-fns"
 import { toast } from "sonner"
 
@@ -35,6 +40,8 @@ interface MeetingDetailsProps {
   onEdit: (meeting: Meeting) => void
   onDelete: (id: string) => void
   onToggleComplete: (id: string) => void
+  onEditNotes?: (id: string, notes: string) => void
+  onAddNote?: (meetingId: string, note: MeetingNote) => void
 }
 
 const priorityConfig = {
@@ -62,8 +69,17 @@ const typeConfig = {
   presentation: { icon: Video, label: "Presentation", color: "text-orange-600" },
 }
 
-export function MeetingDetails({ meeting, onBack, onEdit, onDelete, onToggleComplete }: MeetingDetailsProps) {
+export function MeetingDetails({ meeting, onBack, onEdit, onDelete, onToggleComplete, onEditNotes, onAddNote }: MeetingDetailsProps) {
   const [copiedLink, setCopiedLink] = useState(false)
+  const [isEditingNotes, setIsEditingNotes] = useState(false)
+  const [notesText, setNotesText] = useState("")
+  const [isAddingNote, setIsAddingNote] = useState(false)
+  const [newNoteText, setNewNoteText] = useState("")
+
+  // Update notes text when meeting changes but don't cause re-renders
+  useEffect(() => {
+    setNotesText(meeting.notes || "")
+  }, [meeting.notes])
   
   // Check if meeting is overdue
   const now = new Date()
@@ -102,6 +118,38 @@ export function MeetingDetails({ meeting, onBack, onEdit, onDelete, onToggleComp
     }
   }
 
+  const handleSaveNotes = () => {
+    if (onEditNotes) {
+      onEditNotes(meeting.id, notesText)
+      setIsEditingNotes(false)
+      toast.success("Meeting notes updated")
+    }
+  }
+
+  const handleCancelEditNotes = () => {
+    setNotesText(meeting.notes || "")
+    setIsEditingNotes(false)
+  }
+
+  const handleAddNote = () => {
+    if (onAddNote && newNoteText.trim()) {
+      const newNote: MeetingNote = {
+        id: `note-${Date.now()}`,
+        content: newNoteText.trim(),
+        timestamp: new Date(),
+      }
+      onAddNote(meeting.id, newNote)
+      setNewNoteText("")
+      setIsAddingNote(false)
+      toast.success("Note added successfully")
+    }
+  }
+
+  const handleCancelAddNote = () => {
+    setNewNoteText("")
+    setIsAddingNote(false)
+  }
+
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Action buttons */}
@@ -121,6 +169,7 @@ export function MeetingDetails({ meeting, onBack, onEdit, onDelete, onToggleComp
             <TooltipContent>Share meeting details</TooltipContent>
           </Tooltip>
         </TooltipProvider>
+        
         
         <Button
           variant="outline"
@@ -292,6 +341,150 @@ export function MeetingDetails({ meeting, onBack, onEdit, onDelete, onToggleComp
                   </div>
                 </div>
               )}
+
+              {/* Meeting Notes */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                    Meeting Notes ({(meeting.meetingNotes?.length || 0) + (meeting.notes ? 1 : 0)})
+                  </h3>
+                  {!isAddingNote && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsAddingNote(true)}
+                      disabled={!onAddNote}
+                    >
+                      <Plus className="h-3 w-3 mr-1" />
+                      Add Note
+                    </Button>
+                  )}
+                </div>
+                
+                {isAddingNote && (
+                  <div className="space-y-3 p-3 bg-secondary/30 rounded-lg border-2 border-dashed border-primary/30">
+                    <Textarea
+                      value={newNoteText}
+                      onChange={(e) => setNewNoteText(e.target.value)}
+                      placeholder="Add a new meeting note..."
+                      className="min-h-[80px] resize-none"
+                    />
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        onClick={handleAddNote}
+                        disabled={!newNoteText.trim()}
+                      >
+                        <Save className="h-3 w-3 mr-1" />
+                        Add Note
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleCancelAddNote}
+                      >
+                        <X className="h-3 w-3 mr-1" />
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Display existing notes */}
+                <div className="space-y-3">
+                  {/* Legacy single note (if exists) */}
+                  {meeting.notes && (
+                    <div className="p-3 bg-secondary/30 rounded-lg border-l-4 border-amber-500">
+                      <div className="flex items-start gap-2 mb-2">
+                        <FileText className="h-4 w-4 text-amber-600 mt-0.5" />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-xs font-medium text-amber-700 dark:text-amber-400">Legacy Note</span>
+                            <Badge variant="secondary" className="text-xs">
+                              <Clock className="h-2.5 w-2.5 mr-1" />
+                              {format(new Date(meeting.createdAt), "MMM d, HH:mm")}
+                            </Badge>
+                          </div>
+                          <p className="text-sm whitespace-pre-wrap">{meeting.notes}</p>
+                        </div>
+                        {!isEditingNotes && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setIsEditingNotes(true)}
+                            disabled={!onEditNotes}
+                            className="h-6 w-6 p-0"
+                          >
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
+                      {isEditingNotes && (
+                        <div className="space-y-2 mt-2">
+                          <Textarea
+                            value={notesText}
+                            onChange={(e) => setNotesText(e.target.value)}
+                            placeholder="Edit your meeting note..."
+                            className="min-h-[60px] resize-none text-sm"
+                          />
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              onClick={handleSaveNotes}
+                              className="h-7 text-xs"
+                            >
+                              <Save className="h-3 w-3 mr-1" />
+                              Save
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={handleCancelEditNotes}
+                              className="h-7 text-xs"
+                            >
+                              <X className="h-3 w-3 mr-1" />
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* New timestamped notes */}
+                  {meeting.meetingNotes && meeting.meetingNotes.length > 0 ? (
+                    meeting.meetingNotes
+                      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+                      .map((note) => (
+                        <div key={note.id} className="p-3 bg-secondary/30 rounded-lg border-l-4 border-blue-500">
+                          <div className="flex items-start gap-2">
+                            <FileText className="h-4 w-4 text-blue-600 mt-0.5" />
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                {note.author && (
+                                  <span className="text-xs font-medium text-blue-700 dark:text-blue-400">{note.author}</span>
+                                )}
+                                <Badge variant="secondary" className="text-xs">
+                                  <Clock className="h-2.5 w-2.5 mr-1" />
+                                  {format(new Date(note.timestamp), "MMM d, HH:mm")}
+                                </Badge>
+                              </div>
+                              <p className="text-sm whitespace-pre-wrap">{note.content}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                  ) : (
+                    !meeting.notes && (
+                      <div className="p-6 bg-secondary/30 rounded-lg text-center">
+                        <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                        <p className="text-sm text-muted-foreground">No meeting notes yet</p>
+                        <p className="text-xs text-muted-foreground mt-1">Click "Add Note" to create your first note</p>
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
             </div>
             
             {/* Right column */}
@@ -380,9 +573,14 @@ export function MeetingDetails({ meeting, onBack, onEdit, onDelete, onToggleComp
                       <Bell className="h-4 w-4 mr-2" />
                       Set Reminder
                     </Button>
-                    <Button variant="outline" size="sm">
-                      <FileText className="h-4 w-4 mr-2" />
-                      Add Notes
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setIsAddingNote(true)}
+                      disabled={!onAddNote}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Note
                     </Button>
                     {meeting.location.startsWith('http') && (
                       <Button 
