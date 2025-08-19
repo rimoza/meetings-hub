@@ -5,14 +5,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { useAuth } from "@/contexts/auth-context"
-import { NotificationDiagnostic } from "@/components/notification-diagnostic"
+// import { NotificationDiagnostic } from "@/components/notification-diagnostic"
 
 export function AppSettings() {
   const { user } = useAuth()
 
   return (
     <div className="space-y-6">
-      <NotificationDiagnostic />
+      {/* <NotificationDiagnostic /> */}
       
       <Card className="w-full">
         <CardHeader className="pb-4">
