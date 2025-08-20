@@ -57,51 +57,87 @@ export function useMeetings() {
     }
   }, [isPermissionGranted, isRemindersEnabled, meetings, scheduleReminders]);
 
-  // Filter meetings based on current filters
+  // Filter meetings based on current filters and sort by date and time
   const filteredMeetings = useMemo(() => {
-    return meetings.filter((meeting) => {
-      const matchesSearch =
-        meeting.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-        meeting.description.toLowerCase().includes(filters.search.toLowerCase()) ||
-        meeting.location.toLowerCase().includes(filters.search.toLowerCase()) ||
-        meeting.attendees.some((attendee) => 
-          attendee.toLowerCase().includes(filters.search.toLowerCase())
-        );
+    return meetings
+      .filter((meeting) => {
+        const matchesSearch =
+          meeting.title.toLowerCase().includes(filters.search.toLowerCase()) ||
+          meeting.description.toLowerCase().includes(filters.search.toLowerCase()) ||
+          meeting.location.toLowerCase().includes(filters.search.toLowerCase()) ||
+          meeting.attendees.some((attendee) => 
+            attendee.toLowerCase().includes(filters.search.toLowerCase())
+          );
 
-      const matchesStatus =
-        filters.status === "all" ||
-        (filters.status === "completed" && meeting.completed) ||
-        (filters.status === "pending" && !meeting.completed);
+        const matchesStatus =
+          filters.status === "all" ||
+          (filters.status === "completed" && meeting.completed) ||
+          (filters.status === "pending" && !meeting.completed);
 
-      const matchesPriority = 
-        filters.priority === "all" || meeting.priority === filters.priority;
+        const matchesPriority = 
+          filters.priority === "all" || meeting.priority === filters.priority;
 
-      const matchesType = 
-        filters.type === "all" || meeting.type === filters.type;
+        const matchesType = 
+          filters.type === "all" || meeting.type === filters.type;
 
-      return matchesSearch && matchesStatus && matchesPriority && matchesType;
-    });
+        return matchesSearch && matchesStatus && matchesPriority && matchesType;
+      })
+      .sort((a, b) => {
+        // Create Date objects for comparison
+        const dateTimeA = new Date(`${a.date}T${a.time}`);
+        const dateTimeB = new Date(`${b.date}T${b.time}`);
+        
+        // Sort in ascending order (earliest meetings first)
+        return dateTimeA.getTime() - dateTimeB.getTime();
+      });
   }, [meetings, filters]);
 
-  // Get today's meetings
+  // Get today's meetings sorted by time
   const todayMeetings = useMemo(() => {
     const today = new Date().toISOString().split("T")[0];
-    return meetings.filter((meeting) => {
-      return meeting.date === today;
-    });
+    return meetings
+      .filter((meeting) => {
+        return meeting.date === today;
+      })
+      .sort((a, b) => {
+        // Create Date objects for comparison
+        const dateTimeA = new Date(`${a.date}T${a.time}`);
+        const dateTimeB = new Date(`${b.date}T${b.time}`);
+        
+        // Sort in ascending order (earliest meetings first)
+        return dateTimeA.getTime() - dateTimeB.getTime();
+      });
   }, [meetings]);
 
-  // Get upcoming meetings
+  // Get upcoming meetings sorted by time
   const upcomingMeetings = useMemo(() => {
     const today = new Date().toISOString().split("T")[0];
-    return meetings.filter((meeting) => {
-      return meeting.date > today;
-    });
+    return meetings
+      .filter((meeting) => {
+        return meeting.date > today;
+      })
+      .sort((a, b) => {
+        // Create Date objects for comparison
+        const dateTimeA = new Date(`${a.date}T${a.time}`);
+        const dateTimeB = new Date(`${b.date}T${b.time}`);
+        
+        // Sort in ascending order (earliest meetings first)
+        return dateTimeA.getTime() - dateTimeB.getTime();
+      });
   }, [meetings]);
 
-  // Get completed meetings
+  // Get completed meetings sorted by time
   const completedMeetings = useMemo(() => {
-    return meetings.filter((meeting) => meeting.completed);
+    return meetings
+      .filter((meeting) => meeting.completed)
+      .sort((a, b) => {
+        // Create Date objects for comparison
+        const dateTimeA = new Date(`${a.date}T${a.time}`);
+        const dateTimeB = new Date(`${b.date}T${b.time}`);
+        
+        // Sort in ascending order (earliest meetings first)
+        return dateTimeA.getTime() - dateTimeB.getTime();
+      });
   }, [meetings]);
 
   // Create a new meeting
