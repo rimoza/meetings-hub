@@ -57,7 +57,7 @@ export function useMeetings() {
     }
   }, [isPermissionGranted, isRemindersEnabled, meetings, scheduleReminders]);
 
-  // Filter meetings based on current filters and sort by date and time
+  // Filter meetings based on current filters and sort by completion status, then by date and time
   const filteredMeetings = useMemo(() => {
     return meetings
       .filter((meeting) => {
@@ -83,7 +83,12 @@ export function useMeetings() {
         return matchesSearch && matchesStatus && matchesPriority && matchesType;
       })
       .sort((a, b) => {
-        // Create Date objects for comparison
+        // First sort by completion status (pending meetings first, completed meetings last)
+        if (a.completed !== b.completed) {
+          return a.completed ? 1 : -1; // false (pending) comes before true (completed)
+        }
+        
+        // Within the same completion status, sort by date and time
         const dateTimeA = new Date(`${a.date}T${a.time}`);
         const dateTimeB = new Date(`${b.date}T${b.time}`);
         
@@ -92,7 +97,7 @@ export function useMeetings() {
       });
   }, [meetings, filters]);
 
-  // Get today's meetings sorted by time
+  // Get today's meetings sorted by completion status, then by time
   const todayMeetings = useMemo(() => {
     const today = new Date().toISOString().split("T")[0];
     return meetings
@@ -100,7 +105,12 @@ export function useMeetings() {
         return meeting.date === today;
       })
       .sort((a, b) => {
-        // Create Date objects for comparison
+        // First sort by completion status (pending meetings first, completed meetings last)
+        if (a.completed !== b.completed) {
+          return a.completed ? 1 : -1; // false (pending) comes before true (completed)
+        }
+        
+        // Within the same completion status, sort by date and time
         const dateTimeA = new Date(`${a.date}T${a.time}`);
         const dateTimeB = new Date(`${b.date}T${b.time}`);
         
@@ -109,7 +119,7 @@ export function useMeetings() {
       });
   }, [meetings]);
 
-  // Get upcoming meetings sorted by time
+  // Get upcoming meetings sorted by completion status, then by time
   const upcomingMeetings = useMemo(() => {
     const today = new Date().toISOString().split("T")[0];
     return meetings
@@ -117,7 +127,12 @@ export function useMeetings() {
         return meeting.date > today;
       })
       .sort((a, b) => {
-        // Create Date objects for comparison
+        // First sort by completion status (pending meetings first, completed meetings last)
+        if (a.completed !== b.completed) {
+          return a.completed ? 1 : -1; // false (pending) comes before true (completed)
+        }
+        
+        // Within the same completion status, sort by date and time
         const dateTimeA = new Date(`${a.date}T${a.time}`);
         const dateTimeB = new Date(`${b.date}T${b.time}`);
         
@@ -126,7 +141,7 @@ export function useMeetings() {
       });
   }, [meetings]);
 
-  // Get completed meetings sorted by time
+  // Get completed meetings sorted by time (most recent first for completed meetings)
   const completedMeetings = useMemo(() => {
     return meetings
       .filter((meeting) => meeting.completed)
@@ -135,8 +150,8 @@ export function useMeetings() {
         const dateTimeA = new Date(`${a.date}T${a.time}`);
         const dateTimeB = new Date(`${b.date}T${b.time}`);
         
-        // Sort in ascending order (earliest meetings first)
-        return dateTimeA.getTime() - dateTimeB.getTime();
+        // Sort in descending order for completed meetings (most recent completed first)
+        return dateTimeB.getTime() - dateTimeA.getTime();
       });
   }, [meetings]);
 

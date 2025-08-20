@@ -44,9 +44,19 @@ export function UpcomingMeetings({ onEditMeeting }: Readonly<UpcomingMeetingsPro
     return matchesSearch && matchesType && matchesPriority && matchesStatus
   })
 
-  // Sort by date (earliest first)
+  // Sort by completion status first, then by date and time
   const sortedMeetings = filteredMeetings.sort((a, b) => {
-    return a.date.localeCompare(b.date)
+    // First sort by completion status (pending meetings first, completed meetings last)
+    if (a.completed !== b.completed) {
+      return a.completed ? 1 : -1; // false (pending) comes before true (completed)
+    }
+    
+    // Within the same completion status, sort by date and time
+    const dateTimeA = new Date(`${a.date}T${a.time}`);
+    const dateTimeB = new Date(`${b.date}T${b.time}`);
+    
+    // Sort in ascending order (earliest meetings first)
+    return dateTimeA.getTime() - dateTimeB.getTime();
   })
 
   return (
