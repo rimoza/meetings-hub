@@ -6,6 +6,13 @@ import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DeleteConfirmDialog } from "@/components/ui/confirm-dialog"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
+} from "@/components/ui/dropdown-menu"
 import { CalendarIntegration } from "@/components/calendar-integration"
 import { useRouter } from "next/navigation"
 import type { Meeting } from "@/types/meeting"
@@ -221,82 +228,77 @@ export function MeetingTable({ meetings, onEdit, onDelete, onToggleComplete, nex
                 
                 {/* Actions */}
                 <TableCell>
-                  <div className="flex items-center justify-center gap-1">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className="h-8 w-8 p-0 hover:bg-blue-100 hover:text-blue-600 dark:hover:bg-blue-900/20"
-                            onClick={() => router.push(`/meetings/${meeting.id}`)}
+                  <div className="flex items-center justify-center gap-2">
+                    {/* Actions Dropdown Menu */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 hover:bg-muted"
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-40">
+                        <DropdownMenuItem
+                          onClick={() => router.push(`/meetings/${meeting.id}`)}
+                          className="cursor-pointer"
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          View Details
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuItem
+                          onClick={() => onEdit(meeting)}
+                          className="cursor-pointer"
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit Meeting
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuItem
+                          onClick={() => onToggleComplete(meeting.id)}
+                          className="cursor-pointer"
+                        >
+                          {meeting.completed ? (
+                            <>
+                              <XCircle className="h-4 w-4 mr-2" />
+                              Mark as Pending
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle2 className="h-4 w-4 mr-2" />
+                              Mark as Complete
+                            </>
+                          )}
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuSeparator />
+                        
+                        <DeleteConfirmDialog
+                          itemName={meeting.title}
+                          itemType="meeting"
+                          onConfirm={() => onDelete(meeting.id)}
+                        >
+                          <DropdownMenuItem
+                            className="cursor-pointer text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400"
+                            onSelect={(e) => e.preventDefault()}
                           >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>View</TooltipContent>
-                      </Tooltip>
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete Meeting
+                          </DropdownMenuItem>
+                        </DeleteConfirmDialog>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                       
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary"
-                            onClick={() => onEdit(meeting)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Edit</TooltipContent>
-                      </Tooltip>
-                      
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className={`h-8 w-8 p-0 ${
-                              meeting.completed 
-                                ? "hover:bg-amber-100 hover:text-amber-600 dark:hover:bg-amber-900/20" 
-                                : "hover:bg-emerald-100 hover:text-emerald-600 dark:hover:bg-emerald-900/20"
-                            }`}
-                            onClick={() => onToggleComplete(meeting.id)}
-                          >
-                            {meeting.completed ? <XCircle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {meeting.completed ? "Mark pending" : "Mark complete"}
-                        </TooltipContent>
-                      </Tooltip>
-                      
-                      <CalendarIntegration 
-                        meeting={meeting} 
-                        size="sm" 
-                        variant="ghost"
-                        showTooltip={false}
-                      />
-                      
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <DeleteConfirmDialog
-                            itemName={meeting.title}
-                            itemType="meeting"
-                            onConfirm={() => onDelete(meeting.id)}
-                          >
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </DeleteConfirmDialog>
-                        </TooltipTrigger>
-                        <TooltipContent>Delete</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    {/* Calendar Integration - Separate */}
+                    <CalendarIntegration 
+                      meeting={meeting} 
+                      size="sm" 
+                      variant="ghost"
+                      showTooltip={true}
+                    />
                   </div>
                 </TableCell>
               </TableRow>
