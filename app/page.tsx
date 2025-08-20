@@ -39,6 +39,7 @@ export default function Dashboard() {
     todayMeetings,
     upcomingMeetings,
     completedMeetings,
+    nextMeeting,
     filters,
     setFilters,
     createMeeting,
@@ -225,6 +226,7 @@ export default function Dashboard() {
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                     onToggleComplete={handleToggleComplete}
+                    isNext={nextMeeting?.id === meeting.id}
                   />
                 ))}
               </div>
@@ -234,6 +236,7 @@ export default function Dashboard() {
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 onToggleComplete={handleToggleComplete}
+                nextMeetingId={nextMeeting?.id}
               />
             )}
           </>

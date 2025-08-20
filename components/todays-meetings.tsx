@@ -13,7 +13,7 @@ interface TodaysMeetingsProps {
 }
 
 export function TodaysMeetings({ onEditMeeting }: Readonly<TodaysMeetingsProps>) {
-  const { meetings, deleteMeeting, toggleMeetingCompletion } = useMeetings()
+  const { meetings, nextMeeting, deleteMeeting, toggleMeetingCompletion } = useMeetings()
   const [viewMode, setViewMode] = useState<"card" | "table">("table")
   const [filters, setFilters] = useState<MeetingFiltersType>({
     search: "",
@@ -70,6 +70,7 @@ export function TodaysMeetings({ onEditMeeting }: Readonly<TodaysMeetingsProps>)
               onEdit={() => onEditMeeting(meeting)}
               onDelete={() => deleteMeeting(meeting.id)}
               onToggleComplete={() => toggleMeetingCompletion(meeting.id)}
+              isNext={nextMeeting?.id === meeting.id}
             />
           ))}
         </div>
@@ -79,6 +80,7 @@ export function TodaysMeetings({ onEditMeeting }: Readonly<TodaysMeetingsProps>)
           onEdit={onEditMeeting}
           onDelete={deleteMeeting}
           onToggleComplete={toggleMeetingCompletion}
+          nextMeetingId={nextMeeting?.id}
         />
       )}
     </div>

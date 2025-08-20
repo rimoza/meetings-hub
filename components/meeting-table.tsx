@@ -15,6 +15,7 @@ interface MeetingTableProps {
   onEdit: (meeting: Meeting) => void
   onDelete: (id: string) => void
   onToggleComplete: (id: string) => void
+  nextMeetingId?: string
 }
 
 const priorityConfig = {
@@ -39,7 +40,7 @@ const typeIcons = {
   presentation: MoreHorizontal,
 }
 
-export function MeetingTable({ meetings, onEdit, onDelete, onToggleComplete }: MeetingTableProps) {
+export function MeetingTable({ meetings, onEdit, onDelete, onToggleComplete, nextMeetingId }: MeetingTableProps) {
   const router = useRouter()
   
   return (
@@ -80,6 +81,7 @@ export function MeetingTable({ meetings, onEdit, onDelete, onToggleComplete }: M
           {meetings.map((meeting, index) => {
             const TypeIcon = typeIcons[meeting.type] || Calendar
             const isLast = index === meetings.length - 1
+            const isNext = nextMeetingId === meeting.id
             
             // Check if meeting is overdue
             const now = new Date()
@@ -92,7 +94,11 @@ export function MeetingTable({ meetings, onEdit, onDelete, onToggleComplete }: M
                 className={`group hover:bg-muted/30 transition-colors ${
                   meeting.completed ? "opacity-60" : ""
                 } ${!isLast ? "border-b" : ""} ${
-                  isOverdue ? "bg-red-50 dark:bg-red-950/20" : ""
+                  isNext && !meeting.completed 
+                    ? "bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-blue-200 dark:border-blue-800" 
+                    : isOverdue 
+                      ? "bg-red-50 dark:bg-red-950/20" 
+                      : ""
                 }`}
               >
                 {/* Meeting Title & Type */}
@@ -112,6 +118,12 @@ export function MeetingTable({ meetings, onEdit, onDelete, onToggleComplete }: M
                         {meeting.title}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
+                        {isNext && !meeting.completed && (
+                          <Badge className="text-xs bg-blue-600 hover:bg-blue-700 text-white border-blue-600 animate-pulse">
+                            <Clock className="h-3 w-3 mr-1" />
+                            Next
+                          </Badge>
+                        )}
                         <Badge variant="secondary" className="text-xs capitalize">
                           {meeting.type}
                         </Badge>

@@ -15,6 +15,7 @@ interface MeetingCardProps {
   onEdit: (meeting: Meeting) => void
   onDelete: (id: string) => void
   onToggleComplete: (id: string) => void
+  isNext?: boolean
 }
 
 const priorityConfig = {
@@ -39,7 +40,7 @@ const typeIcons = {
   presentation: MoreHorizontal,
 }
 
-export function MeetingCard({ meeting, onEdit, onDelete, onToggleComplete }: MeetingCardProps) {
+export function MeetingCard({ meeting, onEdit, onDelete, onToggleComplete, isNext = false }: MeetingCardProps) {
   const router = useRouter()
   const TypeIcon = typeIcons[meeting.type] || Calendar
   
@@ -50,6 +51,8 @@ export function MeetingCard({ meeting, onEdit, onDelete, onToggleComplete }: Mee
   
   const borderColorClass = meeting.completed 
     ? "border-l-muted" 
+    : isNext
+      ? "border-l-blue-600"
     : isOverdue
       ? "border-l-red-600"
       : meeting.priority === "high" 
@@ -58,9 +61,11 @@ export function MeetingCard({ meeting, onEdit, onDelete, onToggleComplete }: Mee
           ? "border-l-amber-500" 
           : "border-l-emerald-500"
   
-  const cardBackgroundClass = isOverdue && !meeting.completed
-    ? "bg-red-50 dark:bg-red-950/20"
-    : ""
+  const cardBackgroundClass = isNext && !meeting.completed
+    ? "bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 shadow-md border-blue-200 dark:border-blue-800"
+    : isOverdue && !meeting.completed
+      ? "bg-red-50 dark:bg-red-950/20"
+      : ""
   
   return (
     <Card className={`group transition-all duration-200 hover:shadow-lg border-l-4 ${borderColorClass} ${
@@ -92,6 +97,12 @@ export function MeetingCard({ meeting, onEdit, onDelete, onToggleComplete }: Mee
               
               {/* Badges Row */}
               <div className="flex flex-wrap items-center gap-2">
+                {isNext && !meeting.completed && (
+                  <Badge className="text-xs bg-blue-600 hover:bg-blue-700 text-white border-blue-600 animate-pulse">
+                    <Clock className="h-3 w-3 mr-1" />
+                    Next Meeting
+                  </Badge>
+                )}
                 {isOverdue && !meeting.completed && (
                   <Badge variant="destructive" className="text-xs">
                     <AlertCircle className="h-3 w-3 mr-1" />

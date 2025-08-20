@@ -140,6 +140,25 @@ export function useMeetings() {
       });
   }, [meetings]);
 
+  // Get the next upcoming meeting (earliest non-completed meeting from now)
+  const nextMeeting = useMemo(() => {
+    const now = new Date();
+    return meetings
+      .filter((meeting) => !meeting.completed)
+      .filter((meeting) => {
+        const meetingDateTime = new Date(`${meeting.date}T${meeting.time}`);
+        return meetingDateTime >= now;
+      })
+      .sort((a, b) => {
+        // Create Date objects for comparison
+        const dateTimeA = new Date(`${a.date}T${a.time}`);
+        const dateTimeB = new Date(`${b.date}T${b.time}`);
+        
+        // Sort in ascending order (earliest meetings first)
+        return dateTimeA.getTime() - dateTimeB.getTime();
+      })[0]; // Get the first (earliest) meeting
+  }, [meetings]);
+
   // Create a new meeting
   const createMeeting = async (
     meetingData: Omit<Meeting, "id" | "createdAt" | "updatedAt">
@@ -223,6 +242,7 @@ export function useMeetings() {
     todayMeetings,
     upcomingMeetings,
     completedMeetings,
+    nextMeeting,
     filters,
     setFilters,
     createMeeting,
