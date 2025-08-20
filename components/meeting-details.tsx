@@ -17,7 +17,6 @@ import {
   Link2,
   Copy,
   Share2,
-  Bell,
   Save,
   X,
   Plus,
@@ -30,6 +29,7 @@ import { Separator } from "@/components/ui/separator"
 import { DeleteConfirmDialog } from "@/components/ui/confirm-dialog"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Textarea } from "@/components/ui/textarea"
+import { CalendarIntegration } from "@/components/calendar-integration"
 import type { Meeting, MeetingNote } from "@/types/meeting"
 import { format } from "date-fns"
 import { toast } from "sonner"
@@ -170,6 +170,11 @@ export function MeetingDetails({ meeting, onBack, onEdit, onDelete, onToggleComp
           </Tooltip>
         </TooltipProvider>
         
+        <CalendarIntegration 
+          meeting={meeting} 
+          variant="outline"
+          size="sm"
+        />
         
         <Button
           variant="outline"
@@ -569,10 +574,11 @@ export function MeetingDetails({ meeting, onBack, onEdit, onDelete, onToggleComp
                     Quick Actions
                   </h3>
                   <div className="flex flex-wrap gap-2">
-                    <Button variant="outline" size="sm">
-                      <Bell className="h-4 w-4 mr-2" />
-                      Set Reminder
-                    </Button>
+                    <CalendarIntegration 
+                      meeting={meeting} 
+                      variant="outline"
+                      size="sm"
+                    />
                     <Button 
                       variant="outline" 
                       size="sm"

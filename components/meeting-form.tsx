@@ -11,9 +11,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { CalendarIcon } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
+import { CalendarIcon, Plus } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
+import { CalendarIntegration, QuickCalendarButton } from "@/components/calendar-integration"
 import type { Meeting, MeetingType, Priority } from "@/types/meeting"
 
 interface MeetingFormProps {
@@ -33,10 +35,12 @@ interface FormData {
   priority: Priority
   attendees: string[]
   location: string
+  addToCalendar: boolean
 }
 
 export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: MeetingFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [createdMeeting, setCreatedMeeting] = useState<Meeting | null>(null)
   const [formData, setFormData] = useState<FormData>({
     title: "",
     description: "",
@@ -47,6 +51,7 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: MeetingFormP
     priority: "medium",
     attendees: [],
     location: "",
+    addToCalendar: false,
   })
 
   const [attendeeInput, setAttendeeInput] = useState("")
@@ -63,6 +68,7 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: MeetingFormP
         priority: meeting.priority as Priority,
         attendees: meeting.attendees,
         location: meeting.location,
+        addToCalendar: false,
       })
     } else {
       // Reset form for new meeting
@@ -76,8 +82,11 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: MeetingFormP
         priority: "medium",
         attendees: [],
         location: "",
+        addToCalendar: false,
       })
     }
+    // Reset created meeting when form opens/closes
+    setCreatedMeeting(null)
   }, [meeting, isOpen])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -86,14 +95,26 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: MeetingFormP
     
     try {
       const now = new Date()
-      await onSubmit({
+      const meetingData = {
         ...formData,
         date: formData.date.toISOString().split("T")[0],
         completed: false,
         createdAt: now,
         updatedAt: now,
-      })
-      // onClose is now handled in the parent component after successful submission
+      }
+      
+      await onSubmit(meetingData)
+      
+      // If user wants to add to calendar and this is a new meeting, store the meeting data
+      if (formData.addToCalendar && !meeting) {
+        setCreatedMeeting({
+          ...meetingData,
+          id: `temp-${Date.now()}`, // Temporary ID for calendar integration
+        } as Meeting)
+      } else {
+        // Close form immediately if not adding to calendar or if editing
+        onClose()
+      }
     } catch (error) {
       console.error("Error submitting form:", error)
     } finally {
@@ -291,22 +312,75 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: MeetingFormP
                 </div>
               )}
             </div>
+
+            {/* Calendar Integration Option - Only show for new meetings */}
+            {!meeting && (
+              <div className="flex items-center space-x-2 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <Checkbox
+                  id="addToCalendar"
+                  checked={formData.addToCalendar}
+                  onCheckedChange={(checked) => 
+                    setFormData((prev) => ({ ...prev, addToCalendar: checked as boolean }))
+                  }
+                />
+                <div className="flex-1">
+                  <Label 
+                    htmlFor="addToCalendar" 
+                    className="text-sm font-medium cursor-pointer flex items-center"
+                  >
+                    <CalendarIcon className="h-4 w-4 mr-2 text-blue-600" />
+                    Add to calendar after creation
+                  </Label>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Show calendar options to add this meeting to your calendar app
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
-            <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting} className="w-full sm:w-auto order-2 sm:order-1">
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto order-1 sm:order-2">
-              {isSubmitting ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  {meeting ? "Updating..." : "Creating..."}
-                </>
-              ) : (
-                `${meeting ? "Update" : "Create"} Meeting`
-              )}
-            </Button>
+            {createdMeeting ? (
+              // Show calendar options after meeting creation
+              <div className="w-full space-y-3">
+                <div className="text-center">
+                  <h3 className="text-sm font-medium text-green-700 dark:text-green-400 mb-1">
+                    Meeting created successfully! 🎉
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    Choose how to add it to your calendar:
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2 justify-center">
+                  <QuickCalendarButton meeting={createdMeeting} provider="download" size="sm" />
+                  <QuickCalendarButton meeting={createdMeeting} provider="google" size="sm" />
+                  <QuickCalendarButton meeting={createdMeeting} provider="outlook" size="sm" />
+                  <QuickCalendarButton meeting={createdMeeting} provider="yahoo" size="sm" />
+                </div>
+                <div className="flex justify-center">
+                  <Button variant="outline" onClick={onClose} size="sm">
+                    Done
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              // Show normal form buttons
+              <>
+                <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting} className="w-full sm:w-auto order-2 sm:order-1">
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto order-1 sm:order-2">
+                  {isSubmitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      {meeting ? "Updating..." : "Creating..."}
+                    </>
+                  ) : (
+                    `${meeting ? "Update" : "Create"} Meeting`
+                  )}
+                </Button>
+              </>
+            )}
           </DialogFooter>
         </form>
       </DialogContent>

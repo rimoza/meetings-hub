@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DeleteConfirmDialog } from "@/components/ui/confirm-dialog"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { CalendarIntegration } from "@/components/calendar-integration"
 import { useRouter } from "next/navigation"
 import type { Meeting } from "@/types/meeting"
 import { format } from "date-fns"
@@ -269,6 +270,13 @@ export function MeetingTable({ meetings, onEdit, onDelete, onToggleComplete, nex
                           {meeting.completed ? "Mark pending" : "Mark complete"}
                         </TooltipContent>
                       </Tooltip>
+                      
+                      <CalendarIntegration 
+                        meeting={meeting} 
+                        size="sm" 
+                        variant="ghost"
+                        showTooltip={false}
+                      />
                       
                       <Tooltip>
                         <TooltipTrigger asChild>
