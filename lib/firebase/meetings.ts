@@ -268,7 +268,7 @@ export const addMeetingNote = async (
       id: `note_${Date.now()}`,
       content: noteContent,
       timestamp: new Date(),
-      author,
+      ...(author && { author }), // Only include author if it's defined
       type: noteType
     };
     
