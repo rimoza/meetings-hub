@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Checkbox } from "@/components/ui/checkbox"
-import { CalendarIcon, Plus } from "lucide-react"
+import { CalendarIcon } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { CalendarIntegration, QuickCalendarButton } from "@/components/calendar-integration"
@@ -38,7 +38,7 @@ interface FormData {
   addToCalendar: boolean
 }
 
-export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: MeetingFormProps) {
+export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: Readonly<MeetingFormProps>) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [createdMeeting, setCreatedMeeting] = useState<Meeting | null>(null)
   const [formData, setFormData] = useState<FormData>({
@@ -86,6 +86,7 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: MeetingFormP
       })
     }
     // Reset created meeting when form opens/closes
+    console.log(CalendarIntegration, "CalendarIntegration")
     setCreatedMeeting(null)
   }, [meeting, isOpen])
 

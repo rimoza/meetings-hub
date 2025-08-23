@@ -48,7 +48,7 @@ export default function Dashboard() {
     toggleMeetingCompletion,
   } = useMeetings()
 
-  const [viewMode, setViewMode] = useState<ViewMode>("card")
+  const [viewMode, setViewMode] = useState<ViewMode>("table")
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingMeeting, setEditingMeeting] = useState<Meeting | undefined>()
   const [currentPage, setCurrentPage] = useState("dashboard")

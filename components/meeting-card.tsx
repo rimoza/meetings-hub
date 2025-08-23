@@ -41,7 +41,7 @@ const typeIcons = {
   presentation: MoreHorizontal,
 }
 
-export function MeetingCard({ meeting, onEdit, onDelete, onToggleComplete, isNext = false }: MeetingCardProps) {
+export function MeetingCard({ meeting, onEdit, onDelete, onToggleComplete, isNext = false }: Readonly<MeetingCardProps>) {
   const router = useRouter()
   const TypeIcon = typeIcons[meeting.type] || Calendar
   
