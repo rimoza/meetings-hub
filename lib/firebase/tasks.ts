@@ -65,6 +65,40 @@ export const createTask = async (
   }
 };
 
+// Helper function to extract todo items from note content
+const extractTodoList = (content: string): string[] => {
+  const todoItems: string[] = [];
+  
+  // Match various list formats:
+  // - Item 1
+  // * Item 2
+  // 1. Item 3
+  // • Item 4
+  // ☐ Item 5
+  // [ ] Item 6
+  // - [ ] Item 7
+  const listPatterns = [
+    /^[\s]*[-*•]\s+(.+)$/gm,           // - Item, * Item, • Item
+    /^[\s]*\d+\.\s+(.+)$/gm,          // 1. Item
+    /^[\s]*☐\s+(.+)$/gm,              // ☐ Item
+    /^[\s]*\[\s*\]\s+(.+)$/gm,        // [ ] Item
+    /^[\s]*-\s*\[\s*\]\s+(.+)$/gm     // - [ ] Item
+  ];
+  
+  for (const pattern of listPatterns) {
+    let match;
+    while ((match = pattern.exec(content)) !== null) {
+      const item = match[1].trim();
+      if (item && !todoItems.includes(item)) {
+        todoItems.push(item);
+      }
+    }
+    pattern.lastIndex = 0; // Reset regex state
+  }
+  
+  return todoItems;
+};
+
 // Create task from meeting note
 export const createTaskFromMeetingNote = async (
   userId: string,
@@ -78,6 +112,9 @@ export const createTaskFromMeetingNote = async (
   }
   
   try {
+    // Extract todo items from the note content
+    const todoList = extractTodoList(noteContent);
+    
     const taskData = {
       title: `Follow-up: ${meetingTitle}`,
       description: noteContent,
@@ -86,6 +123,7 @@ export const createTaskFromMeetingNote = async (
       type: 'follow_up' as const,
       meetingId,
       priority,
+      todoList: todoList.length > 0 ? todoList : undefined,
       userId,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),

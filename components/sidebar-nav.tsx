@@ -14,30 +14,31 @@ import {
 import { useReminders } from "@/hooks/use-reminders"
 import { useMeetings } from "@/hooks/use-meetings"
 import { NotificationSidebar } from "@/components/notification-sidebar"
+import { useRouter, usePathname } from "next/navigation"
 
 interface SidebarNavProps {
   onCreateMeeting: () => void
-  onNavigate: (page: string) => void
-  activePage: string
   todayCount?: number
   upcomingCount?: number
 }
 
-export function SidebarNav({ onCreateMeeting, onNavigate, activePage, todayCount = 0, upcomingCount = 0 }: SidebarNavProps) {
+export function SidebarNav({ onCreateMeeting, todayCount = 0, upcomingCount = 0 }: SidebarNavProps) {
   const { isMobile, setOpenMobile } = useSidebar()
   const { isPermissionGranted, isRemindersEnabled } = useReminders()
   const { upcomingMeetings } = useMeetings()
+  const router = useRouter()
+  const pathname = usePathname()
   
   const menuItems = [
-    { id: "dashboard", label: "Dashboard", icon: <Home className="h-4 w-4" />, count: null },
-    { id: "today", label: "Today's Meetings", icon: <Calendar className="h-4 w-4 text-blue-500" />, count: todayCount },
-    { id: "upcoming", label: "Upcoming Meetings", icon: <Clock className="h-4 w-4" />, count: upcomingCount },
-    { id: "tasks", label: "Tasks", icon: <CheckSquare className="h-4 w-4 text-purple-500" />, count: null },
-    { id: "settings", label: "Settings", icon: <Settings className="h-4 w-4" />, count: null },
+    { id: "/", label: "Dashboard", icon: <Home className="h-4 w-4" />, count: null },
+    { id: "/today-meetings", label: "Today's Meetings", icon: <Calendar className="h-4 w-4 text-blue-500" />, count: todayCount },
+    { id: "/upcoming-meetings", label: "Upcoming Meetings", icon: <Clock className="h-4 w-4" />, count: upcomingCount },
+    { id: "/tasks", label: "Tasks", icon: <CheckSquare className="h-4 w-4 text-purple-500" />, count: null },
+    { id: "/settings", label: "Settings", icon: <Settings className="h-4 w-4" />, count: null },
   ]
   
-  const handleNavClick = (pageId: string) => {
-    onNavigate(pageId)
+  const handleNavClick = (path: string) => {
+    router.push(path)
     // Only close sidebar on mobile
     if (isMobile) {
       setOpenMobile(false)
@@ -109,7 +110,7 @@ export function SidebarNav({ onCreateMeeting, onNavigate, activePage, todayCount
             {menuItems.map((item) => (
               <SidebarMenuItem key={item.id}>
                 <SidebarMenuButton
-                  isActive={activePage === item.id}
+                  isActive={pathname === item.id}
                   onClick={() => handleNavClick(item.id)}
                   className="h-10 text-sm sm:text-base"
                 >

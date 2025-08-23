@@ -19,18 +19,12 @@ import { ViewToggle } from "@/components/view-toggle"
 import { MeetingFilters } from "@/components/meeting-filters"
 import { MeetingCard } from "@/components/meeting-card"
 import { MeetingTable } from "@/components/meeting-table"
-import { TodaysMeetings } from "@/components/todays-meetings"
-import { UpcomingMeetings } from "@/components/upcoming-meetings"
 import { useMeetings } from "@/hooks/use-meetings"
-import TasksPage from "./tasks/page"
 import type { ViewMode, Meeting } from "@/types/meeting"
 import { toast } from "sonner"
 import { SidebarNav } from "@/components/sidebar-nav"
 import { MeetingForm } from "@/components/meeting-form"
 import { ProtectedRoute } from "@/components/protected-route"
-import { NotificationSettings } from "@/components/notification-settings"
-import { ThemeSettings } from "@/components/theme-settings"
-import { AppSettings } from "@/components/app-settings"
 
 export default function Dashboard() {
   const { user, logout } = useAuth()
@@ -52,8 +46,6 @@ export default function Dashboard() {
   const [viewMode, setViewMode] = useState<ViewMode>("table")
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingMeeting, setEditingMeeting] = useState<Meeting | undefined>()
-  const [currentPage, setCurrentPage] = useState("dashboard")
-
   const handleEdit = (meeting: Meeting) => {
     setEditingMeeting(meeting)
     setIsFormOpen(true)
@@ -92,10 +84,6 @@ export default function Dashboard() {
     toast.success("Meeting completion status toggled successfully")
   }
 
-  const handleNavigate = (page: string) => {
-    setCurrentPage(page)
-  }
-
   const handleLogout = () => {
     logout()
     window.location.href = "/login"
@@ -122,130 +110,78 @@ export default function Dashboard() {
     },
   ]
 
-  const renderPageContent = () => {
-    switch (currentPage) {
-      case "today":
-        return <TodaysMeetings onEditMeeting={handleEdit} />
-      case "upcoming":
-        return <UpcomingMeetings onEditMeeting={handleEdit} />
-      case "tasks":
-        return <TasksPage />
-      case "settings":
-        return (
-          <div className="max-w-4xl mx-auto space-y-8">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold mb-2">Settings</h2>
-              <p className="text-muted-foreground">Configure your preferences and view system information</p>
-            </div>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Left Column */}
-              <div className="space-y-8">
-                <div>
-                  <h3 className="text-lg font-semibold mb-4 flex items-center">
-                    <span className="w-1 h-6 bg-primary rounded-full mr-3"></span>
-                    Meeting Reminders
-                  </h3>
-                  <NotificationSettings />
-                </div>
-                
-                <div>
-                  <h3 className="text-lg font-semibold mb-4 flex items-center">
-                    <span className="w-1 h-6 bg-primary rounded-full mr-3"></span>
-                    Appearance
-                  </h3>
-                  <ThemeSettings />
+  const dashboardContent = (
+    <>
+      {/* Stats Cards - Mobile First */}
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8">
+        {stats.map((stat) => (
+          <Card key={stat.title} className="overflow-hidden">
+            <CardHeader className="p-3 sm:p-4 pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">{stat.title}</CardTitle>
+                <div className={`p-1.5 sm:p-2 rounded-lg bg-gradient-to-r ${stat.gradient}`}>
+                  <stat.icon className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
                 </div>
               </div>
+            </CardHeader>
+            <CardContent className="p-3 sm:p-4 pt-0">
+              <div className="text-xl sm:text-2xl font-bold">{stat.value}</div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
-              {/* Right Column */}
-              <div className="space-y-8">
-                <div>
-                  <h3 className="text-lg font-semibold mb-4 flex items-center">
-                    <span className="w-1 h-6 bg-primary rounded-full mr-3"></span>
-                    System Information
-                  </h3>
-                  <AppSettings />
-                </div>
-              </div>
-            </div>
-          </div>
-        )
-      default:
-        return (
-          <>
-            {/* Stats Cards - Mobile First */}
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8">
-              {stats.map((stat) => (
-                <Card key={stat.title} className="overflow-hidden">
-                  <CardHeader className="p-3 sm:p-4 pb-2">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">{stat.title}</CardTitle>
-                      <div className={`p-1.5 sm:p-2 rounded-lg bg-gradient-to-r ${stat.gradient}`}>
-                        <stat.icon className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-3 sm:p-4 pt-0">
-                    <div className="text-xl sm:text-2xl font-bold">{stat.value}</div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+      {/* Filters and View Controls */}
+      <div className="flex flex-col lg:flex-row gap-4 mb-6">
+        <div className="flex-1">
+          <MeetingFilters filters={filters} onFiltersChange={setFilters} />
+        </div>
+        <div className="flex justify-end lg:justify-start">
+          <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
+        </div>
+      </div>
 
-            {/* Filters and View Controls */}
-            <div className="flex flex-col lg:flex-row gap-4 mb-6">
-              <div className="flex-1">
-                <MeetingFilters filters={filters} onFiltersChange={setFilters} />
-              </div>
-              <div className="flex justify-end lg:justify-start">
-                <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
-              </div>
-            </div>
-
-            {/* Meetings Display */}
-            {filteredMeetings.length === 0 ? (
-              <Card className="text-center py-8 sm:py-12">
-                <CardContent>
-                  <Calendar className="h-10 w-10 sm:h-12 sm:w-12 text-blue-500 mx-auto mb-3 sm:mb-4" />
-                  <h3 className="text-base sm:text-lg font-semibold mb-2">No meetings found</h3>
-                  <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4 px-2">
-                    {filters.search || filters.status !== "all" || filters.priority !== "all" || filters.type !== "all"
-                      ? "Try adjusting your filters."
-                      : "Create your first meeting."}
-                  </p>
-                  <Button onClick={handleCreateMeeting} size="sm" className="sm:size-default">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Meeting
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : viewMode === "card" ? (
-              <div className="grid grid-cols-1 gap-3 sm:gap-4 md:gap-6">
-                {filteredMeetings.map((meeting) => (
-                  <MeetingCard
-                    key={meeting.id}
-                    meeting={meeting}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    onToggleComplete={handleToggleComplete}
-                    isNext={nextMeeting?.id === meeting.id}
-                  />
-                ))}
-              </div>
-            ) : (
-              <MeetingTable
-                meetings={filteredMeetings}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onToggleComplete={handleToggleComplete}
-                nextMeetingId={nextMeeting?.id}
-              />
-            )}
-          </>
-        )
-    }
-  }
+      {/* Meetings Display */}
+      {filteredMeetings.length === 0 ? (
+        <Card className="text-center py-8 sm:py-12">
+          <CardContent>
+            <Calendar className="h-10 w-10 sm:h-12 sm:w-12 text-blue-500 mx-auto mb-3 sm:mb-4" />
+            <h3 className="text-base sm:text-lg font-semibold mb-2">No meetings found</h3>
+            <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4 px-2">
+              {filters.search || filters.status !== "all" || filters.priority !== "all" || filters.type !== "all"
+                ? "Try adjusting your filters."
+                : "Create your first meeting."}
+            </p>
+            <Button onClick={handleCreateMeeting} size="sm" className="sm:size-default">
+              <Plus className="h-4 w-4 mr-2" />
+              Create Meeting
+            </Button>
+          </CardContent>
+        </Card>
+      ) : viewMode === "card" ? (
+        <div className="grid grid-cols-1 gap-3 sm:gap-4 md:gap-6">
+          {filteredMeetings.map((meeting) => (
+            <MeetingCard
+              key={meeting.id}
+              meeting={meeting}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onToggleComplete={handleToggleComplete}
+              isNext={nextMeeting?.id === meeting.id}
+            />
+          ))}
+        </div>
+      ) : (
+        <MeetingTable
+          meetings={filteredMeetings}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onToggleComplete={handleToggleComplete}
+          nextMeetingId={nextMeeting?.id}
+        />
+      )}
+    </>
+  )
 
   return (
     <ProtectedRoute>
@@ -253,8 +189,6 @@ export default function Dashboard() {
         {/* Sidebar */}
         <SidebarNav 
           onCreateMeeting={handleCreateMeeting} 
-          onNavigate={handleNavigate} 
-          activePage={currentPage}
           todayCount={todayMeetings.length}
           upcomingCount={upcomingMeetings.length}
         />
@@ -270,18 +204,10 @@ export default function Dashboard() {
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
                     <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground truncate">
-                      {currentPage === "dashboard" && "Dashboard"}
-                      {currentPage === "today" && "Today's Meetings"}
-                      {currentPage === "upcoming" && "Upcoming"}
-                      {currentPage === "tasks" && "Tasks"}
-                      {currentPage === "settings" && "Settings"}
+                      Dashboard
                     </h1>
                     <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
-                      {currentPage === "dashboard" && "Manage your meetings"}
-                      {currentPage === "today" && "Today's scheduled meetings"}
-                      {currentPage === "upcoming" && "Plan ahead"}
-                      {currentPage === "tasks" && "Manage your tasks and follow-ups"}
-                      {currentPage === "settings" && "Configure preferences"}
+                      Manage your meetings
                     </p>
                   </div>
                   <div className="flex items-center gap-2 ml-2">
@@ -334,7 +260,7 @@ export default function Dashboard() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-auto px-3 py-4 sm:px-4 sm:py-6 md:px-6 md:py-8">{renderPageContent()}</main>
+        <main className="flex-1 overflow-auto px-3 py-4 sm:px-4 sm:py-6 md:px-6 md:py-8">{dashboardContent}</main>
       </div>
 
       {/* Meeting Form Modal */}

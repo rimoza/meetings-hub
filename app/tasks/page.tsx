@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, CheckSquare, Clock, AlertCircle, Calendar } from "lucide-react"
+import { Plus, CheckSquare, Clock, AlertCircle, LogOut, User as UserIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ViewToggle } from "@/components/view-toggle"
@@ -10,10 +10,26 @@ import { TaskCard } from "@/components/task-card"
 import { TaskTable } from "@/components/task-table"
 import { TaskForm } from "@/components/task-form"
 import { useTasks } from "@/hooks/use-tasks"
+import { useMeetings } from "@/hooks/use-meetings"
+import { useAuth } from "@/contexts/auth-context"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { SidebarTrigger } from "@/components/ui/sidebar"
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel
+} from "@/components/ui/dropdown-menu"
+import { SidebarNav } from "@/components/sidebar-nav"
+import { ProtectedRoute } from "@/components/protected-route"
 import type { ViewMode, Task } from "@/types/task"
 import { toast } from "sonner"
 
 export default function TasksPage() {
+  const { user, logout } = useAuth()
+  const { todayMeetings, upcomingMeetings } = useMeetings()
   const {
     tasks,
     filteredTasks,
@@ -75,6 +91,11 @@ export default function TasksPage() {
     toast.success("Task status updated")
   }
 
+  const handleLogout = () => {
+    logout()
+    window.location.href = "/login"
+  }
+
   const uniqueAssignees = Array.from(
     new Set(tasks.filter(task => task.assignee).map(task => task.assignee))
   ).filter(Boolean) as string[]
@@ -107,19 +128,84 @@ export default function TasksPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-6 space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Tasks</h1>
-            <p className="text-muted-foreground">Manage your tasks and follow-ups</p>
-          </div>
-          <Button onClick={handleCreateTask}>
-            <Plus className="h-4 w-4 mr-2" />
-            New Task
-          </Button>
-        </div>
+    <ProtectedRoute>
+      <div className="flex w-full h-screen">
+        {/* Sidebar */}
+        <SidebarNav 
+          onCreateMeeting={() => {}} 
+          todayCount={todayMeetings.length}
+          upcomingCount={upcomingMeetings.length}
+        />
+
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Header */}
+          <header className="border-b bg-card">
+            <div className="px-3 py-3 sm:px-4 sm:py-4">
+              <div className="flex items-center gap-2">
+                <SidebarTrigger className="md:hidden" />
+                <div className="flex-1">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground truncate">
+                        Tasks
+                      </h1>
+                      <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
+                        Manage your tasks and follow-ups
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 ml-2">
+                      <Button 
+                        onClick={handleCreateTask}
+                        size="sm"
+                        className="hidden sm:inline-flex"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        <span className="hidden lg:inline">New Task</span>
+                        <span className="lg:hidden">New</span>
+                      </Button>
+                      <Button
+                        onClick={handleCreateTask}
+                        size="icon"
+                        className="sm:hidden h-8 w-8"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                      
+                      {/* User Menu */}
+                      {user && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <UserIcon className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-56">
+                            <DropdownMenuLabel>
+                              <div className="flex flex-col space-y-1">
+                                <p className="text-sm font-medium">{user.name}</p>
+                                <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                              </div>
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={handleLogout} className="text-red-600 dark:text-red-400">
+                              <LogOut className="mr-2 h-4 w-4" />
+                              <span>Logout</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                      
+                      <ThemeToggle />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          <main className="flex-1 overflow-auto px-3 py-4 sm:px-4 sm:py-6 md:px-6 md:py-8">
+            <div className="space-y-6">
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -194,14 +280,17 @@ export default function TasksPage() {
           />
         )}
 
-        {/* Task Form Modal */}
-        <TaskForm
-          task={editingTask}
-          isOpen={isFormOpen}
-          onClose={() => setIsFormOpen(false)}
-          onSubmit={handleFormSubmit}
-        />
+            {/* Task Form Modal */}
+            <TaskForm
+              task={editingTask}
+              isOpen={isFormOpen}
+              onClose={() => setIsFormOpen(false)}
+              onSubmit={handleFormSubmit}
+            />
+            </div>
+          </main>
+        </div>
       </div>
-    </div>
+    </ProtectedRoute>
   )
 }
