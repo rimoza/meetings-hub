@@ -34,7 +34,7 @@ interface TaskTableProps {
 type SortKey = keyof Task | "none"
 type SortOrder = "asc" | "desc"
 
-export function TaskTable({ tasks, onEdit, onDelete, onToggleComplete, onChangeStatus }: TaskTableProps) {
+export function TaskTable({ tasks, onEdit, onDelete, onChangeStatus }: TaskTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>("none")
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc")
 
@@ -51,18 +51,6 @@ export function TaskTable({ tasks, onEdit, onDelete, onToggleComplete, onChangeS
     }
   }
 
-  const getStatusBadgeVariant = (status: Task["status"]) => {
-    switch (status) {
-      case "completed":
-        return "default" as const
-      case "in_progress":
-        return "secondary" as const
-      case "cancelled":
-        return "destructive" as const
-      default:
-        return "outline" as const
-    }
-  }
 
   const getPriorityColor = (priority: Task["priority"]) => {
     switch (priority) {
@@ -103,8 +91,8 @@ export function TaskTable({ tasks, onEdit, onDelete, onToggleComplete, onChangeS
       bValue = bValue.toLowerCase()
     }
 
-    if (aValue < bValue) return sortOrder === "asc" ? -1 : 1
-    if (aValue > bValue) return sortOrder === "asc" ? 1 : -1
+    if (aValue! < bValue!) return sortOrder === "asc" ? -1 : 1
+    if (aValue! > bValue!) return sortOrder === "asc" ? 1 : -1
     return 0
   })
 
