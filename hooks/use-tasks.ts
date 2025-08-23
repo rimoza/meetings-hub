@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { useAuth } from "@/contexts/auth-context"
-import type { Task, TaskFilters } from "@/types/task"
+import type { Task, TaskFilters, TodoItem } from "@/types/task"
 import {
   subscribeTasks,
   createTask as createTaskFirebase,
@@ -157,12 +157,17 @@ export function useTasks() {
     }
   }
 
-  const addTodoItem = async (taskId: string, todoItem: string) => {
+  const addTodoItem = async (taskId: string, todoText: string) => {
     const task = tasks.find(t => t.id === taskId)
     if (task) {
       const currentTodos = task.todoList || []
+      const newTodoItem = {
+        id: `todo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        text: todoText,
+        status: "pending" as const
+      }
       await updateTask(taskId, {
-        todoList: [...currentTodos, todoItem]
+        todoList: [...currentTodos, newTodoItem]
       })
     }
   }
@@ -177,11 +182,14 @@ export function useTasks() {
     }
   }
 
-  const updateTodoItem = async (taskId: string, todoIndex: number, newValue: string) => {
+  const updateTodoItem = async (taskId: string, todoIndex: number, updatedTodo: Partial<Omit<TodoItem, 'id'>>) => {
     const task = tasks.find(t => t.id === taskId)
-    if (task && task.todoList) {
+    if (task && task.todoList && task.todoList[todoIndex]) {
       const updatedTodos = [...task.todoList]
-      updatedTodos[todoIndex] = newValue
+      updatedTodos[todoIndex] = {
+        ...updatedTodos[todoIndex],
+        ...updatedTodo
+      }
       await updateTask(taskId, {
         todoList: updatedTodos
       })
