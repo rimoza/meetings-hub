@@ -22,6 +22,7 @@ import { MeetingTable } from "@/components/meeting-table"
 import { TodaysMeetings } from "@/components/todays-meetings"
 import { UpcomingMeetings } from "@/components/upcoming-meetings"
 import { useMeetings } from "@/hooks/use-meetings"
+import TasksPage from "./tasks/page"
 import type { ViewMode, Meeting } from "@/types/meeting"
 import { toast } from "sonner"
 import { SidebarNav } from "@/components/sidebar-nav"
@@ -127,6 +128,8 @@ export default function Dashboard() {
         return <TodaysMeetings onEditMeeting={handleEdit} />
       case "upcoming":
         return <UpcomingMeetings onEditMeeting={handleEdit} />
+      case "tasks":
+        return <TasksPage />
       case "settings":
         return (
           <div className="max-w-4xl mx-auto space-y-8">
@@ -270,12 +273,14 @@ export default function Dashboard() {
                       {currentPage === "dashboard" && "Dashboard"}
                       {currentPage === "today" && "Today's Meetings"}
                       {currentPage === "upcoming" && "Upcoming"}
+                      {currentPage === "tasks" && "Tasks"}
                       {currentPage === "settings" && "Settings"}
                     </h1>
                     <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
                       {currentPage === "dashboard" && "Manage your meetings"}
                       {currentPage === "today" && "Today's scheduled meetings"}
                       {currentPage === "upcoming" && "Plan ahead"}
+                      {currentPage === "tasks" && "Manage your tasks and follow-ups"}
                       {currentPage === "settings" && "Configure preferences"}
                     </p>
                   </div>

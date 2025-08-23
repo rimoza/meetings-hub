@@ -1,5 +1,5 @@
 "use client"
-import { Calendar, Home, Plus, Settings, Clock, Bell } from "lucide-react"
+import { Calendar, Home, Plus, Settings, Clock, Bell, CheckSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { 
@@ -32,6 +32,7 @@ export function SidebarNav({ onCreateMeeting, onNavigate, activePage, todayCount
     { id: "dashboard", label: "Dashboard", icon: <Home className="h-4 w-4" />, count: null },
     { id: "today", label: "Today's Meetings", icon: <Calendar className="h-4 w-4 text-blue-500" />, count: todayCount },
     { id: "upcoming", label: "Upcoming Meetings", icon: <Clock className="h-4 w-4" />, count: upcomingCount },
+    { id: "tasks", label: "Tasks", icon: <CheckSquare className="h-4 w-4 text-purple-500" />, count: null },
     { id: "settings", label: "Settings", icon: <Settings className="h-4 w-4" />, count: null },
   ]
   
