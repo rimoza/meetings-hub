@@ -12,7 +12,8 @@ import {
   DocumentData,
   QueryDocumentSnapshot,
   getFirestore,
-  type Firestore
+  type Firestore,
+  type FieldValue
 } from 'firebase/firestore';
 import { app, isFirebaseConfigured } from '@/lib/firebase/config';
 import type { Task } from '@/types/task';
@@ -167,7 +168,7 @@ export const updateTask = async (
     
     // Add completedAt timestamp if status is being changed to completed
     if (updates.status === 'completed') {
-      updateData.completedAt = serverTimestamp();
+      (updateData as DocumentData & { completedAt?: FieldValue }).completedAt = serverTimestamp();
     }
     
     await updateDoc(taskRef, updateData);
@@ -283,7 +284,7 @@ export const toggleTaskCompletion = async (taskId: string, status: 'completed' |
   
   try {
     const taskRef = doc(db, COLLECTION_NAME, taskId);
-    const updateData = {
+    const updateData: DocumentData & { completedAt?: FieldValue } = {
       status,
       updatedAt: serverTimestamp(),
       ...(status === 'completed' ? { completedAt: serverTimestamp() } : {}),

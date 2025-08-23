@@ -90,10 +90,10 @@ export default function TodayMeetingsPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
                       <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground truncate">
-                        Today's Meetings
+                        Today&apos;s Meetings
                       </h1>
                       <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
-                        Today's scheduled meetings
+                        Today&apos;s scheduled meetings
                       </p>
                     </div>
                     <div className="flex items-center gap-2 ml-2">

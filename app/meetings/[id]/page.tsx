@@ -84,9 +84,9 @@ export default function MeetingDetailsPage({ params }: Readonly<MeetingDetailsPa
     router.push("/?create=true")
   }
 
-  const handleNavigate = (page: string) => {
-    router.push(page === "dashboard" ? "/" : `/?page=${page}`)
-  }
+  // const handleNavigate = (page: string) => {
+  //   router.push(page === "dashboard" ? "/" : `/?page=${page}`)
+  // }
 
   const handleLogout = () => {
     logout()
@@ -208,8 +208,6 @@ export default function MeetingDetailsPage({ params }: Readonly<MeetingDetailsPa
         {/* Sidebar */}
         <SidebarNav 
           onCreateMeeting={handleCreateMeeting} 
-          onNavigate={handleNavigate} 
-          activePage="details"
           todayCount={todayMeetings.length}
           upcomingCount={upcomingMeetings.length}
           tasksCount={pendingTasks.length + inProgressTasks.length}

@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { LogOut, User as UserIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"

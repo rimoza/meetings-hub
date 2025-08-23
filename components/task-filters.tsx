@@ -25,7 +25,7 @@ interface TaskFiltersProps {
 }
 
 export function TaskFilters({ filters, onFiltersChange, assignees = [] }: Readonly<TaskFiltersProps>) {
-  const updateFilter = (key: keyof TaskFilters, value: any) => {
+  const updateFilter = (key: keyof TaskFilters, value: TaskFilters[keyof TaskFilters]) => {
     onFiltersChange({ ...filters, [key]: value })
   }
 
