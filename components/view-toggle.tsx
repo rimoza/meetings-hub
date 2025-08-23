@@ -19,7 +19,7 @@ export function ViewToggle({ viewMode, onViewModeChange }: ViewToggleProps) {
         className="h-8 px-3 transition-all"
       >
         <LayoutGrid className="h-4 w-4" />
-        <span className="ml-2 hidden sm:inline">Cards</span>
+        <span className="ml-2 hidden sm:inline"></span>
       </Button>
       <Button
         variant={viewMode === "table" ? "default" : "ghost"}
@@ -28,7 +28,7 @@ export function ViewToggle({ viewMode, onViewModeChange }: ViewToggleProps) {
         className="h-8 px-3 transition-all"
       >
         <Table className="h-4 w-4" />
-        <span className="ml-2 hidden sm:inline">Table</span>
+        <span className="ml-2 hidden sm:inline"></span>
       </Button>
     </div>
   )
