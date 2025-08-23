@@ -12,14 +12,14 @@ const firebaseConfig = {
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
 // Check if Firebase is properly configured
 export const isFirebaseConfigured = (): boolean => {
   return !!(
-    firebaseConfig.apiKey && 
-    firebaseConfig.authDomain && 
+    firebaseConfig.apiKey &&
+    firebaseConfig.authDomain &&
     firebaseConfig.projectId &&
     firebaseConfig.apiKey !== "demo-api-key" &&
     !firebaseConfig.apiKey?.includes("demo")
@@ -37,7 +37,9 @@ if (isFirebaseConfigured()) {
     app = null;
   }
 } else {
-  console.warn("Firebase not configured - using demo configuration. Please set up your Firebase project.");
+  console.warn(
+    "Firebase not configured - using demo configuration. Please set up your Firebase project.",
+  );
 }
 
 export { app };

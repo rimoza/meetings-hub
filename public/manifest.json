@@ -18,7 +18,5 @@
   "categories": ["productivity", "business"],
   "lang": "en",
   "scope": "/",
-  "permissions": [
-    "notifications"
-  ]
+  "permissions": ["notifications"]
 }

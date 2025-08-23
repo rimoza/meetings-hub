@@ -1,37 +1,54 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import type { Meeting, MeetingType, Priority } from "@/types/meeting"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import type { Meeting, MeetingType, Priority } from "@/types/meeting";
 
 interface MeetingFormProps {
-  meeting?: Meeting
-  isOpen: boolean
-  onClose: () => void
-  onSubmit: (meeting: Omit<Meeting, "id">) => Promise<void>
+  meeting?: Meeting;
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (meeting: Omit<Meeting, "id">) => Promise<void>;
 }
 
 interface FormData {
-  title: string
-  description: string
-  date: Date
-  time: string
-  duration: number
-  type: MeetingType
-  priority: Priority
-  attendees: string[]
-  location: string
+  title: string;
+  description: string;
+  date: Date;
+  time: string;
+  duration: number;
+  type: MeetingType;
+  priority: Priority;
+  attendees: string[];
+  location: string;
 }
 
-export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: Readonly<MeetingFormProps>) {
-  const [isSubmitting, setIsSubmitting] = useState(false)
+export function MeetingForm({
+  meeting,
+  isOpen,
+  onClose,
+  onSubmit,
+}: Readonly<MeetingFormProps>) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     title: "",
     description: "",
@@ -42,9 +59,9 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: Readonly<Mee
     priority: "medium",
     attendees: [],
     location: "",
-  })
+  });
 
-  const [attendeeInput, setAttendeeInput] = useState("")
+  const [attendeeInput, setAttendeeInput] = useState("");
 
   useEffect(() => {
     if (meeting) {
@@ -58,7 +75,7 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: Readonly<Mee
         priority: meeting.priority as Priority,
         attendees: meeting.attendees,
         location: meeting.location,
-          })
+      });
     } else {
       // Reset form for new meeting
       setFormData({
@@ -71,56 +88,61 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: Readonly<Mee
         priority: "medium",
         attendees: [],
         location: "",
-          })
+      });
     }
-  }, [meeting, isOpen])
+  }, [meeting, isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    
+    e.preventDefault();
+    setIsSubmitting(true);
+
     try {
-      const now = new Date()
+      const now = new Date();
       const meetingData = {
         ...formData,
         date: formData.date.toISOString().split("T")[0],
         completed: false,
         createdAt: now,
         updatedAt: now,
-      }
-      
-      await onSubmit(meetingData)
-      
-      onClose()
+      };
+
+      await onSubmit(meetingData);
+
+      onClose();
     } catch (error) {
-      console.error("Error submitting form:", error)
+      console.error("Error submitting form:", error);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const addAttendee = () => {
-    if (attendeeInput.trim() && !formData.attendees.includes(attendeeInput.trim())) {
+    if (
+      attendeeInput.trim() &&
+      !formData.attendees.includes(attendeeInput.trim())
+    ) {
       setFormData((prev) => ({
         ...prev,
         attendees: [...prev.attendees, attendeeInput.trim()],
-      }))
-      setAttendeeInput("")
+      }));
+      setAttendeeInput("");
     }
-  }
+  };
 
   const removeAttendee = (attendee: string) => {
     setFormData((prev) => ({
       ...prev,
       attendees: prev.attendees.filter((a) => a !== attendee),
-    }))
-  }
+    }));
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="w-[95vw] max-w-[500px] sm:max-w-[600px] max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-lg sm:text-xl">{meeting ? "Edit Meeting" : "Create Meeting"}</DialogTitle>
+          <DialogTitle className="text-lg sm:text-xl">
+            {meeting ? "Edit Meeting" : "Create Meeting"}
+          </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
@@ -131,7 +153,9 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: Readonly<Mee
               <Input
                 id="title"
                 value={formData.title}
-                onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, title: e.target.value }))
+                }
                 placeholder="Meeting title"
                 required
               />
@@ -143,7 +167,12 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: Readonly<Mee
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
                 placeholder="Meeting description"
                 rows={3}
               />
@@ -152,24 +181,35 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: Readonly<Mee
             {/* Date and Time - Stack on mobile */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <Label htmlFor="date" className="text-sm">Date *</Label>
+                <Label htmlFor="date" className="text-sm">
+                  Date *
+                </Label>
                 <Input
                   id="date"
                   type="date"
-                  value={formData.date.toISOString().split('T')[0]}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, date: new Date(e.target.value) }))}
+                  value={formData.date.toISOString().split("T")[0]}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      date: new Date(e.target.value),
+                    }))
+                  }
                   className="h-9 sm:h-10 text-sm"
                   required
                 />
               </div>
 
               <div>
-                <Label htmlFor="time" className="text-sm">Time *</Label>
+                <Label htmlFor="time" className="text-sm">
+                  Time *
+                </Label>
                 <Input
                   id="time"
                   type="time"
                   value={formData.time}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, time: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, time: e.target.value }))
+                  }
                   className="h-9 sm:h-10 text-sm"
                   required
                 />
@@ -178,14 +218,21 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: Readonly<Mee
 
             {/* Duration - Full width on mobile */}
             <div>
-              <Label htmlFor="duration" className="text-sm">Duration (minutes)</Label>
+              <Label htmlFor="duration" className="text-sm">
+                Duration (minutes)
+              </Label>
               <Input
                 id="duration"
                 type="number"
                 min="15"
                 step="15"
                 value={formData.duration}
-                onChange={(e) => setFormData((prev) => ({ ...prev, duration: Number.parseInt(e.target.value) }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    duration: Number.parseInt(e.target.value),
+                  }))
+                }
                 className="h-9 sm:h-10 text-sm"
                 placeholder="60"
               />
@@ -197,7 +244,9 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: Readonly<Mee
                 <Label className="text-sm">Type</Label>
                 <Select
                   value={formData.type}
-                  onValueChange={(value: MeetingType) => setFormData((prev) => ({ ...prev, type: value }))}
+                  onValueChange={(value: MeetingType) =>
+                    setFormData((prev) => ({ ...prev, type: value }))
+                  }
                 >
                   <SelectTrigger className="h-9 sm:h-10 text-sm">
                     <SelectValue />
@@ -215,7 +264,9 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: Readonly<Mee
                 <Label className="text-sm">Priority</Label>
                 <Select
                   value={formData.priority}
-                  onValueChange={(value: Priority) => setFormData((prev) => ({ ...prev, priority: value }))}
+                  onValueChange={(value: Priority) =>
+                    setFormData((prev) => ({ ...prev, priority: value }))
+                  }
                 >
                   <SelectTrigger className="h-9 sm:h-10 text-sm">
                     <SelectValue />
@@ -235,7 +286,9 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: Readonly<Mee
               <Input
                 id="location"
                 value={formData.location}
-                onChange={(e) => setFormData((prev) => ({ ...prev, location: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, location: e.target.value }))
+                }
                 placeholder="Meeting location or video link"
               />
             </div>
@@ -249,9 +302,17 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: Readonly<Mee
                   onChange={(e) => setAttendeeInput(e.target.value)}
                   placeholder="Add attendee"
                   className="h-9 sm:h-10 text-sm"
-                  onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addAttendee())}
+                  onKeyPress={(e) =>
+                    e.key === "Enter" && (e.preventDefault(), addAttendee())
+                  }
                 />
-                <Button type="button" onClick={addAttendee} variant="outline" size="sm" className="h-9 px-3 sm:h-10 sm:px-4">
+                <Button
+                  type="button"
+                  onClick={addAttendee}
+                  variant="outline"
+                  size="sm"
+                  className="h-9 px-3 sm:h-10 sm:px-4"
+                >
                   Add
                 </Button>
               </div>
@@ -278,10 +339,20 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: Readonly<Mee
           </div>
 
           <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
-            <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting} className="w-full sm:w-auto order-2 sm:order-1">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="w-full sm:w-auto order-2 sm:order-1"
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto order-1 sm:order-2">
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full sm:w-auto order-1 sm:order-2"
+            >
               {isSubmitting ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -295,5 +366,5 @@ export function MeetingForm({ meeting, isOpen, onClose, onSubmit }: Readonly<Mee
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

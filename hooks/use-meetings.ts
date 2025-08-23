@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/contexts/auth-context";
@@ -15,11 +15,12 @@ import {
 
 export function useMeetings() {
   const { user } = useAuth();
-  const { scheduleReminders, isPermissionGranted, isRemindersEnabled } = useReminders();
+  const { scheduleReminders, isPermissionGranted, isRemindersEnabled } =
+    useReminders();
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [filters, setFilters] = useState<MeetingFilters>({
     search: "",
     status: "all",
@@ -36,12 +37,12 @@ export function useMeetings() {
     }
 
     setIsLoading(true);
-    
+
     const unsubscribe = subscribeMeetings(user.uid, (meetings) => {
       console.log(`Received ${meetings.length} meetings from Firebase`);
       setMeetings(meetings);
       setIsLoading(false);
-      
+
       // Schedule reminders for all meetings when data changes
       if (isPermissionGranted && isRemindersEnabled) {
         scheduleReminders(meetings);
@@ -64,10 +65,14 @@ export function useMeetings() {
       .filter((meeting) => {
         const matchesSearch =
           meeting.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-          meeting.description.toLowerCase().includes(filters.search.toLowerCase()) ||
-          meeting.location.toLowerCase().includes(filters.search.toLowerCase()) ||
-          meeting.attendees.some((attendee) => 
-            attendee.toLowerCase().includes(filters.search.toLowerCase())
+          meeting.description
+            .toLowerCase()
+            .includes(filters.search.toLowerCase()) ||
+          meeting.location
+            .toLowerCase()
+            .includes(filters.search.toLowerCase()) ||
+          meeting.attendees.some((attendee) =>
+            attendee.toLowerCase().includes(filters.search.toLowerCase()),
           );
 
         const matchesStatus =
@@ -75,10 +80,10 @@ export function useMeetings() {
           (filters.status === "completed" && meeting.completed) ||
           (filters.status === "pending" && !meeting.completed);
 
-        const matchesPriority = 
+        const matchesPriority =
           filters.priority === "all" || meeting.priority === filters.priority;
 
-        const matchesType = 
+        const matchesType =
           filters.type === "all" || meeting.type === filters.type;
 
         return matchesSearch && matchesStatus && matchesPriority && matchesType;
@@ -88,11 +93,11 @@ export function useMeetings() {
         if (a.completed !== b.completed) {
           return a.completed ? 1 : -1; // false (pending) comes before true (completed)
         }
-        
+
         // Within the same completion status, sort by date and time
         const dateTimeA = new Date(`${a.date}T${a.time}`);
         const dateTimeB = new Date(`${b.date}T${b.time}`);
-        
+
         // Sort in ascending order (earliest meetings first)
         return dateTimeA.getTime() - dateTimeB.getTime();
       });
@@ -110,11 +115,11 @@ export function useMeetings() {
         if (a.completed !== b.completed) {
           return a.completed ? 1 : -1; // false (pending) comes before true (completed)
         }
-        
+
         // Within the same completion status, sort by date and time
         const dateTimeA = new Date(`${a.date}T${a.time}`);
         const dateTimeB = new Date(`${b.date}T${b.time}`);
-        
+
         // Sort in ascending order (earliest meetings first)
         return dateTimeA.getTime() - dateTimeB.getTime();
       });
@@ -132,11 +137,11 @@ export function useMeetings() {
         if (a.completed !== b.completed) {
           return a.completed ? 1 : -1; // false (pending) comes before true (completed)
         }
-        
+
         // Within the same completion status, sort by date and time
         const dateTimeA = new Date(`${a.date}T${a.time}`);
         const dateTimeB = new Date(`${b.date}T${b.time}`);
-        
+
         // Sort in ascending order (earliest meetings first)
         return dateTimeA.getTime() - dateTimeB.getTime();
       });
@@ -150,7 +155,7 @@ export function useMeetings() {
         // Create Date objects for comparison
         const dateTimeA = new Date(`${a.date}T${a.time}`);
         const dateTimeB = new Date(`${b.date}T${b.time}`);
-        
+
         // Sort in descending order for completed meetings (most recent completed first)
         return dateTimeB.getTime() - dateTimeA.getTime();
       });
@@ -169,7 +174,7 @@ export function useMeetings() {
         // Create Date objects for comparison
         const dateTimeA = new Date(`${a.date}T${a.time}`);
         const dateTimeB = new Date(`${b.date}T${b.time}`);
-        
+
         // Sort in ascending order (earliest meetings first)
         return dateTimeA.getTime() - dateTimeB.getTime();
       })[0]; // Get the first (earliest) meeting
@@ -177,7 +182,7 @@ export function useMeetings() {
 
   // Create a new meeting
   const createMeeting = async (
-    meetingData: Omit<Meeting, "id" | "createdAt" | "updatedAt">
+    meetingData: Omit<Meeting, "id" | "createdAt" | "updatedAt">,
   ) => {
     if (!user?.uid) {
       setError("User not authenticated");
@@ -200,8 +205,8 @@ export function useMeetings() {
 
   // Update a meeting
   const updateMeeting = async (
-    id: string, 
-    updates: Partial<Omit<Meeting, "id">>
+    id: string,
+    updates: Partial<Omit<Meeting, "id">>,
   ) => {
     try {
       setError(null);
@@ -254,15 +259,15 @@ export function useMeetings() {
 
   // Add a note to a meeting
   const addMeetingNote = async (
-    meetingId: string, 
-    noteContent: string, 
-    noteType: 'regular' | 'follow-up',
+    meetingId: string,
+    noteContent: string,
+    noteType: "regular" | "follow-up",
     author?: string,
     taskDetails?: {
-      assignee?: string
-      priority?: 'low' | 'medium' | 'high'
-      dueDate?: string
-    }
+      assignee?: string;
+      priority?: "low" | "medium" | "high";
+      dueDate?: string;
+    },
   ) => {
     if (!user?.uid) {
       setError("User not authenticated");
@@ -271,7 +276,14 @@ export function useMeetings() {
 
     try {
       setError(null);
-      await addMeetingNoteFirebase(user.uid, meetingId, noteContent, noteType, author, taskDetails);
+      await addMeetingNoteFirebase(
+        user.uid,
+        meetingId,
+        noteContent,
+        noteType,
+        author,
+        taskDetails,
+      );
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);

@@ -1,16 +1,25 @@
-"use client"
+"use client";
 
-import { Search } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import type { MeetingFilters as FilterType } from "@/types/meeting"
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { MeetingFilters as FilterType } from "@/types/meeting";
 
 interface MeetingFiltersProps {
-  filters: FilterType
-  onFiltersChange: (filters: FilterType) => void
+  filters: FilterType;
+  onFiltersChange: (filters: FilterType) => void;
 }
 
-export function MeetingFilters({ filters, onFiltersChange }: Readonly<MeetingFiltersProps>) {
+export function MeetingFilters({
+  filters,
+  onFiltersChange,
+}: Readonly<MeetingFiltersProps>) {
   return (
     <div className="flex flex-col lg:flex-row justify-between gap-3 w-full p-4 bg-card/50 backdrop-blur-sm border rounded-lg shadow-sm">
       {/* Search Bar */}
@@ -19,7 +28,9 @@ export function MeetingFilters({ filters, onFiltersChange }: Readonly<MeetingFil
         <Input
           placeholder="Search by title, description, or attendees..."
           value={filters.search}
-          onChange={(e) => onFiltersChange({ ...filters, search: e.target.value })}
+          onChange={(e) =>
+            onFiltersChange({ ...filters, search: e.target.value })
+          }
           className="pl-10 h-10 bg-background/60 border-muted focus:bg-background transition-colors"
         />
       </div>
@@ -29,7 +40,12 @@ export function MeetingFilters({ filters, onFiltersChange }: Readonly<MeetingFil
 
       {/* Filter Dropdowns */}
       <div className="flex gap-2 flex-wrap sm:flex-nowrap">
-        <Select value={filters.status} onValueChange={(value: FilterType['status']) => onFiltersChange({ ...filters, status: value })}>
+        <Select
+          value={filters.status}
+          onValueChange={(value: FilterType["status"]) =>
+            onFiltersChange({ ...filters, status: value })
+          }
+        >
           <SelectTrigger className="h-10 text-sm w-full sm:w-[130px] bg-background/60 border-muted hover:bg-background/80 transition-colors">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
@@ -40,7 +56,12 @@ export function MeetingFilters({ filters, onFiltersChange }: Readonly<MeetingFil
           </SelectContent>
         </Select>
 
-        <Select value={filters.priority} onValueChange={(value: FilterType['priority']) => onFiltersChange({ ...filters, priority: value })}>
+        <Select
+          value={filters.priority}
+          onValueChange={(value: FilterType["priority"]) =>
+            onFiltersChange({ ...filters, priority: value })
+          }
+        >
           <SelectTrigger className="h-10 text-sm w-full sm:w-[130px] bg-background/60 border-muted hover:bg-background/80 transition-colors">
             <SelectValue placeholder="Priority" />
           </SelectTrigger>
@@ -52,7 +73,12 @@ export function MeetingFilters({ filters, onFiltersChange }: Readonly<MeetingFil
           </SelectContent>
         </Select>
 
-        <Select value={filters.type} onValueChange={(value: FilterType['type']) => onFiltersChange({ ...filters, type: value })}>
+        <Select
+          value={filters.type}
+          onValueChange={(value: FilterType["type"]) =>
+            onFiltersChange({ ...filters, type: value })
+          }
+        >
           <SelectTrigger className="h-10 text-sm w-full sm:w-[130px] bg-background/60 border-muted hover:bg-background/80 transition-colors">
             <SelectValue placeholder="Type" />
           </SelectTrigger>
@@ -66,5 +92,5 @@ export function MeetingFilters({ filters, onFiltersChange }: Readonly<MeetingFil
         </Select>
       </div>
     </div>
-  )
+  );
 }

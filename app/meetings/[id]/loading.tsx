@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function MeetingDetailsLoading() {
   return (
@@ -99,5 +99,5 @@ export default function MeetingDetailsLoading() {
         </div>
       </div>
     </div>
-  )
+  );
 }

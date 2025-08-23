@@ -1,15 +1,18 @@
-"use client"
+"use client";
 
-import { LayoutGrid, Table } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import type { ViewMode } from "@/types/meeting"
+import { LayoutGrid, Table } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import type { ViewMode } from "@/types/meeting";
 
 interface ViewToggleProps {
-  viewMode: ViewMode
-  onViewModeChange: (view: ViewMode) => void
+  viewMode: ViewMode;
+  onViewModeChange: (view: ViewMode) => void;
 }
 
-export function ViewToggle({ viewMode, onViewModeChange }: Readonly<ViewToggleProps>) {
+export function ViewToggle({
+  viewMode,
+  onViewModeChange,
+}: Readonly<ViewToggleProps>) {
   return (
     <div className="inline-flex items-center bg-card/50 backdrop-blur-sm border rounded-lg p-1 shadow-sm">
       <Button
@@ -31,5 +34,5 @@ export function ViewToggle({ viewMode, onViewModeChange }: Readonly<ViewTogglePr
         <span className="ml-2 hidden sm:inline"></span>
       </Button>
     </div>
-  )
+  );
 }

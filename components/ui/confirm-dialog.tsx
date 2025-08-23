@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { AlertTriangle } from "lucide-react"
+import { useState } from "react";
+import { AlertTriangle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -9,17 +9,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface ConfirmDialogProps {
-  title: string
-  description: string
-  confirmText?: string
-  cancelText?: string
-  variant?: "default" | "destructive"
-  onConfirm: () => void | Promise<void>
-  children: React.ReactNode
+  title: string;
+  description: string;
+  confirmText?: string;
+  cancelText?: string;
+  variant?: "default" | "destructive";
+  onConfirm: () => void | Promise<void>;
+  children: React.ReactNode;
 }
 
 export function ConfirmDialog({
@@ -31,26 +31,24 @@ export function ConfirmDialog({
   onConfirm,
   children,
 }: ConfirmDialogProps) {
-  const [open, setOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [open, setOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleConfirm = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      await onConfirm()
-      setOpen(false)
+      await onConfirm();
+      setOpen(false);
     } catch (error) {
-      console.error('Error in confirmation action:', error)
+      console.error("Error in confirmation action:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <>
-      <div onClick={() => setOpen(true)}>
-        {children}
-      </div>
+      <div onClick={() => setOpen(true)}>{children}</div>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -93,7 +91,7 @@ export function ConfirmDialog({
         </DialogContent>
       </Dialog>
     </>
-  )
+  );
 }
 
 export function DeleteConfirmDialog({
@@ -102,10 +100,10 @@ export function DeleteConfirmDialog({
   onConfirm,
   children,
 }: {
-  itemName: string
-  itemType?: string
-  onConfirm: () => void | Promise<void>
-  children: React.ReactNode
+  itemName: string;
+  itemType?: string;
+  onConfirm: () => void | Promise<void>;
+  children: React.ReactNode;
 }) {
   return (
     <ConfirmDialog
@@ -118,5 +116,5 @@ export function DeleteConfirmDialog({
     >
       {children}
     </ConfirmDialog>
-  )
+  );
 }

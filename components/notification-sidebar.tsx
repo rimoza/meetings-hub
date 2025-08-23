@@ -1,45 +1,55 @@
-"use client"
+"use client";
 
-import { Bell, BellOff, Settings, Calendar } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Switch } from "@/components/ui/switch"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { useReminders } from "@/hooks/use-reminders"
-import { useMeetings } from "@/hooks/use-meetings"
+import { Bell, BellOff, Settings, Calendar } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { useReminders } from "@/hooks/use-reminders";
+import { useMeetings } from "@/hooks/use-meetings";
 
 interface NotificationSidebarProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 export function NotificationSidebar({ children }: NotificationSidebarProps) {
-  const { 
-    isPermissionGranted, 
+  const {
+    isPermissionGranted,
     isRemindersEnabled,
-    isRequestingPermission, 
+    isRequestingPermission,
     requestPermission,
-    toggleReminders
-  } = useReminders()
-  
-  const { upcomingMeetings } = useMeetings()
+    toggleReminders,
+  } = useReminders();
+
+  const { upcomingMeetings } = useMeetings();
 
   const handleToggleReminders = async (enabled: boolean) => {
     if (enabled && !isPermissionGranted) {
-      const granted = await requestPermission()
+      const granted = await requestPermission();
       if (granted) {
-        toggleReminders(true)
+        toggleReminders(true);
       }
     } else {
-      toggleReminders(enabled)
+      toggleReminders(enabled);
     }
-  }
+  };
 
   return (
     <Sheet>
-      <SheetTrigger asChild>
-        {children}
-      </SheetTrigger>
+      <SheetTrigger asChild>{children}</SheetTrigger>
       <SheetContent side="right" className="w-[400px] sm:w-[500px]">
         <SheetHeader>
           <SheetTitle className="flex items-center space-x-2">
@@ -47,7 +57,7 @@ export function NotificationSidebar({ children }: NotificationSidebarProps) {
             <span>Notification Settings</span>
           </SheetTitle>
         </SheetHeader>
-        
+
         <div className="mt-6 space-y-6">
           {/* Main Toggle */}
           <Card>
@@ -66,22 +76,21 @@ export function NotificationSidebar({ children }: NotificationSidebarProps) {
                   <div>
                     <CardTitle className="text-lg">Meeting Reminders</CardTitle>
                     <CardDescription>
-                      {isRemindersEnabled && isPermissionGranted 
-                        ? "Active - You'll receive notifications" 
-                        : "Disabled - No notifications will be sent"
-                      }
+                      {isRemindersEnabled && isPermissionGranted
+                        ? "Active - You'll receive notifications"
+                        : "Disabled - No notifications will be sent"}
                     </CardDescription>
                   </div>
                 </div>
-                <Switch 
+                <Switch
                   checked={isRemindersEnabled && isPermissionGranted}
                   onCheckedChange={handleToggleReminders}
                   disabled={isRequestingPermission}
                 />
               </div>
             </CardHeader>
-            
-            {(!isPermissionGranted && isRemindersEnabled) && (
+
+            {!isPermissionGranted && isRemindersEnabled && (
               <CardContent className="pt-0">
                 <div className="p-3 bg-secondary/50 rounded-lg border">
                   <p className="text-sm text-muted-foreground">
@@ -93,7 +102,9 @@ export function NotificationSidebar({ children }: NotificationSidebarProps) {
                     size="sm"
                     className="mt-2 w-full"
                   >
-                    {isRequestingPermission ? "Requesting..." : "Grant Permission"}
+                    {isRequestingPermission
+                      ? "Requesting..."
+                      : "Grant Permission"}
                   </Button>
                 </div>
               </CardContent>
@@ -112,15 +123,21 @@ export function NotificationSidebar({ children }: NotificationSidebarProps) {
               <div className="text-sm space-y-2">
                 <div className="flex items-center justify-between p-2 bg-secondary/30 rounded">
                   <span>1 hour before</span>
-                  <Badge variant="secondary" className="text-xs">Active</Badge>
+                  <Badge variant="secondary" className="text-xs">
+                    Active
+                  </Badge>
                 </div>
                 <div className="flex items-center justify-between p-2 bg-secondary/30 rounded">
                   <span>30 minutes before</span>
-                  <Badge variant="secondary" className="text-xs">Active</Badge>
+                  <Badge variant="secondary" className="text-xs">
+                    Active
+                  </Badge>
                 </div>
                 <div className="flex items-center justify-between p-2 bg-secondary/30 rounded">
                   <span>5 minutes before</span>
-                  <Badge variant="secondary" className="text-xs">Active</Badge>
+                  <Badge variant="secondary" className="text-xs">
+                    Active
+                  </Badge>
                 </div>
               </div>
             </CardContent>
@@ -139,8 +156,13 @@ export function NotificationSidebar({ children }: NotificationSidebarProps) {
               {upcomingMeetings.length > 0 ? (
                 <div className="space-y-2 max-h-48 overflow-y-auto">
                   {upcomingMeetings.slice(0, 5).map((meeting) => (
-                    <div key={meeting.id} className="p-2 bg-secondary/30 rounded text-sm">
-                      <div className="font-medium truncate">{meeting.title}</div>
+                    <div
+                      key={meeting.id}
+                      className="p-2 bg-secondary/30 rounded text-sm"
+                    >
+                      <div className="font-medium truncate">
+                        {meeting.title}
+                      </div>
                       <div className="text-xs text-muted-foreground">
                         {meeting.date} at {meeting.time}
                       </div>
@@ -166,7 +188,8 @@ export function NotificationSidebar({ children }: NotificationSidebarProps) {
               <div className="flex items-center space-x-2">
                 <div className="h-2 w-2 bg-primary rounded-full animate-pulse" />
                 <p className="text-sm text-primary font-medium">
-                  Reminders are active for {upcomingMeetings.length} upcoming meeting{upcomingMeetings.length !== 1 ? 's' : ''}
+                  Reminders are active for {upcomingMeetings.length} upcoming
+                  meeting{upcomingMeetings.length !== 1 ? "s" : ""}
                 </p>
               </div>
             </div>
@@ -174,5 +197,5 @@ export function NotificationSidebar({ children }: NotificationSidebarProps) {
         </div>
       </SheetContent>
     </Sheet>
-  )
+  );
 }

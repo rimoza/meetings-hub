@@ -1,166 +1,175 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { LogOut, User as UserIcon, ArrowLeft } from "lucide-react"
-import { useAuth } from "@/contexts/auth-context"
-import { useMeetingsStore } from "@/stores/meetings-store"
-import { useTasksStore } from "@/stores/tasks-store"
-import { MeetingDetails } from "@/components/meeting-details"
-import { MeetingForm } from "@/components/meeting-form"
-import { Button } from "@/components/ui/button"
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { LogOut, User as UserIcon, ArrowLeft } from "lucide-react";
+import { useAuth } from "@/contexts/auth-context";
+import { useMeetingsStore } from "@/stores/meetings-store";
+import { useTasksStore } from "@/stores/tasks-store";
+import { MeetingDetails } from "@/components/meeting-details";
+import { MeetingForm } from "@/components/meeting-form";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-  DropdownMenuLabel
-} from "@/components/ui/dropdown-menu"
-import { ThemeToggle } from "@/components/theme-toggle"
-import type { Meeting } from "@/types/meeting"
-import { toast } from "sonner"
-import { subscribeMeetings, updateMeeting as updateMeetingFirebase, deleteMeeting as deleteMeetingFirebase, addMeetingNote as addMeetingNoteFirebase, toggleMeetingCompletion as toggleMeetingFirebase } from "@/lib/firebase/meetings"
-import { subscribeTasks } from "@/lib/firebase/tasks"
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
+import { ThemeToggle } from "@/components/theme-toggle";
+import type { Meeting } from "@/types/meeting";
+import { toast } from "sonner";
+import {
+  subscribeMeetings,
+  updateMeeting as updateMeetingFirebase,
+  deleteMeeting as deleteMeetingFirebase,
+  addMeetingNote as addMeetingNoteFirebase,
+  toggleMeetingCompletion as toggleMeetingFirebase,
+} from "@/lib/firebase/meetings";
+import { subscribeTasks } from "@/lib/firebase/tasks";
 
 interface MeetingDetailsClientProps {
-  initialMeeting: Meeting
+  initialMeeting: Meeting;
 }
 
-export function MeetingDetailsClient({ initialMeeting }: Readonly<MeetingDetailsClientProps>) {
-  const router = useRouter()
-  const { user, logout } = useAuth()
-  
+export function MeetingDetailsClient({
+  initialMeeting,
+}: Readonly<MeetingDetailsClientProps>) {
+  const router = useRouter();
+  const { user, logout } = useAuth();
+
   // Zustand stores
-  const { 
-    meetings,
-    setMeetings,
-    updateMeeting,
-    removeMeeting
-  } = useMeetingsStore()
-  
-  const { 
-    setTasks 
-  } = useTasksStore()
+  const { meetings, setMeetings, updateMeeting, removeMeeting } =
+    useMeetingsStore();
+
+  const { setTasks } = useTasksStore();
 
   // Local state for UI
-  const [meeting, setMeeting] = useState<Meeting>(initialMeeting)
-  const [isFormOpen, setIsFormOpen] = useState(false)
-  const [editingMeeting, setEditingMeeting] = useState<Meeting | undefined>()
+  const [meeting, setMeeting] = useState<Meeting>(initialMeeting);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingMeeting, setEditingMeeting] = useState<Meeting | undefined>();
 
   // Initialize stores and subscribe to real-time updates
   useEffect(() => {
-    if (!user?.uid) return
+    if (!user?.uid) return;
 
     // Subscribe to meetings for real-time updates
     const unsubscribeMeetings = subscribeMeetings(user.uid, (meetings) => {
-      setMeetings(meetings)
-      
+      setMeetings(meetings);
+
       // Update current meeting if it exists in the new data
-      const updatedMeeting = meetings.find(m => m.id === initialMeeting.id)
+      const updatedMeeting = meetings.find((m) => m.id === initialMeeting.id);
       if (updatedMeeting) {
-        setMeeting(updatedMeeting)
+        setMeeting(updatedMeeting);
       }
-    })
+    });
 
     // Subscribe to tasks for sidebar counts
     const unsubscribeTasks = subscribeTasks(user.uid, (tasks) => {
-      setTasks(tasks)
-    })
+      setTasks(tasks);
+    });
 
     return () => {
-      unsubscribeMeetings()
-      unsubscribeTasks()
-    }
-  }, [user?.uid, initialMeeting.id, setMeetings, setTasks])
+      unsubscribeMeetings();
+      unsubscribeTasks();
+    };
+  }, [user?.uid, initialMeeting.id, setMeetings, setTasks]);
 
   const handleLogout = () => {
-    logout()
-    window.location.href = "/login"
-  }
+    logout();
+    window.location.href = "/login";
+  };
 
   const handleEdit = (meeting: Meeting) => {
-    setEditingMeeting(meeting)
-    setIsFormOpen(true)
-  }
+    setEditingMeeting(meeting);
+    setIsFormOpen(true);
+  };
 
   const handleFormSubmit = async (meetingData: Omit<Meeting, "id">) => {
     try {
       if (editingMeeting) {
-        const { ...updateData } = meetingData
-        await updateMeetingFirebase(editingMeeting.id, updateData)
-        updateMeeting(editingMeeting.id, updateData)
-        toast.success("Meeting updated successfully")
+        const { ...updateData } = meetingData;
+        await updateMeetingFirebase(editingMeeting.id, updateData);
+        updateMeeting(editingMeeting.id, updateData);
+        toast.success("Meeting updated successfully");
       }
-      
-      setIsFormOpen(false)
-      setEditingMeeting(undefined)
+
+      setIsFormOpen(false);
+      setEditingMeeting(undefined);
     } catch (error) {
-      console.error("Error submitting meeting:", error)
-      toast.error("Failed to update meeting")
+      console.error("Error submitting meeting:", error);
+      toast.error("Failed to update meeting");
     }
-  }
+  };
 
   const handleDelete = async (id: string) => {
     try {
-      await deleteMeetingFirebase(id)
-      removeMeeting(id)
-      toast.success("Meeting deleted successfully")
-      router.push("/")
+      await deleteMeetingFirebase(id);
+      removeMeeting(id);
+      toast.success("Meeting deleted successfully");
+      router.push("/");
     } catch (error) {
-      console.error("Error deleting meeting:", error)
-      toast.error("Failed to delete meeting")
+      console.error("Error deleting meeting:", error);
+      toast.error("Failed to delete meeting");
     }
-  }
+  };
 
   const handleToggleComplete = async (meetingId: string) => {
     try {
-      const currentMeeting = meetings.find(m => m.id === meetingId)
+      const currentMeeting = meetings.find((m) => m.id === meetingId);
       if (currentMeeting) {
-        const newStatus = currentMeeting.completed ? false : true
-        await toggleMeetingFirebase(meetingId, newStatus)
-        updateMeeting(meetingId, { completed: newStatus })
-        toast.success("Meeting completion status toggled successfully")
+        const newStatus = currentMeeting.completed ? false : true;
+        await toggleMeetingFirebase(meetingId, newStatus);
+        updateMeeting(meetingId, { completed: newStatus });
+        toast.success("Meeting completion status toggled successfully");
       }
     } catch (error) {
-      console.error("Error toggling completion:", error)
-      toast.error("Failed to toggle completion status")
+      console.error("Error toggling completion:", error);
+      toast.error("Failed to toggle completion status");
     }
-  }
+  };
 
   const handleEditNotes = async (meetingId: string, notes: string) => {
     try {
-      await updateMeetingFirebase(meetingId, { notes })
-      updateMeeting(meetingId, { notes })
+      await updateMeetingFirebase(meetingId, { notes });
+      updateMeeting(meetingId, { notes });
     } catch (error) {
-      console.error("Error updating notes:", error)
-      toast.error("Failed to update meeting notes")
+      console.error("Error updating notes:", error);
+      toast.error("Failed to update meeting notes");
     }
-  }
+  };
 
   const handleAddNote = async (
-    meetingId: string, 
-    noteContent: string, 
-    noteType: 'regular' | 'follow-up',
+    meetingId: string,
+    noteContent: string,
+    noteType: "regular" | "follow-up",
     author?: string,
     taskDetails?: {
-      assignee?: string
-      priority?: 'low' | 'medium' | 'high'
-      dueDate?: string
-    }
+      assignee?: string;
+      priority?: "low" | "medium" | "high";
+      dueDate?: string;
+    },
   ) => {
     try {
-      await addMeetingNoteFirebase(user!.uid, meetingId, noteContent, noteType, author, taskDetails)
+      await addMeetingNoteFirebase(
+        user!.uid,
+        meetingId,
+        noteContent,
+        noteType,
+        author,
+        taskDetails,
+      );
       // The meeting will be updated through real-time subscription
     } catch (error) {
-      console.error("Error adding note:", error)
-      toast.error("Failed to add meeting note")
+      console.error("Error adding note:", error);
+      toast.error("Failed to add meeting note");
     }
-  }
+  };
 
   const handleBack = () => {
-    router.push("/")
-  }
+    router.push("/");
+  };
 
   return (
     <div className="min-h-screen w-full max-w-4xl mx-auto bg-background">
@@ -188,7 +197,7 @@ export function MeetingDetailsClient({ initialMeeting }: Readonly<MeetingDetails
                 </p>
               </div>
             </div>
-            
+
             {/* User Menu */}
             <div className="flex items-center gap-2">
               <ThemeToggle />
@@ -214,7 +223,10 @@ export function MeetingDetailsClient({ initialMeeting }: Readonly<MeetingDetails
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="cursor-pointer"
+                  >
                     <LogOut className="mr-2 h-4 w-4" />
                     Log out
                   </DropdownMenuItem>
@@ -243,11 +255,11 @@ export function MeetingDetailsClient({ initialMeeting }: Readonly<MeetingDetails
         meeting={editingMeeting}
         isOpen={isFormOpen}
         onClose={() => {
-          setIsFormOpen(false)
-          setEditingMeeting(undefined)
+          setIsFormOpen(false);
+          setEditingMeeting(undefined);
         }}
         onSubmit={handleFormSubmit}
       />
     </div>
-  )
+  );
 }

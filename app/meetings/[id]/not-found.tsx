@@ -1,7 +1,7 @@
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { ArrowLeft, Calendar } from 'lucide-react'
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowLeft, Calendar } from "lucide-react";
 
 export default function NotFound() {
   return (
@@ -15,7 +15,8 @@ export default function NotFound() {
             <div className="text-center space-y-2">
               <h1 className="text-2xl font-bold">Meeting Not Found</h1>
               <p className="text-muted-foreground">
-                The meeting you&apos;re looking for doesn&apos;t exist or may have been deleted.
+                The meeting you&apos;re looking for doesn&apos;t exist or may
+                have been deleted.
               </p>
             </div>
             <Button asChild className="w-full">
@@ -28,5 +29,5 @@ export default function NotFound() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

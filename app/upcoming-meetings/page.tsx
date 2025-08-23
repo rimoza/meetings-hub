@@ -1,79 +1,75 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Plus } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { ThemeToggle } from "@/components/theme-toggle"
-import { SidebarTrigger } from "@/components/ui/sidebar"
-import { useAuth } from "@/contexts/auth-context"
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
+import { useState } from "react";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useAuth } from "@/contexts/auth-context";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-  DropdownMenuLabel
-} from "@/components/ui/dropdown-menu"
-import { UpcomingMeetings } from "@/components/upcoming-meetings"
-import { useMeetings } from "@/hooks/use-meetings"
-import { useTasks } from "@/hooks/use-tasks"
-import type { Meeting } from "@/types/meeting"
-import { toast } from "sonner"
-import { SidebarNav } from "@/components/sidebar-nav"
-import { MeetingForm } from "@/components/meeting-form"
-import { ProtectedRoute } from "@/components/protected-route"
-import { LogOut, User as UserIcon } from "lucide-react"
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
+import { UpcomingMeetings } from "@/components/upcoming-meetings";
+import { useMeetings } from "@/hooks/use-meetings";
+import { useTasks } from "@/hooks/use-tasks";
+import type { Meeting } from "@/types/meeting";
+import { toast } from "sonner";
+import { SidebarNav } from "@/components/sidebar-nav";
+import { MeetingForm } from "@/components/meeting-form";
+import { ProtectedRoute } from "@/components/protected-route";
+import { LogOut, User as UserIcon } from "lucide-react";
 
 export default function UpcomingMeetingsPage() {
-  const { user, logout } = useAuth()
-  const {
-    todayMeetings,
-    upcomingMeetings,
-    createMeeting,
-    updateMeeting,
-  } = useMeetings()
-  const { pendingTasks, inProgressTasks } = useTasks()
+  const { user, logout } = useAuth();
+  const { todayMeetings, upcomingMeetings, createMeeting, updateMeeting } =
+    useMeetings();
+  const { pendingTasks, inProgressTasks } = useTasks();
 
-  const [isFormOpen, setIsFormOpen] = useState(false)
-  const [editingMeeting, setEditingMeeting] = useState<Meeting | undefined>()
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingMeeting, setEditingMeeting] = useState<Meeting | undefined>();
 
   const handleEdit = (meeting: Meeting) => {
-    setEditingMeeting(meeting)
-    setIsFormOpen(true)
-  }
+    setEditingMeeting(meeting);
+    setIsFormOpen(true);
+  };
 
   const handleCreateMeeting = () => {
-    setEditingMeeting(undefined)
-    setIsFormOpen(true)
-  }
+    setEditingMeeting(undefined);
+    setIsFormOpen(true);
+  };
 
   const handleFormSubmit = async (meetingData: Omit<Meeting, "id">) => {
     try {
       if (editingMeeting) {
-        await updateMeeting(editingMeeting.id, meetingData)
-        toast.success("Meeting updated successfully")
+        await updateMeeting(editingMeeting.id, meetingData);
+        toast.success("Meeting updated successfully");
       } else {
-        await createMeeting(meetingData)
-        toast.success("Meeting created successfully")
+        await createMeeting(meetingData);
+        toast.success("Meeting created successfully");
       }
-      setIsFormOpen(false)
-      setEditingMeeting(undefined)
+      setIsFormOpen(false);
+      setEditingMeeting(undefined);
     } catch (error) {
-      console.error("Error submitting meeting:", error)
+      console.error("Error submitting meeting:", error);
     }
-  }
+  };
 
   const handleLogout = () => {
-    logout()
-    window.location.href = "/login"
-  }
+    logout();
+    window.location.href = "/login";
+  };
 
   return (
     <ProtectedRoute>
       <div className="flex w-full h-screen">
         {/* Sidebar */}
-        <SidebarNav 
-          onCreateMeeting={handleCreateMeeting} 
+        <SidebarNav
+          onCreateMeeting={handleCreateMeeting}
           todayCount={todayMeetings.length}
           upcomingCount={upcomingMeetings.length}
           tasksCount={pendingTasks.length + inProgressTasks.length}
@@ -97,7 +93,7 @@ export default function UpcomingMeetingsPage() {
                       </p>
                     </div>
                     <div className="flex items-center gap-2 ml-2">
-                      <Button 
+                      <Button
                         onClick={handleCreateMeeting}
                         size="sm"
                         className="hidden sm:inline-flex"
@@ -113,31 +109,42 @@ export default function UpcomingMeetingsPage() {
                       >
                         <Plus className="h-4 w-4" />
                       </Button>
-                      
+
                       {/* User Menu */}
                       {user && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0"
+                            >
                               <UserIcon className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-56">
                             <DropdownMenuLabel>
                               <div className="flex flex-col space-y-1">
-                                <p className="text-sm font-medium">{user.name}</p>
-                                <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                                <p className="text-sm font-medium">
+                                  {user.name}
+                                </p>
+                                <p className="text-xs text-muted-foreground truncate">
+                                  {user.email}
+                                </p>
                               </div>
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={handleLogout} className="text-red-600 dark:text-red-400">
+                            <DropdownMenuItem
+                              onClick={handleLogout}
+                              className="text-red-600 dark:text-red-400"
+                            >
                               <LogOut className="mr-2 h-4 w-4" />
                               <span>Logout</span>
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       )}
-                      
+
                       <ThemeToggle />
                     </div>
                   </div>
@@ -160,5 +167,5 @@ export default function UpcomingMeetingsPage() {
         />
       </div>
     </ProtectedRoute>
-  )
+  );
 }

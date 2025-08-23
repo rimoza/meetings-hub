@@ -1,39 +1,51 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { CheckSquare, Clock, AlertCircle, LogOut, User as UserIcon } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ViewToggle } from "@/components/view-toggle"
-import { TaskFilters } from "@/components/task-filters"
-import { TaskCard } from "@/components/task-card"
-import { TaskTable } from "@/components/task-table"
-import { TaskForm } from "@/components/task-form"
-import { useTasksStore } from "@/stores/tasks-store"
-import { useMeetingsStore } from "@/stores/meetings-store"
-import { useAuth } from "@/contexts/auth-context"
-import { ThemeToggle } from "@/components/theme-toggle"
-import { SidebarTrigger } from "@/components/ui/sidebar"
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
+import { useState, useEffect } from "react";
+import {
+  CheckSquare,
+  Clock,
+  AlertCircle,
+  LogOut,
+  User as UserIcon,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ViewToggle } from "@/components/view-toggle";
+import { TaskFilters } from "@/components/task-filters";
+import { TaskCard } from "@/components/task-card";
+import { TaskTable } from "@/components/task-table";
+import { TaskForm } from "@/components/task-form";
+import { useTasksStore } from "@/stores/tasks-store";
+import { useMeetingsStore } from "@/stores/meetings-store";
+import { useAuth } from "@/contexts/auth-context";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-  DropdownMenuLabel
-} from "@/components/ui/dropdown-menu"
-import { SidebarNav } from "@/components/sidebar-nav"
-import type { Task } from "@/types/task"
-import { toast } from "sonner"
-import { subscribeTasks, createTask as createTaskFirebase, updateTask as updateTaskFirebase, deleteTask as deleteTaskFirebase, toggleTaskCompletion as toggleTaskFirebase } from "@/lib/firebase/tasks"
-import { subscribeMeetings } from "@/lib/firebase/meetings"
-import { TasksLoading } from "@/components/loading/tasks-loading"
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
+import { SidebarNav } from "@/components/sidebar-nav";
+import type { Task } from "@/types/task";
+import { toast } from "sonner";
+import {
+  subscribeTasks,
+  createTask as createTaskFirebase,
+  updateTask as updateTaskFirebase,
+  deleteTask as deleteTaskFirebase,
+  toggleTaskCompletion as toggleTaskFirebase,
+} from "@/lib/firebase/tasks";
+import { subscribeMeetings } from "@/lib/firebase/meetings";
+import { TasksLoading } from "@/components/loading/tasks-loading";
 
-type ViewMode = "table" | "card"
+type ViewMode = "table" | "card";
 
 export function TasksPageClient() {
-  const { user, logout } = useAuth()
-  
+  const { user, logout } = useAuth();
+
   // Zustand stores
   const {
     tasks,
@@ -48,121 +60,121 @@ export function TasksPageClient() {
     getInProgressTasks,
     getCompletedTasks,
     getFollowUpTasks,
-  } = useTasksStore()
+  } = useTasksStore();
 
-  const { 
-    getTodayMeetings,
-    getUpcomingMeetings,
-    setMeetings
-  } = useMeetingsStore()
+  const { getTodayMeetings, getUpcomingMeetings, setMeetings } =
+    useMeetingsStore();
 
   // Local UI state
-  const [viewMode, setViewMode] = useState<ViewMode>("table")
-  const [isFormOpen, setIsFormOpen] = useState(false)
-  const [editingTask, setEditingTask] = useState<Task | undefined>()
+  const [viewMode, setViewMode] = useState<ViewMode>("table");
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | undefined>();
 
   // Subscribe to real-time updates
   useEffect(() => {
-    if (!user?.uid) return
+    if (!user?.uid) return;
 
     const unsubscribeTasks = subscribeTasks(user.uid, (tasks) => {
-      setTasks(tasks)
-    })
+      setTasks(tasks);
+    });
 
     const unsubscribeMeetings = subscribeMeetings(user.uid, (meetings) => {
-      setMeetings(meetings)
-    })
+      setMeetings(meetings);
+    });
 
     return () => {
-      unsubscribeTasks()
-      unsubscribeMeetings()
-    }
-  }, [user?.uid, setTasks, setMeetings])
+      unsubscribeTasks();
+      unsubscribeMeetings();
+    };
+  }, [user?.uid, setTasks, setMeetings]);
 
   // Computed values
-  const pendingTasks = getPendingTasks()
-  const inProgressTasks = getInProgressTasks()
-  const completedTasks = getCompletedTasks()
-  const followUpTasks = getFollowUpTasks()
-  const todayMeetings = getTodayMeetings()
-  const upcomingMeetings = getUpcomingMeetings()
+  const pendingTasks = getPendingTasks();
+  const inProgressTasks = getInProgressTasks();
+  const completedTasks = getCompletedTasks();
+  const followUpTasks = getFollowUpTasks();
+  const todayMeetings = getTodayMeetings();
+  const upcomingMeetings = getUpcomingMeetings();
 
   const handleLogout = () => {
-    logout()
-    window.location.href = "/login"
-  }
+    logout();
+    window.location.href = "/login";
+  };
 
   const handleCreateTask = () => {
-    setEditingTask(undefined)
-    setIsFormOpen(true)
-  }
+    setEditingTask(undefined);
+    setIsFormOpen(true);
+  };
 
   const handleCreateMeeting = () => {
     // Navigate to dashboard to create meeting
-    window.location.href = "/"
-  }
+    window.location.href = "/";
+  };
 
   const handleEditTask = (task: Task) => {
-    setEditingTask(task)
-    setIsFormOpen(true)
-  }
+    setEditingTask(task);
+    setIsFormOpen(true);
+  };
 
-  const handleFormSubmit = async (taskData: Omit<Task, "id" | "createdAt" | "updatedAt" | "completedAt">) => {
+  const handleFormSubmit = async (
+    taskData: Omit<Task, "id" | "createdAt" | "updatedAt" | "completedAt">,
+  ) => {
     try {
       if (editingTask) {
-        await updateTaskFirebase(editingTask.id, taskData)
-        updateTask(editingTask.id, taskData)
-        toast.success("Task updated successfully")
+        await updateTaskFirebase(editingTask.id, taskData);
+        updateTask(editingTask.id, taskData);
+        toast.success("Task updated successfully");
       } else {
-        await createTaskFirebase(user!.uid, taskData)
+        await createTaskFirebase(user!.uid, taskData);
         // Real-time subscription will automatically add the new task to the store
-        toast.success("Task created successfully")
+        toast.success("Task created successfully");
       }
-      
-      setIsFormOpen(false)
-      setEditingTask(undefined)
+
+      setIsFormOpen(false);
+      setEditingTask(undefined);
     } catch (error) {
-      console.error("Error submitting task:", error)
-      toast.error(editingTask ? "Failed to update task" : "Failed to create task")
+      console.error("Error submitting task:", error);
+      toast.error(
+        editingTask ? "Failed to update task" : "Failed to create task",
+      );
     }
-  }
+  };
 
   const handleDeleteTask = async (id: string) => {
     try {
-      await deleteTaskFirebase(id)
-      removeTask(id)
-      toast.success("Task deleted successfully")
+      await deleteTaskFirebase(id);
+      removeTask(id);
+      toast.success("Task deleted successfully");
     } catch (error) {
-      console.error("Error deleting task:", error)
-      toast.error("Failed to delete task")
+      console.error("Error deleting task:", error);
+      toast.error("Failed to delete task");
     }
-  }
+  };
 
   const handleToggleCompletion = async (id: string) => {
     try {
-      const task = tasks.find(t => t.id === id)
+      const task = tasks.find((t) => t.id === id);
       if (task) {
-        const newStatus = task.status === "completed" ? "pending" : "completed"
-        await toggleTaskFirebase(id, newStatus)
-        updateTask(id, { status: newStatus })
-        toast.success("Task status updated successfully")
+        const newStatus = task.status === "completed" ? "pending" : "completed";
+        await toggleTaskFirebase(id, newStatus);
+        updateTask(id, { status: newStatus });
+        toast.success("Task status updated successfully");
       }
     } catch (error) {
-      console.error("Error toggling task completion:", error)
-      toast.error("Failed to update task status")
+      console.error("Error toggling task completion:", error);
+      toast.error("Failed to update task status");
     }
-  }
-
+  };
 
   if (isLoading) {
-    return <TasksLoading />
+    return <TasksLoading />;
   }
 
   return (
     <div className="flex w-full h-screen">
       {/* Sidebar */}
-      <SidebarNav 
-        onCreateMeeting={handleCreateMeeting} 
+      <SidebarNav
+        onCreateMeeting={handleCreateMeeting}
         todayCount={todayMeetings.length}
         upcomingCount={upcomingMeetings.length}
         tasksCount={pendingTasks.length + inProgressTasks.length}
@@ -185,10 +197,10 @@ export function TasksPageClient() {
                       Manage your tasks and follow-ups
                     </p>
                   </div>
-                  
+
                   {/* Action Buttons and User Menu */}
                   <div className="flex items-center gap-2 ml-2">
-                    <Button 
+                    <Button
                       onClick={handleCreateTask}
                       size="sm"
                       className="hidden sm:inline-flex"
@@ -215,7 +227,11 @@ export function TasksPageClient() {
                           <span className="sr-only">Toggle user menu</span>
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-56" align="end" forceMount>
+                      <DropdownMenuContent
+                        className="w-56"
+                        align="end"
+                        forceMount
+                      >
                         <DropdownMenuLabel className="font-normal">
                           <div className="flex flex-col space-y-1">
                             <p className="text-sm font-medium leading-none">
@@ -227,7 +243,10 @@ export function TasksPageClient() {
                           </div>
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                        <DropdownMenuItem
+                          onClick={handleLogout}
+                          className="cursor-pointer"
+                        >
                           <LogOut className="mr-2 h-4 w-4" />
                           Log out
                         </DropdownMenuItem>
@@ -258,11 +277,15 @@ export function TasksPageClient() {
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">In Progress</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  In Progress
+                </CardTitle>
                 <AlertCircle className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{inProgressTasks.length}</div>
+                <div className="text-2xl font-bold">
+                  {inProgressTasks.length}
+                </div>
                 <p className="text-xs text-muted-foreground">
                   Currently active tasks
                 </p>
@@ -274,15 +297,17 @@ export function TasksPageClient() {
                 <CheckSquare className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{completedTasks.length}</div>
-                <p className="text-xs text-muted-foreground">
-                  Finished tasks
-                </p>
+                <div className="text-2xl font-bold">
+                  {completedTasks.length}
+                </div>
+                <p className="text-xs text-muted-foreground">Finished tasks</p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Follow-ups</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Follow-ups
+                </CardTitle>
                 <AlertCircle className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -309,10 +334,9 @@ export function TasksPageClient() {
                 <CheckSquare className="h-12 w-12 text-muted-foreground mb-4" />
                 <h3 className="text-lg font-semibold mb-2">No tasks found</h3>
                 <p className="text-muted-foreground text-center mb-4">
-                  {tasks.length === 0 
+                  {tasks.length === 0
                     ? "Create your first task to get started"
-                    : "Try adjusting your filters to see more tasks"
-                  }
+                    : "Try adjusting your filters to see more tasks"}
                 </p>
                 {tasks.length === 0 && (
                   <Button onClick={handleCreateTask}>
@@ -350,11 +374,11 @@ export function TasksPageClient() {
         task={editingTask}
         isOpen={isFormOpen}
         onClose={() => {
-          setIsFormOpen(false)
-          setEditingTask(undefined)
+          setIsFormOpen(false);
+          setEditingTask(undefined);
         }}
         onSubmit={handleFormSubmit}
       />
     </div>
-  )
+  );
 }

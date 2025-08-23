@@ -1,6 +1,7 @@
 # Firebase Integration Guide for Meetings Hub
 
 ## Table of Contents
+
 1. [Overview](#overview)
 2. [Prerequisites](#prerequisites)
 3. [Firebase Setup](#firebase-setup)
@@ -19,6 +20,7 @@
 This guide provides step-by-step instructions for integrating Firebase into your Meetings Hub application. The integration will replace localStorage with a cloud-based solution, add Gmail-only authentication, and enable real-time synchronization across devices.
 
 ### Key Benefits
+
 - **Authentication**: Secure user authentication with Gmail/Google accounts only
 - **Real-time Database**: Firestore for instant data synchronization
 - **Scalability**: Handle growing user base without infrastructure concerns
@@ -28,8 +30,9 @@ This guide provides step-by-step instructions for integrating Firebase into your
 ## Prerequisites
 
 Before starting, ensure you have:
+
 - Node.js 18+ installed
-- A Google account for Firebase Console access*
+- A Google account for Firebase Console access\*
 - Basic understanding of Next.js and React
 - The current Meetings Hub project running locally
 
@@ -83,10 +86,10 @@ npm install react-firebase-hooks
 Create `lib/firebase/config.ts`:
 
 ```typescript
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getAnalytics, isSupported } from 'firebase/analytics';
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getAnalytics, isSupported } from "firebase/analytics";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -95,7 +98,7 @@ const firebaseConfig = {
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase
@@ -106,9 +109,10 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 
 // Initialize Analytics (client-side only)
-export const analytics = typeof window !== 'undefined' 
-  ? isSupported().then(yes => yes ? getAnalytics(app) : null)
-  : null;
+export const analytics =
+  typeof window !== "undefined"
+    ? isSupported().then((yes) => (yes ? getAnalytics(app) : null))
+    : null;
 
 export default app;
 ```
@@ -121,7 +125,7 @@ Replace `contexts/auth-context.tsx`:
 "use client"
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { 
+import {
   User as FirebaseUser,
   signOut,
   onAuthStateChanged,
@@ -165,14 +169,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setIsLoading(true);
-      
+
       if (firebaseUser) {
         setFirebaseUser(firebaseUser);
-        
+
         // Get or create user document in Firestore
         const userDocRef = doc(db, 'users', firebaseUser.uid);
         const userDoc = await getDoc(userDocRef);
-        
+
         if (userDoc.exists()) {
           const userData = userDoc.data();
           setUser({
@@ -184,10 +188,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             createdAt: userData.createdAt?.toDate(),
             lastLoginAt: new Date()
           });
-          
+
           // Update last login
-          await setDoc(userDocRef, { 
-            lastLoginAt: serverTimestamp() 
+          await setDoc(userDocRef, {
+            lastLoginAt: serverTimestamp()
           }, { merge: true });
         } else {
           // Create new user document
@@ -200,7 +204,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             createdAt: serverTimestamp(),
             lastLoginAt: serverTimestamp()
           };
-          
+
           await setDoc(userDocRef, newUser);
           setUser({
             ...newUser,
@@ -212,7 +216,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
         setFirebaseUser(null);
       }
-      
+
       setIsLoading(false);
     });
 
@@ -277,29 +281,31 @@ export function useAuth() {
 Create `lib/firebase/meetings.ts`:
 
 ```typescript
-import { 
-  collection, 
-  doc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  getDocs, 
-  query, 
-  where, 
-  orderBy, 
+import {
+  collection,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  getDocs,
+  query,
+  where,
+  orderBy,
   onSnapshot,
   serverTimestamp,
   Timestamp,
   DocumentData,
-  QueryDocumentSnapshot
-} from 'firebase/firestore';
-import { db } from './config';
-import type { Meeting } from '@/types/meeting';
+  QueryDocumentSnapshot,
+} from "firebase/firestore";
+import { db } from "./config";
+import type { Meeting } from "@/types/meeting";
 
-const COLLECTION_NAME = 'meetings';
+const COLLECTION_NAME = "meetings";
 
 // Convert Firestore document to Meeting type
-const convertDocToMeeting = (doc: QueryDocumentSnapshot<DocumentData>): Meeting => {
+const convertDocToMeeting = (
+  doc: QueryDocumentSnapshot<DocumentData>,
+): Meeting => {
   const data = doc.data();
   return {
     id: doc.id,
@@ -320,8 +326,8 @@ const convertDocToMeeting = (doc: QueryDocumentSnapshot<DocumentData>): Meeting 
 
 // Create a new meeting
 export const createMeeting = async (
-  userId: string, 
-  meetingData: Omit<Meeting, 'id' | 'createdAt' | 'updatedAt'>
+  userId: string,
+  meetingData: Omit<Meeting, "id" | "createdAt" | "updatedAt">,
 ) => {
   try {
     const docRef = await addDoc(collection(db, COLLECTION_NAME), {
@@ -332,15 +338,15 @@ export const createMeeting = async (
     });
     return docRef.id;
   } catch (error) {
-    console.error('Error creating meeting:', error);
+    console.error("Error creating meeting:", error);
     throw error;
   }
 };
 
 // Update a meeting
 export const updateMeeting = async (
-  meetingId: string, 
-  updates: Partial<Omit<Meeting, 'id' | 'createdAt'>>
+  meetingId: string,
+  updates: Partial<Omit<Meeting, "id" | "createdAt">>,
 ) => {
   try {
     const meetingRef = doc(db, COLLECTION_NAME, meetingId);
@@ -349,7 +355,7 @@ export const updateMeeting = async (
       updatedAt: serverTimestamp(),
     });
   } catch (error) {
-    console.error('Error updating meeting:', error);
+    console.error("Error updating meeting:", error);
     throw error;
   }
 };
@@ -359,7 +365,7 @@ export const deleteMeeting = async (meetingId: string) => {
   try {
     await deleteDoc(doc(db, COLLECTION_NAME, meetingId));
   } catch (error) {
-    console.error('Error deleting meeting:', error);
+    console.error("Error deleting meeting:", error);
     throw error;
   }
 };
@@ -369,82 +375,91 @@ export const getUserMeetings = async (userId: string): Promise<Meeting[]> => {
   try {
     const q = query(
       collection(db, COLLECTION_NAME),
-      where('userId', '==', userId),
-      orderBy('date', 'asc'),
-      orderBy('time', 'asc')
+      where("userId", "==", userId),
+      orderBy("date", "asc"),
+      orderBy("time", "asc"),
     );
-    
+
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(convertDocToMeeting);
   } catch (error) {
-    console.error('Error fetching meetings:', error);
+    console.error("Error fetching meetings:", error);
     throw error;
   }
 };
 
 // Subscribe to real-time meeting updates
 export const subscribeMeetings = (
-  userId: string, 
-  callback: (meetings: Meeting[]) => void
+  userId: string,
+  callback: (meetings: Meeting[]) => void,
 ) => {
   const q = query(
     collection(db, COLLECTION_NAME),
-    where('userId', '==', userId),
-    orderBy('date', 'asc'),
-    orderBy('time', 'asc')
+    where("userId", "==", userId),
+    orderBy("date", "asc"),
+    orderBy("time", "asc"),
   );
 
-  return onSnapshot(q, (snapshot) => {
-    const meetings = snapshot.docs.map(convertDocToMeeting);
-    callback(meetings);
-  }, (error) => {
-    console.error('Error in meetings subscription:', error);
-  });
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const meetings = snapshot.docs.map(convertDocToMeeting);
+      callback(meetings);
+    },
+    (error) => {
+      console.error("Error in meetings subscription:", error);
+    },
+  );
 };
 
 // Get today's meetings
 export const getTodayMeetings = async (userId: string): Promise<Meeting[]> => {
-  const today = new Date().toISOString().split('T')[0];
-  
+  const today = new Date().toISOString().split("T")[0];
+
   try {
     const q = query(
       collection(db, COLLECTION_NAME),
-      where('userId', '==', userId),
-      where('date', '==', today),
-      orderBy('time', 'asc')
+      where("userId", "==", userId),
+      where("date", "==", today),
+      orderBy("time", "asc"),
     );
-    
+
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(convertDocToMeeting);
   } catch (error) {
-    console.error('Error fetching today meetings:', error);
+    console.error("Error fetching today meetings:", error);
     throw error;
   }
 };
 
 // Get upcoming meetings
-export const getUpcomingMeetings = async (userId: string): Promise<Meeting[]> => {
-  const today = new Date().toISOString().split('T')[0];
-  
+export const getUpcomingMeetings = async (
+  userId: string,
+): Promise<Meeting[]> => {
+  const today = new Date().toISOString().split("T")[0];
+
   try {
     const q = query(
       collection(db, COLLECTION_NAME),
-      where('userId', '==', userId),
-      where('date', '>', today),
-      orderBy('date', 'asc'),
-      orderBy('time', 'asc')
+      where("userId", "==", userId),
+      where("date", ">", today),
+      orderBy("date", "asc"),
+      orderBy("time", "asc"),
     );
-    
+
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(convertDocToMeeting);
   } catch (error) {
-    console.error('Error fetching upcoming meetings:', error);
+    console.error("Error fetching upcoming meetings:", error);
     throw error;
   }
 };
 
 // Toggle meeting completion
-export const toggleMeetingCompletion = async (meetingId: string, completed: boolean) => {
+export const toggleMeetingCompletion = async (
+  meetingId: string,
+  completed: boolean,
+) => {
   try {
     const meetingRef = doc(db, COLLECTION_NAME, meetingId);
     await updateDoc(meetingRef, {
@@ -452,7 +467,7 @@ export const toggleMeetingCompletion = async (meetingId: string, completed: bool
       updatedAt: serverTimestamp(),
     });
   } catch (error) {
-    console.error('Error toggling meeting completion:', error);
+    console.error("Error toggling meeting completion:", error);
     throw error;
   }
 };
@@ -463,7 +478,7 @@ export const toggleMeetingCompletion = async (meetingId: string, completed: bool
 Replace `hooks/use-meetings.ts`:
 
 ```typescript
-"use client"
+"use client";
 
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/contexts/auth-context";
@@ -481,7 +496,7 @@ export function useMeetings() {
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [filters, setFilters] = useState<MeetingFilters>({
     search: "",
     status: "all",
@@ -498,7 +513,7 @@ export function useMeetings() {
     }
 
     setIsLoading(true);
-    
+
     const unsubscribe = subscribeMeetings(user.uid, (meetings) => {
       setMeetings(meetings);
       setIsLoading(false);
@@ -512,10 +527,12 @@ export function useMeetings() {
     return meetings.filter((meeting) => {
       const matchesSearch =
         meeting.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-        meeting.description.toLowerCase().includes(filters.search.toLowerCase()) ||
+        meeting.description
+          .toLowerCase()
+          .includes(filters.search.toLowerCase()) ||
         meeting.location.toLowerCase().includes(filters.search.toLowerCase()) ||
-        meeting.attendees.some((attendee) => 
-          attendee.toLowerCase().includes(filters.search.toLowerCase())
+        meeting.attendees.some((attendee) =>
+          attendee.toLowerCase().includes(filters.search.toLowerCase()),
         );
 
       const matchesStatus =
@@ -523,10 +540,10 @@ export function useMeetings() {
         (filters.status === "completed" && meeting.completed) ||
         (filters.status === "pending" && !meeting.completed);
 
-      const matchesPriority = 
+      const matchesPriority =
         filters.priority === "all" || meeting.priority === filters.priority;
 
-      const matchesType = 
+      const matchesType =
         filters.type === "all" || meeting.type === filters.type;
 
       return matchesSearch && matchesStatus && matchesPriority && matchesType;
@@ -552,7 +569,7 @@ export function useMeetings() {
 
   // Create a new meeting
   const createMeeting = async (
-    meetingData: Omit<Meeting, "id" | "createdAt" | "updatedAt">
+    meetingData: Omit<Meeting, "id" | "createdAt" | "updatedAt">,
   ) => {
     if (!user?.uid) {
       setError("User not authenticated");
@@ -570,8 +587,8 @@ export function useMeetings() {
 
   // Update a meeting
   const updateMeeting = async (
-    id: string, 
-    updates: Partial<Omit<Meeting, "id">>
+    id: string,
+    updates: Partial<Omit<Meeting, "id">>,
   ) => {
     try {
       setError(null);
@@ -628,6 +645,7 @@ export function useMeetings() {
 ## Real-time Updates
 
 The real-time updates are already integrated in the meetings hook using Firestore's `onSnapshot` listener. This ensures:
+
 - Instant synchronization across all devices
 - Automatic updates when data changes
 - Optimistic UI updates with error handling
@@ -646,12 +664,12 @@ service cloud.firestore {
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
-    
+
     // Meetings are private to each user
     match /meetings/{meetingId} {
-      allow read, write: if request.auth != null 
+      allow read, write: if request.auth != null
         && request.auth.uid == resource.data.userId;
-      allow create: if request.auth != null 
+      allow create: if request.auth != null
         && request.auth.uid == request.resource.data.userId;
     }
   }
@@ -661,6 +679,7 @@ service cloud.firestore {
 ### Authentication Security
 
 Add to Firebase Authentication → Settings → Authorized domains:
+
 - Your production domain
 - Your staging domain
 - localhost (for development)
@@ -696,21 +715,25 @@ FIREBASE_ADMIN_PRIVATE_KEY="your-private-key"
 ## Migration Strategy
 
 ### Phase 1: Parallel Implementation (Week 1-2)
+
 1. Set up Firebase project and configuration
 2. Implement Firebase authentication alongside existing auth
 3. Test Firebase services in development
 
 ### Phase 2: Data Migration (Week 3)
+
 1. Create migration script for existing users
 2. Implement dual-write pattern (write to both localStorage and Firebase)
 3. Verify data integrity
 
 ### Phase 3: Gradual Rollout (Week 4)
+
 1. Enable Firebase for new users first
 2. Migrate existing users in batches
 3. Monitor performance and errors
 
 ### Phase 4: Cleanup (Week 5)
+
 1. Remove localStorage implementation
 2. Update all components to use Firebase hooks
 3. Performance optimization
@@ -720,16 +743,16 @@ FIREBASE_ADMIN_PRIVATE_KEY="your-private-key"
 Create `scripts/migrate-to-firebase.ts`:
 
 ```typescript
-import { initializeApp, cert } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
-import { getAuth } from 'firebase-admin/auth';
+import { initializeApp, cert } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
+import { getAuth } from "firebase-admin/auth";
 
 // Initialize admin SDK
 const app = initializeApp({
   credential: cert({
     projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
     clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
-    privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, "\n"),
   }),
 });
 
@@ -740,17 +763,17 @@ async function migrateUsers() {
   // Note: Since we're using Gmail-only authentication,
   // existing users will need to sign in with their Google accounts.
   // This migration script will only migrate user data, not authentication.
-  
+
   const existingUsers = getExistingUsers(); // Implement based on your current storage
-  
-  console.log('Gmail-only authentication enabled.');
-  console.log('Users will need to sign in with their Google accounts.');
-  console.log('User data will be created upon first Google sign-in.');
-  
+
+  console.log("Gmail-only authentication enabled.");
+  console.log("Users will need to sign in with their Google accounts.");
+  console.log("User data will be created upon first Google sign-in.");
+
   // Optionally, you can prepare a mapping of email addresses to existing data
   // to be imported when users first sign in with Google
   const migrationMap = new Map();
-  
+
   for (const user of existingUsers) {
     migrationMap.set(user.email, {
       previousData: user,
@@ -758,20 +781,22 @@ async function migrateUsers() {
     });
     console.log(`Prepared migration data for: ${user.email}`);
   }
-  
+
   // Store this mapping for use during first Google sign-in
   // Implementation depends on your temporary storage solution
   await storeMigrationMap(migrationMap);
 }
 
 // Run migration
-migrateUsers().then(() => {
-  console.log('Migration complete');
-  process.exit(0);
-}).catch((error) => {
-  console.error('Migration failed:', error);
-  process.exit(1);
-});
+migrateUsers()
+  .then(() => {
+    console.log("Migration complete");
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error("Migration failed:", error);
+    process.exit(1);
+  });
 ```
 
 ## Testing
@@ -781,30 +806,30 @@ migrateUsers().then(() => {
 Create `__tests__/firebase/auth.test.ts`:
 
 ```typescript
-import { renderHook, act } from '@testing-library/react';
-import { useAuth } from '@/contexts/auth-context';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { renderHook, act } from "@testing-library/react";
+import { useAuth } from "@/contexts/auth-context";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
-jest.mock('firebase/auth');
+jest.mock("firebase/auth");
 
-describe('Firebase Authentication', () => {
-  test('should login with Google successfully', async () => {
+describe("Firebase Authentication", () => {
+  test("should login with Google successfully", async () => {
     const { result } = renderHook(() => useAuth());
-    
+
     await act(async () => {
       await result.current.loginWithGoogle();
     });
-    
+
     expect(result.current.isAuthenticated).toBe(true);
-    expect(result.current.user?.email).toContain('@gmail.com');
+    expect(result.current.user?.email).toContain("@gmail.com");
   });
-  
-  test('should handle Google login errors', async () => {
+
+  test("should handle Google login errors", async () => {
     const { result } = renderHook(() => useAuth());
-    
+
     // Mock a failed Google sign-in
-    jest.spyOn(console, 'error').mockImplementation();
-    
+    jest.spyOn(console, "error").mockImplementation();
+
     await act(async () => {
       try {
         await result.current.loginWithGoogle();
@@ -812,7 +837,7 @@ describe('Firebase Authentication', () => {
         expect(error).toBeDefined();
       }
     });
-    
+
     expect(result.current.isAuthenticated).toBe(false);
   });
 });
@@ -821,29 +846,29 @@ describe('Firebase Authentication', () => {
 ### Integration Tests
 
 ```typescript
-describe('Meetings Integration', () => {
-  test('should create and retrieve meeting', async () => {
+describe("Meetings Integration", () => {
+  test("should create and retrieve meeting", async () => {
     const { result } = renderHook(() => useMeetings());
-    
+
     const newMeeting = {
-      title: 'Test Meeting',
-      description: 'Test Description',
-      date: '2024-12-25',
-      time: '10:00',
+      title: "Test Meeting",
+      description: "Test Description",
+      date: "2024-12-25",
+      time: "10:00",
       duration: 60,
-      location: 'Virtual',
-      attendees: ['test@example.com'],
+      location: "Virtual",
+      attendees: ["test@example.com"],
       completed: false,
-      priority: 'medium' as const,
-      type: 'meeting' as const,
+      priority: "medium" as const,
+      type: "meeting" as const,
     };
-    
+
     await act(async () => {
       await result.current.createMeeting(newMeeting);
     });
-    
+
     expect(result.current.meetings).toContainEqual(
-      expect.objectContaining(newMeeting)
+      expect.objectContaining(newMeeting),
     );
   });
 });
@@ -902,32 +927,33 @@ enableIndexedDbPersistence(db).catch((err) => {
 Create `functions/index.ts`:
 
 ```typescript
-import * as functions from 'firebase-functions';
-import * as admin from 'firebase-admin';
+import * as functions from "firebase-functions";
+import * as admin from "firebase-admin";
 
 admin.initializeApp();
 
 // Send email reminder for meetings
 export const sendMeetingReminder = functions.pubsub
-  .schedule('every 1 hours')
+  .schedule("every 1 hours")
   .onRun(async (context) => {
     const now = new Date();
     const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
-    
-    const meetings = await admin.firestore()
-      .collection('meetings')
-      .where('date', '==', now.toISOString().split('T')[0])
-      .where('reminderSent', '==', false)
+
+    const meetings = await admin
+      .firestore()
+      .collection("meetings")
+      .where("date", "==", now.toISOString().split("T")[0])
+      .where("reminderSent", "==", false)
       .get();
-    
+
     for (const meeting of meetings.docs) {
       const data = meeting.data();
       const meetingTime = new Date(`${data.date}T${data.time}`);
-      
+
       if (meetingTime > now && meetingTime <= oneHourLater) {
         // Send reminder (implement email service)
         await sendReminderEmail(data);
-        
+
         // Mark reminder as sent
         await meeting.ref.update({ reminderSent: true });
       }
@@ -938,14 +964,14 @@ export const sendMeetingReminder = functions.pubsub
 ### 3. Analytics Integration
 
 ```typescript
-import { logEvent } from 'firebase/analytics';
-import { analytics } from '@/lib/firebase/config';
+import { logEvent } from "firebase/analytics";
+import { analytics } from "@/lib/firebase/config";
 
 // Track meeting creation
 export const trackMeetingCreated = async (meetingType: string) => {
   const analyticsInstance = await analytics;
   if (analyticsInstance) {
-    logEvent(analyticsInstance, 'meeting_created', {
+    logEvent(analyticsInstance, "meeting_created", {
       meeting_type: meetingType,
       timestamp: new Date().toISOString(),
     });
@@ -956,7 +982,7 @@ export const trackMeetingCreated = async (meetingType: string) => {
 export const trackFeatureUsage = async (feature: string) => {
   const analyticsInstance = await analytics;
   if (analyticsInstance) {
-    logEvent(analyticsInstance, 'feature_used', {
+    logEvent(analyticsInstance, "feature_used", {
       feature_name: feature,
     });
   }

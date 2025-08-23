@@ -1,41 +1,48 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
 const SidebarContext = React.createContext<{
-  isCollapsed: boolean
-  setIsCollapsed: (collapsed: boolean) => void
+  isCollapsed: boolean;
+  setIsCollapsed: (collapsed: boolean) => void;
 }>({
   isCollapsed: false,
   setIsCollapsed: () => {},
-})
+});
 
 export function useSidebar() {
-  const context = React.useContext(SidebarContext)
+  const context = React.useContext(SidebarContext);
   if (!context) {
-    throw new Error("useSidebar must be used within a SidebarProvider")
+    throw new Error("useSidebar must be used within a SidebarProvider");
   }
-  return context
+  return context;
 }
 
 interface SidebarProviderProps {
-  children: React.ReactNode
-  defaultCollapsed?: boolean
+  children: React.ReactNode;
+  defaultCollapsed?: boolean;
 }
 
-export function SidebarProvider({ children, defaultCollapsed = false }: SidebarProviderProps) {
-  const [isCollapsed, setIsCollapsed] = React.useState(defaultCollapsed)
+export function SidebarProvider({
+  children,
+  defaultCollapsed = false,
+}: SidebarProviderProps) {
+  const [isCollapsed, setIsCollapsed] = React.useState(defaultCollapsed);
 
-  return <SidebarContext.Provider value={{ isCollapsed, setIsCollapsed }}>{children}</SidebarContext.Provider>
+  return (
+    <SidebarContext.Provider value={{ isCollapsed, setIsCollapsed }}>
+      {children}
+    </SidebarContext.Provider>
+  );
 }
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 export function Sidebar({ children, className, ...props }: SidebarProps) {
-  const { isCollapsed } = useSidebar()
+  const { isCollapsed } = useSidebar();
 
   return (
     <div
@@ -48,41 +55,58 @@ export function Sidebar({ children, className, ...props }: SidebarProps) {
     >
       {children}
     </div>
-  )
+  );
 }
 
 interface SidebarHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
-export function SidebarHeader({ children, className, ...props }: SidebarHeaderProps) {
+export function SidebarHeader({
+  children,
+  className,
+  ...props
+}: SidebarHeaderProps) {
   return (
-    <div className={cn("flex h-16 items-center border-b px-4", className)} {...props}>
+    <div
+      className={cn("flex h-16 items-center border-b px-4", className)}
+      {...props}
+    >
       {children}
     </div>
-  )
+  );
 }
 
 interface SidebarContentProps extends React.HTMLAttributes<HTMLDivElement> {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
-export function SidebarContent({ children, className, ...props }: SidebarContentProps) {
+export function SidebarContent({
+  children,
+  className,
+  ...props
+}: SidebarContentProps) {
   return (
     <div className={cn("flex-1 overflow-auto py-4", className)} {...props}>
       {children}
     </div>
-  )
+  );
 }
 
 interface SidebarItemProps extends React.HTMLAttributes<HTMLDivElement> {
-  children: React.ReactNode
-  icon?: React.ReactNode
-  active?: boolean
+  children: React.ReactNode;
+  icon?: React.ReactNode;
+  active?: boolean;
 }
 
-export function SidebarItem({ children, icon, active, className, ...props }: SidebarItemProps) {
-  const { isCollapsed } = useSidebar()
+export function SidebarItem({
+  children,
+  icon,
+  active,
+  className,
+  ...props
+}: SidebarItemProps) {
+  const { isCollapsed } = useSidebar();
 
   return (
     <div
@@ -98,5 +122,5 @@ export function SidebarItem({ children, icon, active, className, ...props }: Sid
       {icon && <div className="flex-shrink-0">{icon}</div>}
       {!isCollapsed && <span className="truncate">{children}</span>}
     </div>
-  )
+  );
 }

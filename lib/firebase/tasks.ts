@@ -1,41 +1,42 @@
-import { 
-  collection, 
-  doc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  getDocs, 
+import {
+  collection,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  getDocs,
   getDoc,
-  query, 
-  where, 
+  query,
+  where,
   onSnapshot,
   serverTimestamp,
   DocumentData,
   QueryDocumentSnapshot,
   getFirestore,
   type Firestore,
-  type FieldValue
-} from 'firebase/firestore';
-import { app, isFirebaseConfigured } from '@/lib/firebase/config';
-import type { Task, TodoItem } from '@/types/task';
+  type FieldValue,
+} from "firebase/firestore";
+import { app, isFirebaseConfigured } from "@/lib/firebase/config";
+import type { Task, TodoItem } from "@/types/task";
 
-const COLLECTION_NAME = 'tasks';
-const db: Firestore | null = app && isFirebaseConfigured() ? getFirestore(app) : null;
+const COLLECTION_NAME = "tasks";
+const db: Firestore | null =
+  app && isFirebaseConfigured() ? getFirestore(app) : null;
 
 // Convert Firestore document to Task type
 const convertDocToTask = (doc: QueryDocumentSnapshot<DocumentData>): Task => {
   const data = doc.data();
-  
+
   // Handle migration from string[] to TodoItem[]
   let todoList: TodoItem[] = [];
   if (data.todoList) {
     if (Array.isArray(data.todoList) && data.todoList.length > 0) {
-      if (typeof data.todoList[0] === 'string') {
+      if (typeof data.todoList[0] === "string") {
         // Migrate from string[] to TodoItem[]
         todoList = data.todoList.map((text: string, index: number) => ({
           id: `todo-${index}`,
           text,
-          status: 'pending' as const
+          status: "pending" as const,
         }));
       } else {
         // Already TodoItem[]
@@ -43,7 +44,7 @@ const convertDocToTask = (doc: QueryDocumentSnapshot<DocumentData>): Task => {
       }
     }
   }
-  
+
   return {
     id: doc.id,
     title: data.title,
@@ -65,13 +66,13 @@ const convertDocToTask = (doc: QueryDocumentSnapshot<DocumentData>): Task => {
 
 // Create a new task
 export const createTask = async (
-  userId: string, 
-  taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'completedAt'>
+  userId: string,
+  taskData: Omit<Task, "id" | "createdAt" | "updatedAt" | "completedAt">,
 ) => {
   if (!db) {
-    throw new Error('Firebase is not properly configured');
+    throw new Error("Firebase is not properly configured");
   }
-  
+
   try {
     // Ensure required fields are present and clean undefined values
     const cleanTaskData = {
@@ -84,11 +85,11 @@ export const createTask = async (
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
-    
+
     const docRef = await addDoc(collection(db, COLLECTION_NAME), cleanTaskData);
     return docRef.id;
   } catch (error) {
-    console.error('Error creating task:', error);
+    console.error("Error creating task:", error);
     throw error;
   }
 };
@@ -96,7 +97,7 @@ export const createTask = async (
 // Helper function to extract todo items from note content
 const extractTodoList = (content: string): string[] => {
   const todoItems: string[] = [];
-  
+
   // Match various list formats:
   // - Item 1
   // * Item 2
@@ -106,13 +107,13 @@ const extractTodoList = (content: string): string[] => {
   // [ ] Item 6
   // - [ ] Item 7
   const listPatterns = [
-    /^[\s]*[-*•]\s+(.+)$/gm,           // - Item, * Item, • Item
-    /^[\s]*\d+\.\s+(.+)$/gm,          // 1. Item
-    /^[\s]*☐\s+(.+)$/gm,              // ☐ Item
-    /^[\s]*\[\s*\]\s+(.+)$/gm,        // [ ] Item
-    /^[\s]*-\s*\[\s*\]\s+(.+)$/gm     // - [ ] Item
+    /^[\s]*[-*•]\s+(.+)$/gm, // - Item, * Item, • Item
+    /^[\s]*\d+\.\s+(.+)$/gm, // 1. Item
+    /^[\s]*☐\s+(.+)$/gm, // ☐ Item
+    /^[\s]*\[\s*\]\s+(.+)$/gm, // [ ] Item
+    /^[\s]*-\s*\[\s*\]\s+(.+)$/gm, // - [ ] Item
   ];
-  
+
   for (const pattern of listPatterns) {
     let match;
     while ((match = pattern.exec(content)) !== null) {
@@ -123,7 +124,7 @@ const extractTodoList = (content: string): string[] => {
     }
     pattern.lastIndex = 0; // Reset regex state
   }
-  
+
   return todoItems;
 };
 
@@ -133,24 +134,24 @@ export const createTaskFromMeetingNote = async (
   meetingId: string,
   meetingTitle: string,
   noteContent: string,
-  priority: 'low' | 'medium' | 'high' = 'medium',
+  priority: "low" | "medium" | "high" = "medium",
   assignee?: string,
-  dueDate?: string
+  dueDate?: string,
 ) => {
   if (!db) {
-    throw new Error('Firebase is not properly configured');
+    throw new Error("Firebase is not properly configured");
   }
-  
+
   try {
     // Extract todo items from the note content
     const todoList = extractTodoList(noteContent);
-    
+
     const taskData = {
       title: `Follow-up: ${meetingTitle}`,
       description: noteContent,
-      date: dueDate || new Date().toISOString().split('T')[0], // Use provided due date or today's date
-      status: 'pending' as const,
-      type: 'follow_up' as const,
+      date: dueDate || new Date().toISOString().split("T")[0], // Use provided due date or today's date
+      status: "pending" as const,
+      type: "follow_up" as const,
       meetingId,
       priority,
       assignee: assignee || null,
@@ -161,39 +162,40 @@ export const createTaskFromMeetingNote = async (
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
-    
+
     const docRef = await addDoc(collection(db, COLLECTION_NAME), taskData);
     return docRef.id;
   } catch (error) {
-    console.error('Error creating task from meeting note:', error);
+    console.error("Error creating task from meeting note:", error);
     throw error;
   }
 };
 
 // Update a task
 export const updateTask = async (
-  taskId: string, 
-  updates: Partial<Omit<Task, 'id' | 'createdAt'>>
+  taskId: string,
+  updates: Partial<Omit<Task, "id" | "createdAt">>,
 ) => {
   if (!db) {
-    throw new Error('Firebase is not properly configured');
+    throw new Error("Firebase is not properly configured");
   }
-  
+
   try {
     const taskRef = doc(db, COLLECTION_NAME, taskId);
     const updateData = {
       ...updates,
       updatedAt: serverTimestamp(),
     };
-    
+
     // Add completedAt timestamp if status is being changed to completed
-    if (updates.status === 'completed') {
-      (updateData as DocumentData & { completedAt?: FieldValue }).completedAt = serverTimestamp();
+    if (updates.status === "completed") {
+      (updateData as DocumentData & { completedAt?: FieldValue }).completedAt =
+        serverTimestamp();
     }
-    
+
     await updateDoc(taskRef, updateData);
   } catch (error) {
-    console.error('Error updating task:', error);
+    console.error("Error updating task:", error);
     throw error;
   }
 };
@@ -201,13 +203,13 @@ export const updateTask = async (
 // Delete a task
 export const deleteTask = async (taskId: string) => {
   if (!db) {
-    throw new Error('Firebase is not properly configured');
+    throw new Error("Firebase is not properly configured");
   }
-  
+
   try {
     await deleteDoc(doc(db, COLLECTION_NAME, taskId));
   } catch (error) {
-    console.error('Error deleting task:', error);
+    console.error("Error deleting task:", error);
     throw error;
   }
 };
@@ -215,156 +217,174 @@ export const deleteTask = async (taskId: string) => {
 // Get all tasks for a user
 export const getUserTasks = async (userId: string): Promise<Task[]> => {
   if (!db) {
-    throw new Error('Firebase is not properly configured');
+    throw new Error("Firebase is not properly configured");
   }
-  
+
   try {
     const q = query(
       collection(db, COLLECTION_NAME),
-      where('userId', '==', userId)
+      where("userId", "==", userId),
     );
-    
+
     const querySnapshot = await getDocs(q);
     const tasks = querySnapshot.docs.map(convertDocToTask);
-    
+
     // Sort by date and priority
     return tasks.sort((a, b) => {
       const dateComparison = a.date.localeCompare(b.date);
       if (dateComparison !== 0) return dateComparison;
-      
+
       const priorityOrder = { high: 0, medium: 1, low: 2 };
       return priorityOrder[a.priority] - priorityOrder[b.priority];
     });
   } catch (error) {
-    console.error('Error fetching tasks:', error);
+    console.error("Error fetching tasks:", error);
     throw error;
   }
 };
 
 // Subscribe to real-time task updates
 export const subscribeTasks = (
-  userId: string, 
-  callback: (tasks: Task[]) => void
+  userId: string,
+  callback: (tasks: Task[]) => void,
 ) => {
   if (!db) {
-    console.warn('Firebase not configured, returning empty tasks');
+    console.warn("Firebase not configured, returning empty tasks");
     callback([]);
     return () => {}; // Return empty unsubscribe function
   }
-  
+
   const q = query(
     collection(db, COLLECTION_NAME),
-    where('userId', '==', userId)
+    where("userId", "==", userId),
   );
 
-  return onSnapshot(q, (snapshot) => {
-    const tasks = snapshot.docs.map(convertDocToTask);
-    
-    // Sort by date and priority
-    const sortedTasks = tasks.sort((a, b) => {
-      const dateComparison = a.date.localeCompare(b.date);
-      if (dateComparison !== 0) return dateComparison;
-      
-      const priorityOrder = { high: 0, medium: 1, low: 2 };
-      return priorityOrder[a.priority] - priorityOrder[b.priority];
-    });
-    
-    callback(sortedTasks);
-  }, (error) => {
-    console.error('Error in tasks subscription:', error);
-  });
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const tasks = snapshot.docs.map(convertDocToTask);
+
+      // Sort by date and priority
+      const sortedTasks = tasks.sort((a, b) => {
+        const dateComparison = a.date.localeCompare(b.date);
+        if (dateComparison !== 0) return dateComparison;
+
+        const priorityOrder = { high: 0, medium: 1, low: 2 };
+        return priorityOrder[a.priority] - priorityOrder[b.priority];
+      });
+
+      callback(sortedTasks);
+    },
+    (error) => {
+      console.error("Error in tasks subscription:", error);
+    },
+  );
 };
 
 // Get tasks for a specific meeting
-export const getMeetingTasks = async (userId: string, meetingId: string): Promise<Task[]> => {
+export const getMeetingTasks = async (
+  userId: string,
+  meetingId: string,
+): Promise<Task[]> => {
   if (!db) {
-    throw new Error('Firebase is not properly configured');
+    throw new Error("Firebase is not properly configured");
   }
-  
+
   try {
     const q = query(
       collection(db, COLLECTION_NAME),
-      where('userId', '==', userId),
-      where('meetingId', '==', meetingId)
+      where("userId", "==", userId),
+      where("meetingId", "==", meetingId),
     );
-    
+
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(convertDocToTask);
   } catch (error) {
-    console.error('Error fetching meeting tasks:', error);
+    console.error("Error fetching meeting tasks:", error);
     throw error;
   }
 };
 
 // Toggle task completion
-export const toggleTaskCompletion = async (taskId: string, status: 'completed' | 'pending') => {
+export const toggleTaskCompletion = async (
+  taskId: string,
+  status: "completed" | "pending",
+) => {
   if (!db) {
-    throw new Error('Firebase is not properly configured');
+    throw new Error("Firebase is not properly configured");
   }
-  
+
   try {
     const taskRef = doc(db, COLLECTION_NAME, taskId);
     const updateData: DocumentData & { completedAt?: FieldValue } = {
       status,
       updatedAt: serverTimestamp(),
-      ...(status === 'completed' ? { completedAt: serverTimestamp() } : {}),
+      ...(status === "completed" ? { completedAt: serverTimestamp() } : {}),
     };
-    
+
     await updateDoc(taskRef, updateData);
   } catch (error) {
-    console.error('Error toggling task completion:', error);
+    console.error("Error toggling task completion:", error);
     throw error;
   }
 };
 
 // Update todo item status
-export const updateTodoStatus = async (taskId: string, todoId: string, status: 'pending' | 'in_progress' | 'completed') => {
+export const updateTodoStatus = async (
+  taskId: string,
+  todoId: string,
+  status: "pending" | "in_progress" | "completed",
+) => {
   if (!db) {
-    throw new Error('Firebase is not properly configured');
+    throw new Error("Firebase is not properly configured");
   }
 
   try {
     const taskRef = doc(db, COLLECTION_NAME, taskId);
     const taskDoc = await getDoc(taskRef);
-    
+
     if (!taskDoc.exists()) {
-      throw new Error('Task not found');
+      throw new Error("Task not found");
     }
 
     const task = convertDocToTask(taskDoc);
-    const updatedTodoList = task.todoList?.map(todo => 
-      todo.id === todoId ? { ...todo, status } : todo
-    ) || [];
+    const updatedTodoList =
+      task.todoList?.map((todo) =>
+        todo.id === todoId ? { ...todo, status } : todo,
+      ) || [];
 
     await updateDoc(taskRef, {
       todoList: updatedTodoList,
       updatedAt: serverTimestamp(),
     });
   } catch (error) {
-    console.error('Error updating todo status:', error);
+    console.error("Error updating todo status:", error);
     throw error;
   }
 };
 
 // Add a new todo item to a task
-export const addTodoItem = async (taskId: string, todoText: string): Promise<TodoItem> => {
+export const addTodoItem = async (
+  taskId: string,
+  todoText: string,
+): Promise<TodoItem> => {
   if (!db) {
-    throw new Error('Firebase is not properly configured');
+    throw new Error("Firebase is not properly configured");
   }
 
   try {
     const taskRef = doc(db, COLLECTION_NAME, taskId);
     const taskDoc = await getDoc(taskRef);
-    
+
     if (!taskDoc.exists()) {
-      throw new Error('Task not found');
+      throw new Error("Task not found");
     }
 
     const task = convertDocToTask(taskDoc);
     const newTodo: TodoItem = {
       id: `todo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       text: todoText,
-      status: 'pending'
+      status: "pending",
     };
 
     const updatedTodoList = [...(task.todoList || []), newTodo];
@@ -376,7 +396,7 @@ export const addTodoItem = async (taskId: string, todoText: string): Promise<Tod
 
     return newTodo;
   } catch (error) {
-    console.error('Error adding todo item:', error);
+    console.error("Error adding todo item:", error);
     throw error;
   }
 };
@@ -384,26 +404,27 @@ export const addTodoItem = async (taskId: string, todoText: string): Promise<Tod
 // Delete a todo item from a task
 export const deleteTodoItem = async (taskId: string, todoId: string) => {
   if (!db) {
-    throw new Error('Firebase is not properly configured');
+    throw new Error("Firebase is not properly configured");
   }
 
   try {
     const taskRef = doc(db, COLLECTION_NAME, taskId);
     const taskDoc = await getDoc(taskRef);
-    
+
     if (!taskDoc.exists()) {
-      throw new Error('Task not found');
+      throw new Error("Task not found");
     }
 
     const task = convertDocToTask(taskDoc);
-    const updatedTodoList = task.todoList?.filter(todo => todo.id !== todoId) || [];
+    const updatedTodoList =
+      task.todoList?.filter((todo) => todo.id !== todoId) || [];
 
     await updateDoc(taskRef, {
       todoList: updatedTodoList,
       updatedAt: serverTimestamp(),
     });
   } catch (error) {
-    console.error('Error deleting todo item:', error);
+    console.error("Error deleting todo item:", error);
     throw error;
   }
 };

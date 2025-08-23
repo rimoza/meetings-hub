@@ -1,33 +1,40 @@
-"use client"
+"use client";
 
-import { Search, Filter, X } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { Search, Filter, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
-import type { TaskFilters } from "@/types/task"
+} from "@/components/ui/popover";
+import type { TaskFilters } from "@/types/task";
 
 interface TaskFiltersProps {
-  filters: TaskFilters
-  onFiltersChange: (filters: TaskFilters) => void
-  assignees?: string[]
+  filters: TaskFilters;
+  onFiltersChange: (filters: TaskFilters) => void;
+  assignees?: string[];
 }
 
-export function TaskFilters({ filters, onFiltersChange, assignees = [] }: Readonly<TaskFiltersProps>) {
-  const updateFilter = (key: keyof TaskFilters, value: TaskFilters[keyof TaskFilters]) => {
-    onFiltersChange({ ...filters, [key]: value })
-  }
+export function TaskFilters({
+  filters,
+  onFiltersChange,
+  assignees = [],
+}: Readonly<TaskFiltersProps>) {
+  const updateFilter = (
+    key: keyof TaskFilters,
+    value: TaskFilters[keyof TaskFilters],
+  ) => {
+    onFiltersChange({ ...filters, [key]: value });
+  };
 
   const clearFilters = () => {
     onFiltersChange({
@@ -36,25 +43,25 @@ export function TaskFilters({ filters, onFiltersChange, assignees = [] }: Readon
       type: "all",
       priority: "all",
       assignee: undefined,
-    })
-  }
+    });
+  };
 
-  const hasActiveFilters = 
+  const hasActiveFilters =
     filters.search ||
     filters.status !== "all" ||
     filters.type !== "all" ||
     filters.priority !== "all" ||
-    filters.assignee
+    filters.assignee;
 
   const getActiveFiltersCount = () => {
-    let count = 0
-    if (filters.search) count++
-    if (filters.status !== "all") count++
-    if (filters.type !== "all") count++
-    if (filters.priority !== "all") count++
-    if (filters.assignee) count++
-    return count
-  }
+    let count = 0;
+    if (filters.search) count++;
+    if (filters.status !== "all") count++;
+    if (filters.type !== "all") count++;
+    if (filters.priority !== "all") count++;
+    if (filters.assignee) count++;
+    return count;
+  };
 
   return (
     <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
@@ -72,7 +79,10 @@ export function TaskFilters({ filters, onFiltersChange, assignees = [] }: Readon
       {/* Filter Controls */}
       <div className="flex flex-wrap gap-2 items-center">
         {/* Status Filter */}
-        <Select value={filters.status} onValueChange={(value) => updateFilter("status", value)}>
+        <Select
+          value={filters.status}
+          onValueChange={(value) => updateFilter("status", value)}
+        >
           <SelectTrigger className="w-[130px]">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
@@ -86,7 +96,10 @@ export function TaskFilters({ filters, onFiltersChange, assignees = [] }: Readon
         </Select>
 
         {/* Type Filter */}
-        <Select value={filters.type} onValueChange={(value) => updateFilter("type", value)}>
+        <Select
+          value={filters.type}
+          onValueChange={(value) => updateFilter("type", value)}
+        >
           <SelectTrigger className="w-[120px]">
             <SelectValue placeholder="Type" />
           </SelectTrigger>
@@ -98,7 +111,10 @@ export function TaskFilters({ filters, onFiltersChange, assignees = [] }: Readon
         </Select>
 
         {/* Priority Filter */}
-        <Select value={filters.priority} onValueChange={(value) => updateFilter("priority", value)}>
+        <Select
+          value={filters.priority}
+          onValueChange={(value) => updateFilter("priority", value)}
+        >
           <SelectTrigger className="w-[120px]">
             <SelectValue placeholder="Priority" />
           </SelectTrigger>
@@ -112,9 +128,11 @@ export function TaskFilters({ filters, onFiltersChange, assignees = [] }: Readon
 
         {/* Assignee Filter (if assignees available) */}
         {assignees.length > 0 && (
-          <Select 
-            value={filters.assignee || "all"} 
-            onValueChange={(value) => updateFilter("assignee", value === "all" ? undefined : value)}
+          <Select
+            value={filters.assignee || "all"}
+            onValueChange={(value) =>
+              updateFilter("assignee", value === "all" ? undefined : value)
+            }
           >
             <SelectTrigger className="w-[130px]">
               <SelectValue placeholder="Assignee" />
@@ -137,8 +155,8 @@ export function TaskFilters({ filters, onFiltersChange, assignees = [] }: Readon
               <Filter className="h-4 w-4 mr-2" />
               Filters
               {hasActiveFilters && (
-                <Badge 
-                  variant="secondary" 
+                <Badge
+                  variant="secondary"
                   className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs"
                 >
                   {getActiveFiltersCount()}
@@ -164,8 +182,13 @@ export function TaskFilters({ filters, onFiltersChange, assignees = [] }: Readon
 
               <div className="grid grid-cols-1 gap-3">
                 <div>
-                  <label className="text-sm font-medium mb-1 block">Status</label>
-                  <Select value={filters.status} onValueChange={(value) => updateFilter("status", value)}>
+                  <label className="text-sm font-medium mb-1 block">
+                    Status
+                  </label>
+                  <Select
+                    value={filters.status}
+                    onValueChange={(value) => updateFilter("status", value)}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -181,7 +204,10 @@ export function TaskFilters({ filters, onFiltersChange, assignees = [] }: Readon
 
                 <div>
                   <label className="text-sm font-medium mb-1 block">Type</label>
-                  <Select value={filters.type} onValueChange={(value) => updateFilter("type", value)}>
+                  <Select
+                    value={filters.type}
+                    onValueChange={(value) => updateFilter("type", value)}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -194,8 +220,13 @@ export function TaskFilters({ filters, onFiltersChange, assignees = [] }: Readon
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium mb-1 block">Priority</label>
-                  <Select value={filters.priority} onValueChange={(value) => updateFilter("priority", value)}>
+                  <label className="text-sm font-medium mb-1 block">
+                    Priority
+                  </label>
+                  <Select
+                    value={filters.priority}
+                    onValueChange={(value) => updateFilter("priority", value)}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -210,10 +241,17 @@ export function TaskFilters({ filters, onFiltersChange, assignees = [] }: Readon
 
                 {assignees.length > 0 && (
                   <div>
-                    <label className="text-sm font-medium mb-1 block">Assignee</label>
-                    <Select 
-                      value={filters.assignee || "all"} 
-                      onValueChange={(value) => updateFilter("assignee", value === "all" ? undefined : value)}
+                    <label className="text-sm font-medium mb-1 block">
+                      Assignee
+                    </label>
+                    <Select
+                      value={filters.assignee || "all"}
+                      onValueChange={(value) =>
+                        updateFilter(
+                          "assignee",
+                          value === "all" ? undefined : value,
+                        )
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -246,7 +284,7 @@ export function TaskFilters({ filters, onFiltersChange, assignees = [] }: Readon
             Clear
           </Button>
         )}
+      </div>
     </div>
-  </div>
-  )
+  );
 }

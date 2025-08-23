@@ -1,30 +1,36 @@
-"use client"
+"use client";
 
-import { Bell, BellOff, Settings } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Switch } from "@/components/ui/switch"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useReminders } from "@/hooks/use-reminders"
+import { Bell, BellOff, Settings } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useReminders } from "@/hooks/use-reminders";
 
 export function NotificationSettings() {
-  const { 
+  const {
     isPermissionGranted,
     isRemindersEnabled,
-    isRequestingPermission, 
+    isRequestingPermission,
     requestPermission,
-    toggleReminders
-  } = useReminders()
+    toggleReminders,
+  } = useReminders();
 
   const handleToggleReminders = async (enabled: boolean) => {
     if (enabled && !isPermissionGranted) {
-      const granted = await requestPermission()
+      const granted = await requestPermission();
       if (granted) {
-        toggleReminders(true)
+        toggleReminders(true);
       }
     } else {
-      toggleReminders(enabled)
+      toggleReminders(enabled);
     }
-  }
+  };
 
   return (
     <Card className="w-full max-w-md">
@@ -41,7 +47,7 @@ export function NotificationSettings() {
           </div>
         </div>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between p-3 bg-secondary/30 rounded-lg">
           <div className="flex items-center space-x-3">
@@ -54,7 +60,8 @@ export function NotificationSettings() {
                   <div>
                     <p className="text-sm font-medium">Reminders Active</p>
                     <p className="text-xs text-muted-foreground">
-                      You&apos;ll receive reminders at 1h, 30min, and 5min before meetings
+                      You&apos;ll receive reminders at 1h, 30min, and 5min
+                      before meetings
                     </p>
                   </div>
                 </>
@@ -64,9 +71,12 @@ export function NotificationSettings() {
                     <Bell className="h-4 w-4 text-yellow-600" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-yellow-700">Permission Needed</p>
+                    <p className="text-sm font-medium text-yellow-700">
+                      Permission Needed
+                    </p>
                     <p className="text-xs text-muted-foreground">
-                      Click &quot;Grant Permission&quot; below to enable reminders
+                      Click &quot;Grant Permission&quot; below to enable
+                      reminders
                     </p>
                   </div>
                 </>
@@ -85,15 +95,15 @@ export function NotificationSettings() {
               </>
             )}
           </div>
-          
-          <Switch 
+
+          <Switch
             checked={isRemindersEnabled}
             onCheckedChange={handleToggleReminders}
             disabled={isRequestingPermission}
           />
         </div>
 
-        {(!isPermissionGranted && isRemindersEnabled) && (
+        {!isPermissionGranted && isRemindersEnabled && (
           <div className="p-3 bg-secondary/50 rounded-lg border">
             <p className="text-sm text-muted-foreground mb-3">
               Browser permission is required to receive notifications
@@ -145,5 +155,5 @@ export function NotificationSettings() {
         )}
       </CardContent>
     </Card>
-  )
+  );
 }

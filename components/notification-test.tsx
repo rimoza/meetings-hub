@@ -1,32 +1,33 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Bell, TestTube } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { getReminderService } from "@/lib/notifications/reminder-service"
-import type { Meeting } from "@/types/meeting"
+import { useState } from "react";
+import { Bell, TestTube } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getReminderService } from "@/lib/notifications/reminder-service";
+import type { Meeting } from "@/types/meeting";
 
 export function NotificationTest() {
-  const [isTestingNotification, setIsTestingNotification] = useState(false)
+  const [isTestingNotification, setIsTestingNotification] = useState(false);
 
   const testNotification = async () => {
-    setIsTestingNotification(true)
-    
+    setIsTestingNotification(true);
+
     try {
-      const reminderService = getReminderService()
-      
+      const reminderService = getReminderService();
+
       if (!reminderService) {
-        alert("Reminder service is not available")
-        return
+        alert("Reminder service is not available");
+        return;
       }
 
       // Request permission first if needed
-      const hasPermission = await reminderService.requestNotificationPermission()
-      
+      const hasPermission =
+        await reminderService.requestNotificationPermission();
+
       if (!hasPermission) {
-        alert("Notification permission is required to test reminders")
-        return
+        alert("Notification permission is required to test reminders");
+        return;
       }
 
       // Create a mock meeting for testing (10 seconds from now)
@@ -34,7 +35,7 @@ export function NotificationTest() {
         id: "test-meeting",
         title: "Test Meeting Reminder",
         description: "This is a test notification",
-        date: new Date().toISOString().split('T')[0],
+        date: new Date().toISOString().split("T")[0],
         time: new Date(Date.now() + 10000).toTimeString().slice(0, 5), // 10 seconds from now
         duration: 30,
         location: "Test Location",
@@ -43,21 +44,22 @@ export function NotificationTest() {
         priority: "medium",
         type: "meeting",
         createdAt: new Date(),
-        updatedAt: new Date()
-      }
+        updatedAt: new Date(),
+      };
 
       // Schedule a test reminder for 5 seconds from now (5 seconds before the "meeting")
-      reminderService.scheduleReminder(testMeeting, 0.08) // ~5 seconds in minutes
+      reminderService.scheduleReminder(testMeeting, 0.08); // ~5 seconds in minutes
 
-      alert("Test notification scheduled! You should see it in about 5 seconds.")
-      
+      alert(
+        "Test notification scheduled! You should see it in about 5 seconds.",
+      );
     } catch (error) {
-      console.error("Error testing notification:", error)
-      alert("Error testing notification. Please try again.")
+      console.error("Error testing notification:", error);
+      alert("Error testing notification. Please try again.");
     } finally {
-      setIsTestingNotification(false)
+      setIsTestingNotification(false);
     }
-  }
+  };
 
   return (
     <Card className="w-full max-w-md">
@@ -74,7 +76,7 @@ export function NotificationTest() {
           </div>
         </div>
       </CardHeader>
-      
+
       <CardContent>
         <Button
           onClick={testNotification}
@@ -94,11 +96,11 @@ export function NotificationTest() {
             </>
           )}
         </Button>
-        
+
         <p className="text-xs text-muted-foreground mt-3 text-center">
           This will send a test reminder notification in ~5 seconds
         </p>
       </CardContent>
     </Card>
-  )
+  );
 }

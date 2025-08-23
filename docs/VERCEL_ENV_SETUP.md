@@ -13,29 +13,37 @@ To deploy your Firebase-enabled app to Vercel, you need to add these environment
 Add these environment variables (one by one):
 
 ### Variable Name: `NEXT_PUBLIC_FIREBASE_API_KEY`
+
 **Value:** `AIzaSyCDY5sEZnR6DWpiI0GwM83zE7Cqa-rFk_k`
 
-### Variable Name: `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`  
+### Variable Name: `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+
 **Value:** `meetings-hub-prod.firebaseapp.com`
 
 ### Variable Name: `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+
 **Value:** `meetings-hub-prod`
 
 ### Variable Name: `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+
 **Value:** `meetings-hub-prod.appspot.com`
 
 ### Variable Name: `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+
 **Value:** `970698372590`
 
 ### Variable Name: `NEXT_PUBLIC_FIREBASE_APP_ID`
+
 **Value:** `1:970698372590:web:760495d6f374ef4567caff`
 
 ### Variable Name: `NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID`
+
 **Value:** `G-RNTWHBJT7P`
 
 ## Step 3: Deploy Changes
 
 After adding all environment variables:
+
 1. Go to your project's **Deployments** tab
 2. Click **"Redeploy"** on the latest deployment
 3. Or push a new commit to trigger auto-deployment

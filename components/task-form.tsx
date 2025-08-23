@@ -1,38 +1,44 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { X, Plus, Trash2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+import { useState, useEffect } from "react";
+import { X, Plus, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import type { Task, TodoItem } from "@/types/task"
-import { useMeetings } from "@/hooks/use-meetings"
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import type { Task, TodoItem } from "@/types/task";
+import { useMeetings } from "@/hooks/use-meetings";
 
 interface TaskFormProps {
-  task?: Task
-  isOpen: boolean
-  onClose: () => void
-  onSubmit: (task: Omit<Task, "id">) => void
-  meetingId?: string
+  task?: Task;
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (task: Omit<Task, "id">) => void;
+  meetingId?: string;
 }
 
-export function TaskForm({ task, isOpen, onClose, onSubmit, meetingId }: TaskFormProps) {
-  const { meetings } = useMeetings()
+export function TaskForm({
+  task,
+  isOpen,
+  onClose,
+  onSubmit,
+  meetingId,
+}: TaskFormProps) {
+  const { meetings } = useMeetings();
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -45,11 +51,11 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, meetingId }: TaskFor
     todoList: [] as TodoItem[],
     labels: [] as string[],
     tags: [] as string[],
-  })
+  });
 
-  const [newTodo, setNewTodo] = useState("")
-  const [newLabel, setNewLabel] = useState("")
-  const [newTag, setNewTag] = useState("")
+  const [newTodo, setNewTodo] = useState("");
+  const [newLabel, setNewLabel] = useState("");
+  const [newTag, setNewTag] = useState("");
 
   useEffect(() => {
     if (task) {
@@ -65,9 +71,9 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, meetingId }: TaskFor
         todoList: task.todoList || [],
         labels: task.labels || [],
         tags: task.tags || [],
-      })
+      });
     } else if (meetingId) {
-      setFormData(prev => ({ ...prev, meetingId, type: "follow_up" }))
+      setFormData((prev) => ({ ...prev, meetingId, type: "follow_up" }));
     } else {
       setFormData({
         title: "",
@@ -81,76 +87,76 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, meetingId }: TaskFor
         todoList: [],
         labels: [],
         tags: [],
-      })
+      });
     }
-  }, [task, meetingId])
+  }, [task, meetingId]);
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     onSubmit({
       ...formData,
       meetingId: formData.meetingId === "none" ? "" : formData.meetingId,
       createdAt: task?.createdAt || new Date(),
       updatedAt: new Date(),
-    })
-    onClose()
-  }
+    });
+    onClose();
+  };
 
   const handleAddTodo = () => {
     if (newTodo.trim()) {
       const newTodoItem: TodoItem = {
         id: `todo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         text: newTodo.trim(),
-        status: 'pending'
-      }
-      setFormData(prev => ({
+        status: "pending",
+      };
+      setFormData((prev) => ({
         ...prev,
-        todoList: [...prev.todoList, newTodoItem]
-      }))
-      setNewTodo("")
+        todoList: [...prev.todoList, newTodoItem],
+      }));
+      setNewTodo("");
     }
-  }
+  };
 
   const handleRemoveTodo = (index: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      todoList: prev.todoList.filter((_, i) => i !== index)
-    }))
-  }
+      todoList: prev.todoList.filter((_, i) => i !== index),
+    }));
+  };
 
   const handleAddLabel = () => {
     if (newLabel.trim() && !formData.labels.includes(newLabel.trim())) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        labels: [...prev.labels, newLabel.trim()]
-      }))
-      setNewLabel("")
+        labels: [...prev.labels, newLabel.trim()],
+      }));
+      setNewLabel("");
     }
-  }
+  };
 
   const handleRemoveLabel = (label: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      labels: prev.labels.filter(l => l !== label)
-    }))
-  }
+      labels: prev.labels.filter((l) => l !== label),
+    }));
+  };
 
   const handleAddTag = () => {
     if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        tags: [...prev.tags, newTag.trim()]
-      }))
-      setNewTag("")
+        tags: [...prev.tags, newTag.trim()],
+      }));
+      setNewTag("");
     }
-  }
+  };
 
   const handleRemoveTag = (tag: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      tags: prev.tags.filter(t => t !== tag)
-    }))
-  }
+      tags: prev.tags.filter((t) => t !== tag),
+    }));
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -165,7 +171,9 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, meetingId }: TaskFor
               <Input
                 id="title"
                 value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
                 required
                 placeholder="Enter task title"
               />
@@ -175,7 +183,9 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, meetingId }: TaskFor
               <Label htmlFor="type">Type</Label>
               <Select
                 value={formData.type}
-                onValueChange={(value: Task["type"]) => setFormData({ ...formData, type: value })}
+                onValueChange={(value: Task["type"]) =>
+                  setFormData({ ...formData, type: value })
+                }
               >
                 <SelectTrigger id="type">
                   <SelectValue />
@@ -193,7 +203,9 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, meetingId }: TaskFor
             <Textarea
               id="description"
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               rows={3}
               placeholder="Enter task description"
             />
@@ -206,7 +218,9 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, meetingId }: TaskFor
                 id="date"
                 type="date"
                 value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, date: e.target.value })
+                }
                 required
               />
             </div>
@@ -215,7 +229,9 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, meetingId }: TaskFor
               <Label htmlFor="status">Status</Label>
               <Select
                 value={formData.status}
-                onValueChange={(value: Task["status"]) => setFormData({ ...formData, status: value })}
+                onValueChange={(value: Task["status"]) =>
+                  setFormData({ ...formData, status: value })
+                }
               >
                 <SelectTrigger id="status">
                   <SelectValue />
@@ -233,7 +249,9 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, meetingId }: TaskFor
               <Label htmlFor="priority">Priority</Label>
               <Select
                 value={formData.priority}
-                onValueChange={(value: Task["priority"]) => setFormData({ ...formData, priority: value })}
+                onValueChange={(value: Task["priority"]) =>
+                  setFormData({ ...formData, priority: value })
+                }
               >
                 <SelectTrigger id="priority">
                   <SelectValue />
@@ -253,7 +271,9 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, meetingId }: TaskFor
               <Input
                 id="assignee"
                 value={formData.assignee}
-                onChange={(e) => setFormData({ ...formData, assignee: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, assignee: e.target.value })
+                }
                 placeholder="Enter assignee name"
               />
             </div>
@@ -263,7 +283,9 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, meetingId }: TaskFor
                 <Label htmlFor="meetingId">Related Meeting</Label>
                 <Select
                   value={formData.meetingId}
-                  onValueChange={(value) => setFormData({ ...formData, meetingId: value })}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, meetingId: value })
+                  }
                 >
                   <SelectTrigger id="meetingId">
                     <SelectValue placeholder="Select meeting" />
@@ -288,7 +310,9 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, meetingId }: TaskFor
                 value={newTodo}
                 onChange={(e) => setNewTodo(e.target.value)}
                 placeholder="Add a to-do item"
-                onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTodo())}
+                onKeyPress={(e) =>
+                  e.key === "Enter" && (e.preventDefault(), handleAddTodo())
+                }
               />
               <Button type="button" onClick={handleAddTodo} size="icon">
                 <Plus className="h-4 w-4" />
@@ -297,15 +321,20 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, meetingId }: TaskFor
             {formData.todoList.length > 0 && (
               <div className="space-y-1 mt-2">
                 {formData.todoList.map((todo, index) => (
-                  <div key={todo.id} className="flex items-center justify-between p-2 bg-muted rounded">
+                  <div
+                    key={todo.id}
+                    className="flex items-center justify-between p-2 bg-muted rounded"
+                  >
                     <div className="flex items-center gap-2">
-                      <span className={`text-xs px-2 py-1 rounded-full ${
-                        todo.status === 'completed' 
-                          ? 'bg-green-100 text-green-800' 
-                          : todo.status === 'in_progress'
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full ${
+                          todo.status === "completed"
+                            ? "bg-green-100 text-green-800"
+                            : todo.status === "in_progress"
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
                         {todo.status}
                       </span>
                       <span className="text-sm">{todo.text}</span>
@@ -333,7 +362,9 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, meetingId }: TaskFor
                   value={newLabel}
                   onChange={(e) => setNewLabel(e.target.value)}
                   placeholder="Add a label"
-                  onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddLabel())}
+                  onKeyPress={(e) =>
+                    e.key === "Enter" && (e.preventDefault(), handleAddLabel())
+                  }
                 />
                 <Button type="button" onClick={handleAddLabel} size="icon">
                   <Plus className="h-4 w-4" />
@@ -342,7 +373,12 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, meetingId }: TaskFor
               {formData.labels.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-2">
                   {formData.labels.map((label) => (
-                    <Badge key={label} variant="secondary" className="cursor-pointer" onClick={() => handleRemoveLabel(label)}>
+                    <Badge
+                      key={label}
+                      variant="secondary"
+                      className="cursor-pointer"
+                      onClick={() => handleRemoveLabel(label)}
+                    >
                       {label} <X className="h-3 w-3 ml-1" />
                     </Badge>
                   ))}
@@ -357,7 +393,9 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, meetingId }: TaskFor
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
                   placeholder="Add a tag"
-                  onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTag())}
+                  onKeyPress={(e) =>
+                    e.key === "Enter" && (e.preventDefault(), handleAddTag())
+                  }
                 />
                 <Button type="button" onClick={handleAddTag} size="icon">
                   <Plus className="h-4 w-4" />
@@ -366,7 +404,12 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, meetingId }: TaskFor
               {formData.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-2">
                   {formData.tags.map((tag) => (
-                    <Badge key={tag} variant="outline" className="cursor-pointer" onClick={() => handleRemoveTag(tag)}>
+                    <Badge
+                      key={tag}
+                      variant="outline"
+                      className="cursor-pointer"
+                      onClick={() => handleRemoveTag(tag)}
+                    >
                       #{tag} <X className="h-3 w-3 ml-1" />
                     </Badge>
                   ))}
@@ -386,5 +429,5 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, meetingId }: TaskFor
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

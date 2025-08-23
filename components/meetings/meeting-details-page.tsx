@@ -1,69 +1,69 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '@/contexts/auth-context'
-import { getMeeting as getMeetingFirebase } from '@/lib/firebase/meetings'
-import { MeetingDetailsClient } from '@/components/meetings/meeting-details-client'
-import { Skeleton } from '@/components/ui/skeleton'
-import type { Meeting } from '@/types/meeting'
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/auth-context";
+import { getMeeting as getMeetingFirebase } from "@/lib/firebase/meetings";
+import { MeetingDetailsClient } from "@/components/meetings/meeting-details-client";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { Meeting } from "@/types/meeting";
 
 interface MeetingDetailsPageProps {
   params: Promise<{
-    id: string
-  }>
+    id: string;
+  }>;
 }
 
 export function MeetingDetailsPage({ params }: MeetingDetailsPageProps) {
-  const { user } = useAuth()
-  const router = useRouter()
-  const [meeting, setMeeting] = useState<Meeting | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [meetingId, setMeetingId] = useState<string | null>(null)
+  const { user } = useAuth();
+  const router = useRouter();
+  const [meeting, setMeeting] = useState<Meeting | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [meetingId, setMeetingId] = useState<string | null>(null);
 
   // Resolve params
   useEffect(() => {
     const resolveParams = async () => {
-      const resolvedParams = await params
-      setMeetingId(resolvedParams.id)
-    }
-    resolveParams()
-  }, [params])
+      const resolvedParams = await params;
+      setMeetingId(resolvedParams.id);
+    };
+    resolveParams();
+  }, [params]);
 
   useEffect(() => {
     const fetchMeeting = async () => {
-      if (!user?.uid || !meetingId) return
+      if (!user?.uid || !meetingId) return;
 
       try {
-        setLoading(true)
-        setError(null)
-        
-        const meetingData = await getMeetingFirebase(meetingId, user.uid)
-        
+        setLoading(true);
+        setError(null);
+
+        const meetingData = await getMeetingFirebase(meetingId, user.uid);
+
         if (!meetingData) {
-          setError('Meeting not found')
-          return
+          setError("Meeting not found");
+          return;
         }
 
-        setMeeting(meetingData)
+        setMeeting(meetingData);
       } catch (err) {
-        console.error('Error fetching meeting:', err)
-        setError('Failed to load meeting')
+        console.error("Error fetching meeting:", err);
+        setError("Failed to load meeting");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchMeeting()
-  }, [user?.uid, meetingId])
+    fetchMeeting();
+  }, [user?.uid, meetingId]);
 
   // Handle not found or error cases
   useEffect(() => {
-    if (!loading && (error === 'Meeting not found' || (!meeting && !error))) {
-      router.push('/404')
+    if (!loading && (error === "Meeting not found" || (!meeting && !error))) {
+      router.push("/404");
     }
-  }, [loading, error, meeting, router])
+  }, [loading, error, meeting, router]);
 
   if (loading) {
     return (
@@ -78,16 +78,18 @@ export function MeetingDetailsPage({ params }: MeetingDetailsPageProps) {
           <Skeleton className="h-40 w-full" />
         </div>
       </div>
-    )
+    );
   }
 
-  if (error && error !== 'Meeting not found') {
+  if (error && error !== "Meeting not found") {
     return (
       <div className="container mx-auto p-6">
         <div className="text-center py-8">
-          <h2 className="text-xl font-semibold text-destructive mb-2">Error Loading Meeting</h2>
+          <h2 className="text-xl font-semibold text-destructive mb-2">
+            Error Loading Meeting
+          </h2>
           <p className="text-muted-foreground">{error}</p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
           >
@@ -95,14 +97,12 @@ export function MeetingDetailsPage({ params }: MeetingDetailsPageProps) {
           </button>
         </div>
       </div>
-    )
+    );
   }
 
   if (!meeting) {
-    return null // Will redirect to 404
+    return null; // Will redirect to 404
   }
 
-  return (
-    <MeetingDetailsClient initialMeeting={meeting} />
-  )
+  return <MeetingDetailsClient initialMeeting={meeting} />;
 }

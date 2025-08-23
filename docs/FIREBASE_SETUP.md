@@ -61,6 +61,7 @@ NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID="your-measurement-id"
    - For production: your actual domain
 
 **Important**: If you cannot add `localhost` to authorized domains, you can:
+
 - Use the Firebase Hosting URL for development (e.g., `meetings-hub-prod.web.app`)
 - Or contact your Firebase project administrator to add `localhost`
 
@@ -75,15 +76,15 @@ service cloud.firestore {
   match /databases/{database}/documents {
     // Users can only access their own meetings
     match /meetings/{document} {
-      allow read, write: if request.auth != null && 
+      allow read, write: if request.auth != null &&
         request.auth.uid == resource.data.userId;
-      allow create: if request.auth != null && 
+      allow create: if request.auth != null &&
         request.auth.uid == request.resource.data.userId;
     }
-    
+
     // Users can access their own user document
     match /users/{userId} {
-      allow read, write: if request.auth != null && 
+      allow read, write: if request.auth != null &&
         request.auth.uid == userId;
     }
   }
@@ -102,14 +103,17 @@ service cloud.firestore {
 ## Troubleshooting
 
 ### CORS Errors
+
 - Make sure `localhost` is added to authorized domains
 - Ensure your Firebase config is correct in `.env.local`
 
 ### Authentication Errors
+
 - Check that Google sign-in is enabled in Firebase Console
 - Verify your API key and auth domain are correct
 
 ### Firestore Permission Errors
+
 - Make sure security rules are set up correctly
 - Check that the user is authenticated before making database calls
 
