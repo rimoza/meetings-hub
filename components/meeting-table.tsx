@@ -13,7 +13,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu"
-import { CalendarIntegration } from "@/components/calendar-integration"
 import { useRouter } from "next/navigation"
 import type { Meeting } from "@/types/meeting"
 import { format } from "date-fns"
@@ -291,14 +290,6 @@ export function MeetingTable({ meetings, onEdit, onDelete, onToggleComplete, nex
                         </DeleteConfirmDialog>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                      
-                    {/* Calendar Integration - Separate */}
-                    <CalendarIntegration 
-                      meeting={meeting} 
-                      size="sm" 
-                      variant="ghost"
-                      showTooltip={true}
-                    />
                   </div>
                 </TableCell>
               </TableRow>
