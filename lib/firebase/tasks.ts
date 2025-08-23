@@ -1,0 +1,247 @@
+import { 
+  collection, 
+  doc, 
+  addDoc, 
+  updateDoc, 
+  deleteDoc, 
+  getDocs, 
+  query, 
+  where, 
+  onSnapshot,
+  serverTimestamp,
+  DocumentData,
+  QueryDocumentSnapshot,
+  getFirestore,
+  type Firestore
+} from 'firebase/firestore';
+import { app, isFirebaseConfigured } from '@/lib/firebase/config';
+import type { Task } from '@/types/task';
+
+const COLLECTION_NAME = 'tasks';
+const db: Firestore | null = app && isFirebaseConfigured() ? getFirestore(app) : null;
+
+// Convert Firestore document to Task type
+const convertDocToTask = (doc: QueryDocumentSnapshot<DocumentData>): Task => {
+  const data = doc.data();
+  return {
+    id: doc.id,
+    title: data.title,
+    description: data.description,
+    date: data.date,
+    status: data.status,
+    assignee: data.assignee,
+    todoList: data.todoList || [],
+    labels: data.labels || [],
+    tags: data.tags || [],
+    type: data.type,
+    meetingId: data.meetingId,
+    priority: data.priority,
+    createdAt: data.createdAt?.toDate() || new Date(),
+    updatedAt: data.updatedAt?.toDate() || new Date(),
+    completedAt: data.completedAt?.toDate() || undefined,
+  };
+};
+
+// Create a new task
+export const createTask = async (
+  userId: string, 
+  taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'completedAt'>
+) => {
+  if (!db) {
+    throw new Error('Firebase is not properly configured');
+  }
+  
+  try {
+    const docRef = await addDoc(collection(db, COLLECTION_NAME), {
+      ...taskData,
+      userId,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    return docRef.id;
+  } catch (error) {
+    console.error('Error creating task:', error);
+    throw error;
+  }
+};
+
+// Create task from meeting note
+export const createTaskFromMeetingNote = async (
+  userId: string,
+  meetingId: string,
+  meetingTitle: string,
+  noteContent: string,
+  priority: 'low' | 'medium' | 'high' = 'medium'
+) => {
+  if (!db) {
+    throw new Error('Firebase is not properly configured');
+  }
+  
+  try {
+    const taskData = {
+      title: `Follow-up: ${meetingTitle}`,
+      description: noteContent,
+      date: new Date().toISOString().split('T')[0], // Today's date
+      status: 'pending' as const,
+      type: 'follow_up' as const,
+      meetingId,
+      priority,
+      userId,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    };
+    
+    const docRef = await addDoc(collection(db, COLLECTION_NAME), taskData);
+    return docRef.id;
+  } catch (error) {
+    console.error('Error creating task from meeting note:', error);
+    throw error;
+  }
+};
+
+// Update a task
+export const updateTask = async (
+  taskId: string, 
+  updates: Partial<Omit<Task, 'id' | 'createdAt'>>
+) => {
+  if (!db) {
+    throw new Error('Firebase is not properly configured');
+  }
+  
+  try {
+    const taskRef = doc(db, COLLECTION_NAME, taskId);
+    const updateData = {
+      ...updates,
+      updatedAt: serverTimestamp(),
+    };
+    
+    // Add completedAt timestamp if status is being changed to completed
+    if (updates.status === 'completed') {
+      updateData.completedAt = serverTimestamp();
+    }
+    
+    await updateDoc(taskRef, updateData);
+  } catch (error) {
+    console.error('Error updating task:', error);
+    throw error;
+  }
+};
+
+// Delete a task
+export const deleteTask = async (taskId: string) => {
+  if (!db) {
+    throw new Error('Firebase is not properly configured');
+  }
+  
+  try {
+    await deleteDoc(doc(db, COLLECTION_NAME, taskId));
+  } catch (error) {
+    console.error('Error deleting task:', error);
+    throw error;
+  }
+};
+
+// Get all tasks for a user
+export const getUserTasks = async (userId: string): Promise<Task[]> => {
+  if (!db) {
+    throw new Error('Firebase is not properly configured');
+  }
+  
+  try {
+    const q = query(
+      collection(db, COLLECTION_NAME),
+      where('userId', '==', userId)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    const tasks = querySnapshot.docs.map(convertDocToTask);
+    
+    // Sort by date and priority
+    return tasks.sort((a, b) => {
+      const dateComparison = a.date.localeCompare(b.date);
+      if (dateComparison !== 0) return dateComparison;
+      
+      const priorityOrder = { high: 0, medium: 1, low: 2 };
+      return priorityOrder[a.priority] - priorityOrder[b.priority];
+    });
+  } catch (error) {
+    console.error('Error fetching tasks:', error);
+    throw error;
+  }
+};
+
+// Subscribe to real-time task updates
+export const subscribeTasks = (
+  userId: string, 
+  callback: (tasks: Task[]) => void
+) => {
+  if (!db) {
+    console.warn('Firebase not configured, returning empty tasks');
+    callback([]);
+    return () => {}; // Return empty unsubscribe function
+  }
+  
+  const q = query(
+    collection(db, COLLECTION_NAME),
+    where('userId', '==', userId)
+  );
+
+  return onSnapshot(q, (snapshot) => {
+    const tasks = snapshot.docs.map(convertDocToTask);
+    
+    // Sort by date and priority
+    const sortedTasks = tasks.sort((a, b) => {
+      const dateComparison = a.date.localeCompare(b.date);
+      if (dateComparison !== 0) return dateComparison;
+      
+      const priorityOrder = { high: 0, medium: 1, low: 2 };
+      return priorityOrder[a.priority] - priorityOrder[b.priority];
+    });
+    
+    callback(sortedTasks);
+  }, (error) => {
+    console.error('Error in tasks subscription:', error);
+  });
+};
+
+// Get tasks for a specific meeting
+export const getMeetingTasks = async (userId: string, meetingId: string): Promise<Task[]> => {
+  if (!db) {
+    throw new Error('Firebase is not properly configured');
+  }
+  
+  try {
+    const q = query(
+      collection(db, COLLECTION_NAME),
+      where('userId', '==', userId),
+      where('meetingId', '==', meetingId)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(convertDocToTask);
+  } catch (error) {
+    console.error('Error fetching meeting tasks:', error);
+    throw error;
+  }
+};
+
+// Toggle task completion
+export const toggleTaskCompletion = async (taskId: string, status: 'completed' | 'pending') => {
+  if (!db) {
+    throw new Error('Firebase is not properly configured');
+  }
+  
+  try {
+    const taskRef = doc(db, COLLECTION_NAME, taskId);
+    const updateData = {
+      status,
+      updatedAt: serverTimestamp(),
+      ...(status === 'completed' ? { completedAt: serverTimestamp() } : {}),
+    };
+    
+    await updateDoc(taskRef, updateData);
+  } catch (error) {
+    console.error('Error toggling task completion:', error);
+    throw error;
+  }
+};

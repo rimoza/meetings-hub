@@ -21,6 +21,7 @@ import {
   X,
   Plus,
   Clock,
+  ListTodo,
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -29,7 +30,8 @@ import { Separator } from "@/components/ui/separator"
 import { DeleteConfirmDialog } from "@/components/ui/confirm-dialog"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Textarea } from "@/components/ui/textarea"
-import type { Meeting, MeetingNote } from "@/types/meeting"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import type { Meeting } from "@/types/meeting"
 import { format } from "date-fns"
 import { toast } from "sonner"
 
@@ -40,7 +42,7 @@ interface MeetingDetailsProps {
   onDelete: (id: string) => void
   onToggleComplete: (id: string) => void
   onEditNotes?: (id: string, notes: string) => void
-  onAddNote?: (meetingId: string, note: MeetingNote) => void
+  onAddNote?: (meetingId: string, noteContent: string, noteType: 'regular' | 'follow-up', author?: string) => void
 }
 
 const priorityConfig = {
@@ -74,6 +76,7 @@ export function MeetingDetails({ meeting, onBack, onEdit, onDelete, onToggleComp
   const [notesText, setNotesText] = useState("")
   const [isAddingNote, setIsAddingNote] = useState(false)
   const [newNoteText, setNewNoteText] = useState("")
+  const [noteType, setNoteType] = useState<'regular' | 'follow-up'>('regular')
 
   // Update notes text when meeting changes but don't cause re-renders
   useEffect(() => {
@@ -132,20 +135,21 @@ export function MeetingDetails({ meeting, onBack, onEdit, onDelete, onToggleComp
 
   const handleAddNote = () => {
     if (onAddNote && newNoteText.trim()) {
-      const newNote: MeetingNote = {
-        id: `note-${Date.now()}`,
-        content: newNoteText.trim(),
-        timestamp: new Date(),
-      }
-      onAddNote(meeting.id, newNote)
+      onAddNote(meeting.id, newNoteText.trim(), noteType)
       setNewNoteText("")
+      setNoteType('regular')
       setIsAddingNote(false)
-      toast.success("Note added successfully")
+      if (noteType === 'follow-up') {
+        toast.success("Follow-up note added and task created!")
+      } else {
+        toast.success("Note added successfully")
+      }
     }
   }
 
   const handleCancelAddNote = () => {
     setNewNoteText("")
+    setNoteType('regular')
     setIsAddingNote(false)
   }
 
@@ -361,20 +365,56 @@ export function MeetingDetails({ meeting, onBack, onEdit, onDelete, onToggleComp
                 
                 {isAddingNote && (
                   <div className="space-y-3 p-3 bg-secondary/30 rounded-lg border-2 border-dashed border-primary/30">
-                    <Textarea
-                      value={newNoteText}
-                      onChange={(e) => setNewNoteText(e.target.value)}
-                      placeholder="Add a new meeting note..."
-                      className="min-h-[80px] resize-none"
-                    />
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <label className="text-sm font-medium min-w-fit">Note Type:</label>
+                        <Select value={noteType} onValueChange={(value: 'regular' | 'follow-up') => setNoteType(value)}>
+                          <SelectTrigger className="w-[180px] h-8">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="regular">
+                              <div className="flex items-center gap-2">
+                                <FileText className="h-3 w-3" />
+                                Regular Note
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="follow-up">
+                              <div className="flex items-center gap-2">
+                                <ListTodo className="h-3 w-3" />
+                                Follow-up (Creates Task)
+                              </div>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Textarea
+                        value={newNoteText}
+                        onChange={(e) => setNewNoteText(e.target.value)}
+                        placeholder={noteType === 'follow-up' 
+                          ? "Add a follow-up note (this will create a task automatically)..." 
+                          : "Add a new meeting note..."
+                        }
+                        className="min-h-[80px] resize-none"
+                      />
+                    </div>
                     <div className="flex items-center gap-2">
                       <Button
                         size="sm"
                         onClick={handleAddNote}
                         disabled={!newNoteText.trim()}
                       >
-                        <Save className="h-3 w-3 mr-1" />
-                        Add Note
+                        {noteType === 'follow-up' ? (
+                          <>
+                            <ListTodo className="h-3 w-3 mr-1" />
+                            Add Note & Create Task
+                          </>
+                        ) : (
+                          <>
+                            <Save className="h-3 w-3 mr-1" />
+                            Add Note
+                          </>
+                        )}
                       </Button>
                       <Button
                         variant="outline"
@@ -453,25 +493,42 @@ export function MeetingDetails({ meeting, onBack, onEdit, onDelete, onToggleComp
                   {meeting.meetingNotes && meeting.meetingNotes.length > 0 ? (
                     meeting.meetingNotes
                       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-                      .map((note) => (
-                        <div key={note.id} className="p-3 bg-secondary/30 rounded-lg border-l-4 border-blue-500">
-                          <div className="flex items-start gap-2">
-                            <FileText className="h-4 w-4 text-blue-600 mt-0.5" />
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                {note.author && (
-                                  <span className="text-xs font-medium text-blue-700 dark:text-blue-400">{note.author}</span>
-                                )}
-                                <Badge variant="secondary" className="text-xs">
-                                  <Clock className="h-2.5 w-2.5 mr-1" />
-                                  {format(new Date(note.timestamp), "MMM d, HH:mm")}
-                                </Badge>
+                      .map((note) => {
+                        const isFollowUp = note.type === 'follow-up'
+                        const borderColor = isFollowUp ? 'border-orange-500' : 'border-blue-500'
+                        const iconColor = isFollowUp ? 'text-orange-600' : 'text-blue-600'
+                        const authorColor = isFollowUp ? 'text-orange-700 dark:text-orange-400' : 'text-blue-700 dark:text-blue-400'
+                        
+                        return (
+                          <div key={note.id} className={`p-3 bg-secondary/30 rounded-lg border-l-4 ${borderColor}`}>
+                            <div className="flex items-start gap-2">
+                              {isFollowUp ? (
+                                <ListTodo className={`h-4 w-4 ${iconColor} mt-0.5`} />
+                              ) : (
+                                <FileText className={`h-4 w-4 ${iconColor} mt-0.5`} />
+                              )}
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                  {isFollowUp && (
+                                    <Badge variant="outline" className="text-xs bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
+                                      <ListTodo className="h-2.5 w-2.5 mr-1" />
+                                      Follow-up
+                                    </Badge>
+                                  )}
+                                  {note.author && (
+                                    <span className={`text-xs font-medium ${authorColor}`}>{note.author}</span>
+                                  )}
+                                  <Badge variant="secondary" className="text-xs">
+                                    <Clock className="h-2.5 w-2.5 mr-1" />
+                                    {format(new Date(note.timestamp), "MMM d, HH:mm")}
+                                  </Badge>
+                                </div>
+                                <p className="text-sm whitespace-pre-wrap">{note.content}</p>
                               </div>
-                              <p className="text-sm whitespace-pre-wrap">{note.content}</p>
                             </div>
                           </div>
-                        </div>
-                      ))
+                        )
+                      })
                   ) : (
                     !meeting.notes && (
                       <div className="p-6 bg-secondary/30 rounded-lg text-center">

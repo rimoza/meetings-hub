@@ -5,6 +5,7 @@ import {
   updateDoc, 
   deleteDoc, 
   getDocs, 
+  getDoc,
   query, 
   where, 
   onSnapshot,
@@ -16,6 +17,7 @@ import {
 } from 'firebase/firestore';
 import { app, isFirebaseConfigured } from '@/lib/firebase/config';
 import type { Meeting, MeetingNote } from '@/types/meeting';
+import { createTaskFromMeetingNote } from './tasks';
 
 const COLLECTION_NAME = 'meetings';
 const db: Firestore | null = app && isFirebaseConfigured() ? getFirestore(app) : null;
@@ -233,6 +235,63 @@ export const toggleMeetingCompletion = async (meetingId: string, completed: bool
     });
   } catch (error) {
     console.error('Error toggling meeting completion:', error);
+    throw error;
+  }
+};
+
+// Add a note to a meeting and create task if it's a follow-up
+export const addMeetingNote = async (
+  userId: string,
+  meetingId: string,
+  noteContent: string,
+  noteType: 'regular' | 'follow-up',
+  author?: string
+) => {
+  if (!db) {
+    throw new Error('Firebase is not properly configured');
+  }
+  
+  try {
+    // First, get the current meeting to access its notes and title
+    const meetingRef = doc(db, COLLECTION_NAME, meetingId);
+    const meetingDoc = await getDoc(meetingRef);
+    
+    if (!meetingDoc.exists()) {
+      throw new Error('Meeting not found');
+    }
+    
+    const meetingData = meetingDoc.data();
+    const currentNotes = meetingData.meetingNotes || [];
+    
+    // Create new note
+    const newNote: MeetingNote = {
+      id: `note_${Date.now()}`,
+      content: noteContent,
+      timestamp: new Date(),
+      author,
+      type: noteType
+    };
+    
+    // Update meeting with new note
+    await updateDoc(meetingRef, {
+      meetingNotes: [...currentNotes, newNote],
+      updatedAt: serverTimestamp(),
+    });
+    
+    // If it's a follow-up note, create a task automatically
+    if (noteType === 'follow-up') {
+      await createTaskFromMeetingNote(
+        userId,
+        meetingId,
+        meetingData.title,
+        noteContent,
+        meetingData.priority || 'medium'
+      );
+    }
+    
+    return newNote.id;
+  } catch (error) {
+    console.error('Error adding meeting note:', error);
     throw error;
   }
 };

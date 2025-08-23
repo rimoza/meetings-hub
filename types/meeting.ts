@@ -3,6 +3,7 @@ export interface MeetingNote {
   content: string
   timestamp: Date
   author?: string // Optional field for who added the note
+  type: "regular" | "follow-up" // Type of note to determine if task should be created
 }
 
 export interface Meeting {

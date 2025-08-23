@@ -10,6 +10,7 @@ import {
   updateMeeting as updateMeetingFirebase,
   deleteMeeting as deleteMeetingFirebase,
   toggleMeetingCompletion as toggleMeetingFirebase,
+  addMeetingNote as addMeetingNoteFirebase,
 } from "@/lib/firebase/meetings";
 
 export function useMeetings() {
@@ -251,6 +252,32 @@ export function useMeetings() {
     }
   };
 
+  // Add a note to a meeting
+  const addMeetingNote = async (
+    meetingId: string, 
+    noteContent: string, 
+    noteType: 'regular' | 'follow-up',
+    author?: string
+  ) => {
+    if (!user?.uid) {
+      setError("User not authenticated");
+      return;
+    }
+
+    try {
+      setError(null);
+      await addMeetingNoteFirebase(user.uid, meetingId, noteContent, noteType, author);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+        throw err;
+      } else {
+        setError("An unknown error occurred");
+        throw err;
+      }
+    }
+  };
+
   return {
     meetings,
     filteredMeetings,
@@ -264,6 +291,7 @@ export function useMeetings() {
     updateMeeting,
     deleteMeeting,
     toggleMeetingCompletion,
+    addMeetingNote,
     isLoading,
     error,
   };

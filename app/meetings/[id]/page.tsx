@@ -20,7 +20,7 @@ import {
   DropdownMenuLabel
 } from "@/components/ui/dropdown-menu"
 import { ThemeToggle } from "@/components/theme-toggle"
-import type { Meeting, MeetingNote } from "@/types/meeting"
+import type { Meeting } from "@/types/meeting"
 import { toast } from "sonner"
 
 interface MeetingDetailsPageProps {
@@ -40,7 +40,8 @@ export default function MeetingDetailsPage({ params }: Readonly<MeetingDetailsPa
     createMeeting,
     updateMeeting, 
     deleteMeeting, 
-    toggleMeetingCompletion 
+    toggleMeetingCompletion,
+    addMeetingNote
   } = useMeetings()
   const [meeting, setMeeting] = useState<Meeting | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
@@ -145,17 +146,14 @@ export default function MeetingDetailsPage({ params }: Readonly<MeetingDetailsPa
     }
   }
 
-  const handleAddNote = async (meetingId: string, note: MeetingNote) => {
+  const handleAddNote = async (
+    meetingId: string, 
+    noteContent: string, 
+    noteType: 'regular' | 'follow-up',
+    author?: string
+  ) => {
     try {
-      const currentMeeting = meetings.find(m => m.id === meetingId)
-      if (!currentMeeting) {
-        throw new Error("Meeting not found")
-      }
-      
-      const existingNotes = currentMeeting.meetingNotes || []
-      const updatedNotes = [...existingNotes, note]
-      
-      await updateMeeting(meetingId, { meetingNotes: updatedNotes })
+      await addMeetingNote(meetingId, noteContent, noteType, author)
       // The meeting state will be updated automatically through the useEffect that watches meetings array
     } catch (error) {
       console.error("Error adding note:", error)
