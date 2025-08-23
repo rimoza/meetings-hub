@@ -16,6 +16,7 @@ import {
 import { useRouter } from "next/navigation"
 import type { Meeting } from "@/types/meeting"
 import { format } from "date-fns"
+import Link from "next/link"
 
 interface MeetingTableProps {
   meetings: Meeting[]
@@ -122,7 +123,9 @@ export function MeetingTable({ meetings, onEdit, onDelete, onToggleComplete, nex
                       <p className={`font-semibold truncate ${
                         meeting.completed ? "line-through text-muted-foreground" : ""
                       }`}>
+                        <Link href={`/meetings/${meeting.id}`} className="hover:underline">
                         {meeting.title}
+                        </Link>
                       </p>
                       <div className="flex items-center gap-2 mt-1">
                         {isNext && !meeting.completed && (
