@@ -205,7 +205,7 @@ export default function TaskDetailsPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen w-full max-w-4xl mx-auto bg-background">
         {/* Header with Back Button */}
         <header className="border-b bg-card sticky top-0 z-50">
           <div className="px-6 py-4">
@@ -287,7 +287,7 @@ export default function TaskDetailsPage() {
         </header>
 
         {/* Main Content Area */}
-        <main className="px-6 py-6">
+        <main className="w-full max-w-4xl mx-auto my-4">
             <div className="w-full space-y-6">
               
               {/* Task Overview Card */}
