@@ -1,6 +1,6 @@
 "use client"
 
-import { Calendar, Home, Plus, Settings, Clock, Bell, CheckSquare, ArrowLeft, MapPin, Users } from "lucide-react"
+import { Calendar, Home, Plus, Settings, Clock, CheckSquare, ArrowLeft, MapPin, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
