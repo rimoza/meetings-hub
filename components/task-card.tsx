@@ -1,6 +1,7 @@
 "use client"
 
-import { MoreHorizontal, Calendar, User, CheckCircle, Clock, XCircle, PlayCircle, Flag } from "lucide-react"
+import { MoreHorizontal, Calendar, User, CheckCircle, Clock, XCircle, PlayCircle, Flag, Eye } from "lucide-react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
@@ -80,11 +81,14 @@ export function TaskCard({ task, onEdit, onDelete, onToggleComplete, onChangeSta
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
               {getStatusIcon(task.status)}
-              <h3 className={`font-semibold text-sm truncate ${
-                task.status === "completed" ? "line-through text-muted-foreground" : ""
-              }`}>
+              <Link 
+                href={`/tasks/${task.id}`}
+                className={`font-semibold text-sm truncate hover:underline ${
+                  task.status === "completed" ? "line-through text-muted-foreground" : ""
+                }`}
+              >
                 {task.title}
-              </h3>
+              </Link>
               <Flag className={`h-3 w-3 ${getPriorityColor(task.priority)}`} />
             </div>
             <div className="flex items-center gap-2 mb-2">
@@ -104,6 +108,12 @@ export function TaskCard({ task, onEdit, onDelete, onToggleComplete, onChangeSta
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link href={`/tasks/${task.id}`}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  View Details
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => onEdit(task)}>
                 Edit Task
               </DropdownMenuItem>

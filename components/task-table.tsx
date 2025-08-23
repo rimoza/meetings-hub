@@ -1,6 +1,7 @@
 "use client"
 
-import { MoreHorizontal, Calendar, User, CheckCircle, Clock, XCircle, PlayCircle, Flag, ArrowUpDown } from "lucide-react"
+import { MoreHorizontal, Calendar, User, CheckCircle, Clock, XCircle, PlayCircle, Flag, ArrowUpDown, Eye } from "lucide-react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -160,11 +161,14 @@ export function TaskTable({ tasks, onEdit, onDelete, onToggleComplete, onChangeS
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
-                      <div className={`font-medium text-sm ${
-                        task.status === "completed" ? "line-through text-muted-foreground" : ""
-                      }`}>
+                      <Link 
+                        href={`/tasks/${task.id}`}
+                        className={`font-medium text-sm hover:underline ${
+                          task.status === "completed" ? "line-through text-muted-foreground" : ""
+                        }`}
+                      >
                         {task.title}
-                      </div>
+                      </Link>
                       {task.description && (
                         <div className="text-xs text-muted-foreground line-clamp-1">
                           {task.description}
@@ -228,6 +232,12 @@ export function TaskTable({ tasks, onEdit, onDelete, onToggleComplete, onChangeS
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                          <Link href={`/tasks/${task.id}`}>
+                            <Eye className="h-4 w-4 mr-2" />
+                            View Details
+                          </Link>
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => onEdit(task)}>
                           Edit Task
                         </DropdownMenuItem>
