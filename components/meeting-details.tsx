@@ -30,6 +30,7 @@ import { Separator } from "@/components/ui/separator"
 import { DeleteConfirmDialog } from "@/components/ui/confirm-dialog"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Textarea } from "@/components/ui/textarea"
+import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { Meeting } from "@/types/meeting"
 import { format } from "date-fns"
@@ -42,7 +43,17 @@ interface MeetingDetailsProps {
   onDelete: (id: string) => void
   onToggleComplete: (id: string) => void
   onEditNotes?: (id: string, notes: string) => void
-  onAddNote?: (meetingId: string, noteContent: string, noteType: 'regular' | 'follow-up', author?: string) => void
+  onAddNote?: (
+    meetingId: string, 
+    noteContent: string, 
+    noteType: 'regular' | 'follow-up', 
+    author?: string,
+    taskDetails?: {
+      assignee?: string
+      priority?: 'low' | 'medium' | 'high'
+      dueDate?: string
+    }
+  ) => void
 }
 
 const priorityConfig = {
@@ -77,6 +88,9 @@ export function MeetingDetails({ meeting, onBack, onEdit, onDelete, onToggleComp
   const [isAddingNote, setIsAddingNote] = useState(false)
   const [newNoteText, setNewNoteText] = useState("")
   const [noteType, setNoteType] = useState<'regular' | 'follow-up'>('regular')
+  const [taskAssignee, setTaskAssignee] = useState("")
+  const [taskPriority, setTaskPriority] = useState<'low' | 'medium' | 'high'>('medium')
+  const [taskDueDate, setTaskDueDate] = useState("")
 
   // Update notes text when meeting changes but don't cause re-renders
   useEffect(() => {
@@ -135,9 +149,18 @@ export function MeetingDetails({ meeting, onBack, onEdit, onDelete, onToggleComp
 
   const handleAddNote = () => {
     if (onAddNote && newNoteText.trim()) {
-      onAddNote(meeting.id, newNoteText.trim(), noteType)
+      const taskDetails = noteType === 'follow-up' ? {
+        assignee: taskAssignee || undefined,
+        priority: taskPriority,
+        dueDate: taskDueDate || undefined
+      } : undefined
+
+      onAddNote(meeting.id, newNoteText.trim(), noteType, undefined, taskDetails)
       setNewNoteText("")
       setNoteType('regular')
+      setTaskAssignee("")
+      setTaskPriority('medium')
+      setTaskDueDate("")
       setIsAddingNote(false)
       if (noteType === 'follow-up') {
         toast.success("Follow-up note added and task created!")
@@ -150,6 +173,9 @@ export function MeetingDetails({ meeting, onBack, onEdit, onDelete, onToggleComp
   const handleCancelAddNote = () => {
     setNewNoteText("")
     setNoteType('regular')
+    setTaskAssignee("")
+    setTaskPriority('medium')
+    setTaskDueDate("")
     setIsAddingNote(false)
   }
 
@@ -397,6 +423,49 @@ export function MeetingDetails({ meeting, onBack, onEdit, onDelete, onToggleComp
                         }
                         className="min-h-[80px] resize-none"
                       />
+                      
+                      {/* Additional task fields when follow-up is selected */}
+                      {noteType === 'follow-up' && (
+                        <div className="space-y-3 p-3 bg-orange-50 dark:bg-orange-950/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                          <div className="flex items-center gap-2 text-sm font-medium text-orange-700 dark:text-orange-400">
+                            <ListTodo className="h-4 w-4" />
+                            Task Details (Optional)
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div className="space-y-1">
+                              <label className="text-xs font-medium text-muted-foreground">Assignee</label>
+                              <Input
+                                value={taskAssignee}
+                                onChange={(e) => setTaskAssignee(e.target.value)}
+                                placeholder="Enter assignee name"
+                                className="h-8"
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-xs font-medium text-muted-foreground">Priority</label>
+                              <Select value={taskPriority} onValueChange={(value: 'low' | 'medium' | 'high') => setTaskPriority(value)}>
+                                <SelectTrigger className="h-8">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="low">Low</SelectItem>
+                                  <SelectItem value="medium">Medium</SelectItem>
+                                  <SelectItem value="high">High</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-xs font-medium text-muted-foreground">Due Date</label>
+                              <Input
+                                type="date"
+                                value={taskDueDate}
+                                onChange={(e) => setTaskDueDate(e.target.value)}
+                                className="h-8"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center gap-2">
                       <Button

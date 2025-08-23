@@ -150,10 +150,15 @@ export default function MeetingDetailsPage({ params }: Readonly<MeetingDetailsPa
     meetingId: string, 
     noteContent: string, 
     noteType: 'regular' | 'follow-up',
-    author?: string
+    author?: string,
+    taskDetails?: {
+      assignee?: string
+      priority?: 'low' | 'medium' | 'high'
+      dueDate?: string
+    }
   ) => {
     try {
-      await addMeetingNote(meetingId, noteContent, noteType, author)
+      await addMeetingNote(meetingId, noteContent, noteType, author, taskDetails)
       // The meeting state will be updated automatically through the useEffect that watches meetings array
     } catch (error) {
       console.error("Error adding note:", error)

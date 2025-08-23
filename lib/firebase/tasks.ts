@@ -105,7 +105,9 @@ export const createTaskFromMeetingNote = async (
   meetingId: string,
   meetingTitle: string,
   noteContent: string,
-  priority: 'low' | 'medium' | 'high' = 'medium'
+  priority: 'low' | 'medium' | 'high' = 'medium',
+  assignee?: string,
+  dueDate?: string
 ) => {
   if (!db) {
     throw new Error('Firebase is not properly configured');
@@ -118,11 +120,12 @@ export const createTaskFromMeetingNote = async (
     const taskData = {
       title: `Follow-up: ${meetingTitle}`,
       description: noteContent,
-      date: new Date().toISOString().split('T')[0], // Today's date
+      date: dueDate || new Date().toISOString().split('T')[0], // Use provided due date or today's date
       status: 'pending' as const,
       type: 'follow_up' as const,
       meetingId,
       priority,
+      assignee: assignee || undefined,
       todoList: todoList.length > 0 ? todoList : undefined,
       userId,
       createdAt: serverTimestamp(),

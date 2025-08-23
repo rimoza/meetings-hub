@@ -257,7 +257,12 @@ export function useMeetings() {
     meetingId: string, 
     noteContent: string, 
     noteType: 'regular' | 'follow-up',
-    author?: string
+    author?: string,
+    taskDetails?: {
+      assignee?: string
+      priority?: 'low' | 'medium' | 'high'
+      dueDate?: string
+    }
   ) => {
     if (!user?.uid) {
       setError("User not authenticated");
@@ -266,7 +271,7 @@ export function useMeetings() {
 
     try {
       setError(null);
-      await addMeetingNoteFirebase(user.uid, meetingId, noteContent, noteType, author);
+      await addMeetingNoteFirebase(user.uid, meetingId, noteContent, noteType, author, taskDetails);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);

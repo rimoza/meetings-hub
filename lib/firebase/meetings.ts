@@ -245,7 +245,12 @@ export const addMeetingNote = async (
   meetingId: string,
   noteContent: string,
   noteType: 'regular' | 'follow-up',
-  author?: string
+  author?: string,
+  taskDetails?: {
+    assignee?: string
+    priority?: 'low' | 'medium' | 'high'
+    dueDate?: string
+  }
 ) => {
   if (!db) {
     throw new Error('Firebase is not properly configured');
@@ -285,7 +290,9 @@ export const addMeetingNote = async (
         meetingId,
         meetingData.title,
         noteContent,
-        meetingData.priority || 'medium'
+        taskDetails?.priority || meetingData.priority || 'medium',
+        taskDetails?.assignee,
+        taskDetails?.dueDate
       );
     }
     
