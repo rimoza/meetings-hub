@@ -24,8 +24,10 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { SidebarNav } from "@/components/sidebar-nav"
 import { ProtectedRoute } from "@/components/protected-route"
-import type { ViewMode, Task } from "@/types/task"
+import type { Task } from "@/types/task"
 import { toast } from "sonner"
+
+type ViewMode = "table" | "card"
 
 export default function TasksPage() {
   const { user, logout } = useAuth()
@@ -228,7 +230,7 @@ export default function TasksPage() {
         </div>
 
         {/* Filters and View Controls */}
-        <div className="flex flex-col lg:flex-row gap-4">
+        <div className="flex flex-col lg:flex-row gap-4 lg:items-center">
           <div className="flex-1">
             <TaskFilters 
               filters={filters} 
@@ -236,7 +238,7 @@ export default function TasksPage() {
               assignees={uniqueAssignees}
             />
           </div>
-          <div className="flex justify-end lg:justify-start">
+          <div className="flex justify-end lg:justify-start lg:flex-shrink-0">
             <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
           </div>
         </div>

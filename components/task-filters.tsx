@@ -24,7 +24,7 @@ interface TaskFiltersProps {
   assignees?: string[]
 }
 
-export function TaskFilters({ filters, onFiltersChange, assignees = [] }: TaskFiltersProps) {
+export function TaskFilters({ filters, onFiltersChange, assignees = [] }: Readonly<TaskFiltersProps>) {
   const updateFilter = (key: keyof TaskFilters, value: any) => {
     onFiltersChange({ ...filters, [key]: value })
   }
@@ -57,9 +57,9 @@ export function TaskFilters({ filters, onFiltersChange, assignees = [] }: TaskFi
   }
 
   return (
-    <div className="space-y-3">
+    <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
       {/* Search Bar */}
-      <div className="relative flex-1">
+      <div className="relative flex-1 min-w-[200px]">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search tasks..."
@@ -246,78 +246,7 @@ export function TaskFilters({ filters, onFiltersChange, assignees = [] }: TaskFi
             Clear
           </Button>
         )}
-      </div>
-
-      {/* Active Filters Display */}
-      {hasActiveFilters && (
-        <div className="flex flex-wrap gap-1">
-          {filters.search && (
-            <Badge variant="secondary" className="text-xs">
-              Search: "{filters.search}"
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-auto p-0 ml-1"
-                onClick={() => updateFilter("search", "")}
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            </Badge>
-          )}
-          {filters.status !== "all" && (
-            <Badge variant="secondary" className="text-xs">
-              Status: {filters.status.replace("_", " ")}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-auto p-0 ml-1"
-                onClick={() => updateFilter("status", "all")}
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            </Badge>
-          )}
-          {filters.type !== "all" && (
-            <Badge variant="secondary" className="text-xs">
-              Type: {filters.type === "follow_up" ? "Follow Up" : filters.type}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-auto p-0 ml-1"
-                onClick={() => updateFilter("type", "all")}
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            </Badge>
-          )}
-          {filters.priority !== "all" && (
-            <Badge variant="secondary" className="text-xs">
-              Priority: {filters.priority}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-auto p-0 ml-1"
-                onClick={() => updateFilter("priority", "all")}
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            </Badge>
-          )}
-          {filters.assignee && (
-            <Badge variant="secondary" className="text-xs">
-              Assignee: {filters.assignee}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-auto p-0 ml-1"
-                onClick={() => updateFilter("assignee", undefined)}
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            </Badge>
-          )}
-        </div>
-      )}
     </div>
+  </div>
   )
 }
