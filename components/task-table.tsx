@@ -121,7 +121,7 @@ export function TaskTable({ tasks, onEdit, onDelete, onChangeStatus }: TaskTable
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[40px]">Status</TableHead>
+                <TableHead className="w-[120px]">Status</TableHead>
                 <TableHead>
                   <SortButton sortKey="title">Title</SortButton>
                 </TableHead>
@@ -143,8 +143,11 @@ export function TaskTable({ tasks, onEdit, onDelete, onChangeStatus }: TaskTable
               {sortedTasks.map((task) => (
                 <TableRow key={task.id} className={task.status === "completed" ? "opacity-60" : ""}>
                   <TableCell>
-                    <div className="flex items-center justify-center">
+                    <div className="flex items-center gap-2">
                       {getStatusIcon(task.status)}
+                      <span className="text-sm capitalize">
+                        {task.status.replace('_', ' ')}
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell>
