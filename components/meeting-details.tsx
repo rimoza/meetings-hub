@@ -180,48 +180,7 @@ export function MeetingDetails({ meeting, onBack, onEdit, onDelete, onToggleComp
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      {/* Action buttons */}
-      <div className="flex items-center justify-end gap-2">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleShare}
-              >
-                <Share2 className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Share</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Share meeting details</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onEdit(meeting)}
-        >
-          <Edit className="h-4 w-4 mr-2" />
-          <span className="hidden sm:inline">Edit</span>
-        </Button>
-        
-        <DeleteConfirmDialog
-          itemName={meeting.title}
-          itemType="meeting"
-          onConfirm={() => {
-            onDelete(meeting.id)
-            onBack()
-          }}
-        >
-          <Button variant="destructive" size="sm">
-            <Trash2 className="h-4 w-4 mr-2" />
-            <span className="hidden sm:inline">Delete</span>
-          </Button>
-        </DeleteConfirmDialog>
-      </div>
+    <div className="w-full space-y-6">
 
       {/* Main content card */}
       <Card className={`${isOverdue ? "border-red-500" : ""}`}>
@@ -276,24 +235,65 @@ export function MeetingDetails({ meeting, onBack, onEdit, onDelete, onToggleComp
                 </div>
               </div>
               
-              {/* Complete/Incomplete button */}
-              <Button
-                variant={meeting.completed ? "outline" : "default"}
-                onClick={() => onToggleComplete(meeting.id)}
-                className={meeting.completed ? "" : "bg-emerald-600 hover:bg-emerald-700"}
-              >
-                {meeting.completed ? (
-                  <>
-                    <XCircle className="h-4 w-4 mr-2" />
-                    Mark as Pending
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="h-4 w-4 mr-2" />
-                    Mark as Complete
-                  </>
-                )}
-              </Button>
+              {/* Action buttons */}
+              <div className="flex items-center gap-2">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleShare}
+                      >
+                        <Share2 className="h-4 w-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Share</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Share meeting details</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onEdit(meeting)}
+                >
+                  <Edit className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Edit</span>
+                </Button>
+                
+                <DeleteConfirmDialog
+                  itemName={meeting.title}
+                  itemType="meeting"
+                  onConfirm={() => {
+                    onDelete(meeting.id)
+                    onBack()
+                  }}
+                >
+                  <Button variant="destructive" size="sm">
+                    <Trash2 className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Delete</span>
+                  </Button>
+                </DeleteConfirmDialog>
+                
+                <Button
+                  variant={meeting.completed ? "outline" : "default"}
+                  onClick={() => onToggleComplete(meeting.id)}
+                  className={meeting.completed ? "" : "bg-emerald-600 hover:bg-emerald-700"}
+                >
+                  {meeting.completed ? (
+                    <>
+                      <XCircle className="h-4 w-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Mark as Pending</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="h-4 w-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Mark as Complete</span>
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
         </CardHeader>

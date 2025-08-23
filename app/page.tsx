@@ -1,27 +1,10 @@
-import { PageHeader } from '@/components/ui/page-header'
 import { DashboardClient } from '@/components/dashboard/dashboard-client'
 import { ProtectedRoute } from '@/components/protected-route'
-import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
 
 export default async function DashboardPage() {
   return (
     <ProtectedRoute>
-      <div className="container mx-auto p-6 space-y-6">
-        {/* Server-rendered page header */}
-        <PageHeader 
-          title="Dashboard"
-          description="Welcome to your meeting management dashboard"
-        >
-          <Button size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            New Meeting
-          </Button>
-        </PageHeader>
-        
-        {/* Client component for interactive dashboard features */}
-        <DashboardClient />
-      </div>
+      <DashboardClient />
     </ProtectedRoute>
   )
 }

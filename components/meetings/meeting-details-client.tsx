@@ -2,14 +2,12 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, LogOut, User as UserIcon } from "lucide-react"
+import { LogOut, User as UserIcon, ArrowLeft } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import { useMeetingsStore } from "@/stores/meetings-store"
 import { useTasksStore } from "@/stores/tasks-store"
 import { MeetingDetails } from "@/components/meeting-details"
 import { MeetingForm } from "@/components/meeting-form"
-import { SidebarNav } from "@/components/sidebar-nav"
-import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import { 
   DropdownMenu, 
@@ -29,23 +27,19 @@ interface MeetingDetailsClientProps {
   initialMeeting: Meeting
 }
 
-export function MeetingDetailsClient({ initialMeeting }: MeetingDetailsClientProps) {
+export function MeetingDetailsClient({ initialMeeting }: Readonly<MeetingDetailsClientProps>) {
   const router = useRouter()
   const { user, logout } = useAuth()
   
   // Zustand stores
   const { 
     meetings,
-    getTodayMeetings,
-    getUpcomingMeetings,
     setMeetings,
     updateMeeting,
     removeMeeting
   } = useMeetingsStore()
   
   const { 
-    getPendingTasks,
-    getInProgressTasks,
     setTasks 
   } = useTasksStore()
 
@@ -79,20 +73,6 @@ export function MeetingDetailsClient({ initialMeeting }: MeetingDetailsClientPro
       unsubscribeTasks()
     }
   }, [user?.uid, initialMeeting.id, setMeetings, setTasks])
-
-  // Computed values from stores
-  const todayMeetings = getTodayMeetings()
-  const upcomingMeetings = getUpcomingMeetings()
-  const pendingTasks = getPendingTasks()
-  const inProgressTasks = getInProgressTasks()
-
-  const handleBack = () => {
-    router.push("/")
-  }
-
-  const handleCreateMeeting = () => {
-    router.push("/?create=true")
-  }
 
   const handleLogout = () => {
     logout()
@@ -178,97 +158,85 @@ export function MeetingDetailsClient({ initialMeeting }: MeetingDetailsClientPro
     }
   }
 
-  return (
-    <div className="flex w-full h-screen">
-      {/* Sidebar */}
-      <SidebarNav 
-        onCreateMeeting={handleCreateMeeting} 
-        todayCount={todayMeetings.length}
-        upcomingCount={upcomingMeetings.length}
-        tasksCount={pendingTasks.length + inProgressTasks.length}
-      />
+  const handleBack = () => {
+    router.push("/")
+  }
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <header className="border-b bg-card">
-          <div className="px-3 py-3 sm:px-4 sm:py-4">
-            <div className="flex items-center gap-2">
-              <SidebarTrigger className="md:hidden" />
-              <div className="flex-1">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0 flex items-center gap-3">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleBack}
-                      className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
-                    >
-                      <ArrowLeft className="h-4 w-4" />
-                      <span className="hidden sm:inline">Back</span>
-                    </Button>
-                    <div className="border-l h-6 border-muted-foreground/20" />
-                    <div>
-                      <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground truncate">
-                        {meeting.title}
-                      </h1>
-                      <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
-                        View and manage meeting details
-                      </p>
-                    </div>
-                  </div>
-                  
-                  {/* User Menu */}
-                  <div className="flex items-center gap-2">
-                    <ThemeToggle />
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          className="relative h-9 w-9 rounded-full bg-primary/10"
-                        >
-                          <UserIcon className="h-4 w-4" />
-                          <span className="sr-only">Toggle user menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-56" align="end" forceMount>
-                        <DropdownMenuLabel className="font-normal">
-                          <div className="flex flex-col space-y-1">
-                            <p className="text-sm font-medium leading-none">
-                              {user?.name || user?.email}
-                            </p>
-                            <p className="text-xs leading-none text-muted-foreground">
-                              {user?.email}
-                            </p>
-                          </div>
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
-                          <LogOut className="mr-2 h-4 w-4" />
-                          Log out
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </div>
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header with Back Button */}
+      <header className="border-b bg-card sticky top-0 z-50">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleBack}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span className="hidden sm:inline">Back to Dashboard</span>
+                <span className="sm:hidden">Back</span>
+              </Button>
+              <div className="flex-1 min-w-0">
+                <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground truncate">
+                  Meeting Details
+                </h1>
+                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
+                  View and manage meeting information
+                </p>
               </div>
             </div>
+            
+            {/* User Menu */}
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="relative h-9 w-9 rounded-full bg-primary/10"
+                  >
+                    <UserIcon className="h-4 w-4" />
+                    <span className="sr-only">Toggle user menu</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">
+                        {user?.name || user?.email}
+                      </p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {user?.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Log out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
-        </header>
+        </div>
+      </header>
 
-        {/* Main Content Area */}
-        <main className="flex-1 overflow-auto px-3 py-4 sm:px-4 sm:py-6 md:px-6 md:py-8">
-          <MeetingDetails
-            meeting={meeting}
-            onBack={handleBack}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onToggleComplete={handleToggleComplete}
-            onEditNotes={handleEditNotes}
-            onAddNote={handleAddNote}
-          />
-        </main>
-      </div>
+      {/* Main Content Area */}
+      <main className="px-6 py-6">
+        <MeetingDetails
+          meeting={meeting}
+          onBack={handleBack}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onToggleComplete={handleToggleComplete}
+          onEditNotes={handleEditNotes}
+          onAddNote={handleAddNote}
+        />
+      </main>
 
       {/* Meeting Form Modal */}
       <MeetingForm

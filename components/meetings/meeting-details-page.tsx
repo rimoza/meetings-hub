@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { getMeeting as getMeetingFirebase } from '@/lib/firebase/meetings'
-import { PageHeader } from '@/components/ui/page-header'
 import { MeetingDetailsClient } from '@/components/meetings/meeting-details-client'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { Meeting } from '@/types/meeting'
@@ -104,15 +103,6 @@ export function MeetingDetailsPage({ params }: MeetingDetailsPageProps) {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Page header */}
-      <PageHeader 
-        title={meeting.title}
-        description={`Meeting scheduled for ${new Date(meeting.date).toLocaleDateString()} at ${meeting.time}`}
-      />
-      
-      {/* Client component for interactive features and real-time updates */}
-      <MeetingDetailsClient initialMeeting={meeting} />
-    </div>
+    <MeetingDetailsClient initialMeeting={meeting} />
   )
 }
