@@ -81,7 +81,7 @@ const typeConfig = {
   presentation: { icon: Video, label: "Presentation", color: "text-orange-600" },
 }
 
-export function MeetingDetails({ meeting, onBack, onEdit, onDelete, onToggleComplete, onEditNotes, onAddNote }: MeetingDetailsProps) {
+export function MeetingDetails({ meeting, onBack, onEdit, onDelete, onToggleComplete, onEditNotes, onAddNote }: Readonly<MeetingDetailsProps>) {
   const [copiedLink, setCopiedLink] = useState(false)
   const [isEditingNotes, setIsEditingNotes] = useState(false)
   const [notesText, setNotesText] = useState("")
