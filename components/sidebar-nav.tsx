@@ -20,9 +20,10 @@ interface SidebarNavProps {
   onCreateMeeting: () => void
   todayCount?: number
   upcomingCount?: number
+  tasksCount?: number
 }
 
-export function SidebarNav({ onCreateMeeting, todayCount = 0, upcomingCount = 0 }: SidebarNavProps) {
+export function SidebarNav({ onCreateMeeting, todayCount = 0, upcomingCount = 0, tasksCount = 0 }: SidebarNavProps) {
   const { isMobile, setOpenMobile } = useSidebar()
   const { isPermissionGranted, isRemindersEnabled } = useReminders()
   const { upcomingMeetings } = useMeetings()
@@ -33,7 +34,7 @@ export function SidebarNav({ onCreateMeeting, todayCount = 0, upcomingCount = 0 
     { id: "/", label: "Dashboard", icon: <Home className="h-4 w-4" />, count: null },
     { id: "/today-meetings", label: "Today's Meetings", icon: <Calendar className="h-4 w-4 text-blue-500" />, count: todayCount },
     { id: "/upcoming-meetings", label: "Upcoming Meetings", icon: <Clock className="h-4 w-4" />, count: upcomingCount },
-    { id: "/tasks", label: "Tasks", icon: <CheckSquare className="h-4 w-4 text-purple-500" />, count: null },
+    { id: "/tasks", label: "Tasks", icon: <CheckSquare className="h-4 w-4 text-purple-500" />, count: tasksCount },
     { id: "/settings", label: "Settings", icon: <Settings className="h-4 w-4" />, count: null },
   ]
   

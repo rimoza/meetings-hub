@@ -135,6 +135,7 @@ export default function TasksPage() {
           onCreateMeeting={() => {}} 
           todayCount={todayMeetings.length}
           upcomingCount={upcomingMeetings.length}
+          tasksCount={pendingTasks.length + inProgressTasks.length}
         />
 
         {/* Main Content */}

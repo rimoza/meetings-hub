@@ -15,6 +15,7 @@ import {
   DropdownMenuLabel
 } from "@/components/ui/dropdown-menu"
 import { useMeetings } from "@/hooks/use-meetings"
+import { useTasks } from "@/hooks/use-tasks"
 import { SidebarNav } from "@/components/sidebar-nav"
 import { ProtectedRoute } from "@/components/protected-route"
 import { NotificationSettings } from "@/components/notification-settings"
@@ -24,6 +25,7 @@ import { AppSettings } from "@/components/app-settings"
 export default function SettingsPage() {
   const { user, logout } = useAuth()
   const { todayMeetings, upcomingMeetings } = useMeetings()
+  const { pendingTasks, inProgressTasks } = useTasks()
 
   const handleLogout = () => {
     logout()
@@ -38,6 +40,7 @@ export default function SettingsPage() {
           onCreateMeeting={() => {}} 
           todayCount={todayMeetings.length}
           upcomingCount={upcomingMeetings.length}
+          tasksCount={pendingTasks.length + inProgressTasks.length}
         />
 
         {/* Main Content */}

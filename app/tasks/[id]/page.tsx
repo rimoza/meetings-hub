@@ -32,7 +32,7 @@ export default function TaskDetailsPage() {
   
   const { user, logout } = useAuth()
   const { todayMeetings, upcomingMeetings, meetings } = useMeetings()
-  const { tasks, updateTask, deleteTask, toggleTaskCompletion } = useTasks()
+  const { tasks, updateTask, deleteTask, toggleTaskCompletion, pendingTasks, inProgressTasks } = useTasks()
   
   const [task, setTask] = useState<Task | null>(null)
   const [isEditFormOpen, setIsEditFormOpen] = useState(false)
@@ -163,6 +163,7 @@ export default function TaskDetailsPage() {
           onCreateMeeting={() => {}} 
           todayCount={todayMeetings.length}
           upcomingCount={upcomingMeetings.length}
+          tasksCount={pendingTasks.length + inProgressTasks.length}
         />
 
         {/* Main Content */}

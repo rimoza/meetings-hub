@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { UpcomingMeetings } from "@/components/upcoming-meetings"
 import { useMeetings } from "@/hooks/use-meetings"
+import { useTasks } from "@/hooks/use-tasks"
 import type { Meeting } from "@/types/meeting"
 import { toast } from "sonner"
 import { SidebarNav } from "@/components/sidebar-nav"
@@ -31,6 +32,7 @@ export default function UpcomingMeetingsPage() {
     createMeeting,
     updateMeeting,
   } = useMeetings()
+  const { pendingTasks, inProgressTasks } = useTasks()
 
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingMeeting, setEditingMeeting] = useState<Meeting | undefined>()
@@ -74,6 +76,7 @@ export default function UpcomingMeetingsPage() {
           onCreateMeeting={handleCreateMeeting} 
           todayCount={todayMeetings.length}
           upcomingCount={upcomingMeetings.length}
+          tasksCount={pendingTasks.length + inProgressTasks.length}
         />
 
         {/* Main Content */}

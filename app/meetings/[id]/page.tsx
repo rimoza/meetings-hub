@@ -4,6 +4,7 @@ import { useEffect, useState, use } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, LogOut, User as UserIcon } from "lucide-react"
 import { useMeetings } from "@/hooks/use-meetings"
+import { useTasks } from "@/hooks/use-tasks"
 import { useAuth } from "@/contexts/auth-context"
 import { MeetingDetails } from "@/components/meeting-details"
 import { MeetingForm } from "@/components/meeting-form"
@@ -43,6 +44,7 @@ export default function MeetingDetailsPage({ params }: Readonly<MeetingDetailsPa
     toggleMeetingCompletion,
     addMeetingNote
   } = useMeetings()
+  const { pendingTasks, inProgressTasks } = useTasks()
   const [meeting, setMeeting] = useState<Meeting | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -210,6 +212,7 @@ export default function MeetingDetailsPage({ params }: Readonly<MeetingDetailsPa
           activePage="details"
           todayCount={todayMeetings.length}
           upcomingCount={upcomingMeetings.length}
+          tasksCount={pendingTasks.length + inProgressTasks.length}
         />
 
         {/* Main Content */}

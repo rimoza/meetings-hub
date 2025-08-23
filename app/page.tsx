@@ -20,6 +20,7 @@ import { MeetingFilters } from "@/components/meeting-filters"
 import { MeetingCard } from "@/components/meeting-card"
 import { MeetingTable } from "@/components/meeting-table"
 import { useMeetings } from "@/hooks/use-meetings"
+import { useTasks } from "@/hooks/use-tasks"
 import type { ViewMode, Meeting } from "@/types/meeting"
 import { toast } from "sonner"
 import { SidebarNav } from "@/components/sidebar-nav"
@@ -42,6 +43,7 @@ export default function Dashboard() {
     deleteMeeting,
     toggleMeetingCompletion,
   } = useMeetings()
+  const { pendingTasks, inProgressTasks } = useTasks()
 
   const [viewMode, setViewMode] = useState<ViewMode>("table")
   const [isFormOpen, setIsFormOpen] = useState(false)
@@ -191,6 +193,7 @@ export default function Dashboard() {
           onCreateMeeting={handleCreateMeeting} 
           todayCount={todayMeetings.length}
           upcomingCount={upcomingMeetings.length}
+          tasksCount={pendingTasks.length + inProgressTasks.length}
         />
 
         {/* Main Content */}
