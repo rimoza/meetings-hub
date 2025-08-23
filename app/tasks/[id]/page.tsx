@@ -2,14 +2,15 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { ArrowLeft, Edit, Trash2, CheckSquare, Clock, AlertCircle, Calendar, User, Tag, Hash, LogOut, User as UserIcon, CheckCircle, X } from "lucide-react"
+import { ArrowLeft, Edit, Trash2, CheckSquare, Clock, AlertCircle, Calendar, User, Tag, Hash, LogOut, User as UserIcon, CheckCircle, X, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { TaskForm } from "@/components/task-form"
 import { useTasks } from "@/hooks/use-tasks"
-import { updateTodoStatus } from "@/lib/firebase/tasks"
+import { updateTodoStatus, addTodoItem, deleteTodoItem } from "@/lib/firebase/tasks"
+import { Input } from "@/components/ui/input"
 import { useMeetings } from "@/hooks/use-meetings"
 import { useAuth } from "@/contexts/auth-context"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -38,6 +39,8 @@ export default function TaskDetailsPage() {
   
   const [task, setTask] = useState<Task | null>(null)
   const [isEditFormOpen, setIsEditFormOpen] = useState(false)
+  const [newTodoText, setNewTodoText] = useState("")
+  const [isAddingTodo, setIsAddingTodo] = useState(false)
 
   useEffect(() => {
     const foundTask = tasks.find(t => t.id === taskId)
@@ -98,6 +101,46 @@ export default function TaskDetailsPage() {
     } catch (error) {
       console.error('Error updating todo status:', error)
       toast.error("Failed to update todo status")
+    }
+  }
+
+  const handleAddTodo = async () => {
+    if (!task || !newTodoText.trim()) return
+    
+    setIsAddingTodo(true)
+    try {
+      await addTodoItem(task.id, newTodoText.trim())
+      toast.success("Todo item added successfully")
+      setNewTodoText("")
+      
+      // Refresh the task data
+      const updatedTask = tasks.find(t => t.id === taskId)
+      if (updatedTask) {
+        setTask(updatedTask)
+      }
+    } catch (error) {
+      console.error('Error adding todo item:', error)
+      toast.error("Failed to add todo item")
+    } finally {
+      setIsAddingTodo(false)
+    }
+  }
+
+  const handleDeleteTodo = async (todoId: string) => {
+    if (!task) return
+    
+    try {
+      await deleteTodoItem(task.id, todoId)
+      toast.success("Todo item deleted successfully")
+      
+      // Refresh the task data
+      const updatedTask = tasks.find(t => t.id === taskId)
+      if (updatedTask) {
+        setTask(updatedTask)
+      }
+    } catch (error) {
+      console.error('Error deleting todo item:', error)
+      toast.error("Failed to delete todo item")
     }
   }
 
@@ -324,18 +367,41 @@ export default function TaskDetailsPage() {
               </Card>
 
               {/* Todo List */}
-              {task.todoList && task.todoList.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <CheckSquare className="h-5 w-5" />
-                      To-Do List ({task.todoList.filter(todo => todo.status === 'completed').length}/{task.todoList.length})
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CheckSquare className="h-5 w-5" />
+                    To-Do List {task.todoList && task.todoList.length > 0 && `(${task.todoList.filter(todo => todo.status === 'completed').length}/${task.todoList.length})`}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {/* Add new todo input */}
+                  <div className="flex gap-2 mb-4">
+                    <Input
+                      placeholder="Add a new todo item..."
+                      value={newTodoText}
+                      onChange={(e) => setNewTodoText(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          handleAddTodo()
+                        }
+                      }}
+                      disabled={isAddingTodo}
+                    />
+                    <Button 
+                      onClick={handleAddTodo}
+                      disabled={isAddingTodo || !newTodoText.trim()}
+                      size="icon"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {/* Todo items list */}
+                  {task.todoList && task.todoList.length > 0 ? (
                     <div className="space-y-3">
                       {task.todoList.map((todo) => (
-                        <div key={todo.id} className="flex items-center gap-3 p-3 rounded-lg border">
+                        <div key={todo.id} className="flex items-center gap-3 p-3 rounded-lg border group hover:shadow-sm transition-shadow">
                           <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-medium ${
                             todo.status === 'completed' 
                               ? 'bg-green-500' 
@@ -369,12 +435,24 @@ export default function TaskDetailsPage() {
                               <SelectItem value="completed">Completed</SelectItem>
                             </SelectContent>
                           </Select>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => handleDeleteTodo(todo.id)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
                         </div>
                       ))}
                     </div>
-                  </CardContent>
-                </Card>
-              )}
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No todo items yet. Add one above to get started!
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
 
               {/* Labels and Tags */}
               {((task.labels && task.labels.length > 0) || (task.tags && task.tags.length > 0)) && (

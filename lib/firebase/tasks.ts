@@ -345,3 +345,65 @@ export const updateTodoStatus = async (taskId: string, todoId: string, status: '
     throw error;
   }
 };
+
+// Add a new todo item to a task
+export const addTodoItem = async (taskId: string, todoText: string): Promise<TodoItem> => {
+  if (!db) {
+    throw new Error('Firebase is not properly configured');
+  }
+
+  try {
+    const taskRef = doc(db, COLLECTION_NAME, taskId);
+    const taskDoc = await getDoc(taskRef);
+    
+    if (!taskDoc.exists()) {
+      throw new Error('Task not found');
+    }
+
+    const task = convertDocToTask(taskDoc);
+    const newTodo: TodoItem = {
+      id: `todo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      text: todoText,
+      status: 'pending'
+    };
+
+    const updatedTodoList = [...(task.todoList || []), newTodo];
+
+    await updateDoc(taskRef, {
+      todoList: updatedTodoList,
+      updatedAt: serverTimestamp(),
+    });
+
+    return newTodo;
+  } catch (error) {
+    console.error('Error adding todo item:', error);
+    throw error;
+  }
+};
+
+// Delete a todo item from a task
+export const deleteTodoItem = async (taskId: string, todoId: string) => {
+  if (!db) {
+    throw new Error('Firebase is not properly configured');
+  }
+
+  try {
+    const taskRef = doc(db, COLLECTION_NAME, taskId);
+    const taskDoc = await getDoc(taskRef);
+    
+    if (!taskDoc.exists()) {
+      throw new Error('Task not found');
+    }
+
+    const task = convertDocToTask(taskDoc);
+    const updatedTodoList = task.todoList?.filter(todo => todo.id !== todoId) || [];
+
+    await updateDoc(taskRef, {
+      todoList: updatedTodoList,
+      updatedAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error('Error deleting todo item:', error);
+    throw error;
+  }
+};
