@@ -5,6 +5,7 @@ import {
   updateDoc, 
   deleteDoc, 
   getDocs, 
+  getDoc,
   query, 
   where, 
   onSnapshot,
@@ -16,7 +17,7 @@ import {
   type FieldValue
 } from 'firebase/firestore';
 import { app, isFirebaseConfigured } from '@/lib/firebase/config';
-import type { Task } from '@/types/task';
+import type { Task, TodoItem } from '@/types/task';
 
 const COLLECTION_NAME = 'tasks';
 const db: Firestore | null = app && isFirebaseConfigured() ? getFirestore(app) : null;
@@ -24,6 +25,25 @@ const db: Firestore | null = app && isFirebaseConfigured() ? getFirestore(app) :
 // Convert Firestore document to Task type
 const convertDocToTask = (doc: QueryDocumentSnapshot<DocumentData>): Task => {
   const data = doc.data();
+  
+  // Handle migration from string[] to TodoItem[]
+  let todoList: TodoItem[] = [];
+  if (data.todoList) {
+    if (Array.isArray(data.todoList) && data.todoList.length > 0) {
+      if (typeof data.todoList[0] === 'string') {
+        // Migrate from string[] to TodoItem[]
+        todoList = data.todoList.map((text: string, index: number) => ({
+          id: `todo-${index}`,
+          text,
+          status: 'pending' as const
+        }));
+      } else {
+        // Already TodoItem[]
+        todoList = data.todoList;
+      }
+    }
+  }
+  
   return {
     id: doc.id,
     title: data.title,
@@ -31,7 +51,7 @@ const convertDocToTask = (doc: QueryDocumentSnapshot<DocumentData>): Task => {
     date: data.date,
     status: data.status,
     assignee: data.assignee,
-    todoList: data.todoList || [],
+    todoList,
     labels: data.labels || [],
     tags: data.tags || [],
     type: data.type,
@@ -293,6 +313,35 @@ export const toggleTaskCompletion = async (taskId: string, status: 'completed' |
     await updateDoc(taskRef, updateData);
   } catch (error) {
     console.error('Error toggling task completion:', error);
+    throw error;
+  }
+};
+
+// Update todo item status
+export const updateTodoStatus = async (taskId: string, todoId: string, status: 'pending' | 'in_progress' | 'completed') => {
+  if (!db) {
+    throw new Error('Firebase is not properly configured');
+  }
+
+  try {
+    const taskRef = doc(db, COLLECTION_NAME, taskId);
+    const taskDoc = await getDoc(taskRef);
+    
+    if (!taskDoc.exists()) {
+      throw new Error('Task not found');
+    }
+
+    const task = convertDocToTask(taskDoc);
+    const updatedTodoList = task.todoList?.map(todo => 
+      todo.id === todoId ? { ...todo, status } : todo
+    ) || [];
+
+    await updateDoc(taskRef, {
+      todoList: updatedTodoList,
+      updatedAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error('Error updating todo status:', error);
     throw error;
   }
 };

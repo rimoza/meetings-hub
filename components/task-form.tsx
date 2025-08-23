@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import type { Task } from "@/types/task"
+import type { Task, TodoItem } from "@/types/task"
 import { useMeetings } from "@/hooks/use-meetings"
 
 interface TaskFormProps {
@@ -42,7 +42,7 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, meetingId }: TaskFor
     type: "task" as Task["type"],
     priority: "medium" as Task["priority"],
     meetingId: meetingId || "",
-    todoList: [] as string[],
+    todoList: [] as TodoItem[],
     labels: [] as string[],
     tags: [] as string[],
   })
@@ -98,9 +98,14 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, meetingId }: TaskFor
 
   const handleAddTodo = () => {
     if (newTodo.trim()) {
+      const newTodoItem: TodoItem = {
+        id: `todo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        text: newTodo.trim(),
+        status: 'pending'
+      }
       setFormData(prev => ({
         ...prev,
-        todoList: [...prev.todoList, newTodo.trim()]
+        todoList: [...prev.todoList, newTodoItem]
       }))
       setNewTodo("")
     }
@@ -292,8 +297,19 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, meetingId }: TaskFor
             {formData.todoList.length > 0 && (
               <div className="space-y-1 mt-2">
                 {formData.todoList.map((todo, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 bg-muted rounded">
-                    <span className="text-sm">{todo}</span>
+                  <div key={todo.id} className="flex items-center justify-between p-2 bg-muted rounded">
+                    <div className="flex items-center gap-2">
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        todo.status === 'completed' 
+                          ? 'bg-green-100 text-green-800' 
+                          : todo.status === 'in_progress'
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {todo.status}
+                      </span>
+                      <span className="text-sm">{todo.text}</span>
+                    </div>
                     <Button
                       type="button"
                       variant="ghost"

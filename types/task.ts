@@ -1,3 +1,9 @@
+export interface TodoItem {
+  id: string
+  text: string
+  status: "pending" | "in_progress" | "completed"
+}
+
 export interface Task {
   id: string
   title: string
@@ -5,7 +11,7 @@ export interface Task {
   date: string
   status: "pending" | "in_progress" | "completed" | "cancelled"
   assignee?: string
-  todoList?: string[]
+  todoList?: TodoItem[]
   labels?: string[]
   tags?: string[]
   type: "task" | "follow_up"
@@ -27,3 +33,4 @@ export interface TaskFilters {
 export type TaskStatus = "pending" | "in_progress" | "completed" | "cancelled"
 export type TaskType = "task" | "follow_up"
 export type TaskPriority = "low" | "medium" | "high"
+export type TodoStatus = "pending" | "in_progress" | "completed"

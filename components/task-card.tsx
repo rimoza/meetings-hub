@@ -166,9 +166,16 @@ export function TaskCard({ task, onEdit, onDelete, onToggleComplete, onChangeSta
               To-Do ({task.todoList.length} items)
             </div>
             <div className="space-y-1">
-              {task.todoList.slice(0, 3).map((todo, index) => (
-                <div key={index} className="text-xs p-1 bg-muted rounded text-muted-foreground">
-                  • {todo}
+              {task.todoList.slice(0, 3).map((todo) => (
+                <div key={todo.id} className="flex items-center gap-2 text-xs p-1 bg-muted rounded text-muted-foreground">
+                  <span className={`w-2 h-2 rounded-full ${
+                    todo.status === 'completed' 
+                      ? 'bg-green-500' 
+                      : todo.status === 'in_progress'
+                      ? 'bg-blue-500'
+                      : 'bg-gray-400'
+                  }`} />
+                  <span className={todo.status === 'completed' ? 'line-through' : ''}>{todo.text}</span>
                 </div>
               ))}
               {task.todoList.length > 3 && (

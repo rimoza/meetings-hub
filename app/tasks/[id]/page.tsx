@@ -6,8 +6,10 @@ import { ArrowLeft, Edit, Trash2, CheckSquare, Clock, AlertCircle, Calendar, Use
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { TaskForm } from "@/components/task-form"
 import { useTasks } from "@/hooks/use-tasks"
+import { updateTodoStatus } from "@/lib/firebase/tasks"
 import { useMeetings } from "@/hooks/use-meetings"
 import { useAuth } from "@/contexts/auth-context"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -36,7 +38,6 @@ export default function TaskDetailsPage() {
   
   const [task, setTask] = useState<Task | null>(null)
   const [isEditFormOpen, setIsEditFormOpen] = useState(false)
-  const [completedTodos, setCompletedTodos] = useState<Set<number>>(new Set())
 
   useEffect(() => {
     const foundTask = tasks.find(t => t.id === taskId)
@@ -82,16 +83,22 @@ export default function TaskDetailsPage() {
     window.location.href = "/login"
   }
 
-  const toggleTodoComplete = (index: number) => {
-    setCompletedTodos(prev => {
-      const newSet = new Set(prev)
-      if (newSet.has(index)) {
-        newSet.delete(index)
-      } else {
-        newSet.add(index)
+  const handleTodoStatusChange = async (todoId: string, status: 'pending' | 'in_progress' | 'completed') => {
+    if (!task) return
+    
+    try {
+      await updateTodoStatus(task.id, todoId, status)
+      toast.success(`Todo item status updated to ${status}`)
+      
+      // Refresh the task data
+      const updatedTask = tasks.find(t => t.id === taskId)
+      if (updatedTask) {
+        setTask(updatedTask)
       }
-      return newSet
-    })
+    } catch (error) {
+      console.error('Error updating todo status:', error)
+      toast.error("Failed to update todo status")
+    }
   }
 
   const getStatusIcon = (status: Task["status"]) => {
@@ -322,26 +329,46 @@ export default function TaskDetailsPage() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <CheckSquare className="h-5 w-5" />
-                      To-Do List ({task.todoList.filter((_, index) => completedTodos.has(index)).length}/{task.todoList.length})
+                      To-Do List ({task.todoList.filter(todo => todo.status === 'completed').length}/{task.todoList.length})
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-2">
-                      {task.todoList.map((todo, index) => (
-                        <div key={index} className="flex items-center gap-3 p-2 rounded-lg border">
-                          <button
-                            onClick={() => toggleTodoComplete(index)}
-                            className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
-                              completedTodos.has(index)
-                                ? 'bg-green-500 border-green-500 text-white'
-                                : 'border-gray-300 hover:border-gray-400'
-                            }`}
-                          >
-                            {completedTodos.has(index) && <CheckCircle className="w-3 h-3" />}
-                          </button>
-                          <span className={`text-sm ${completedTodos.has(index) ? 'line-through text-muted-foreground' : ''}`}>
-                            {todo}
+                    <div className="space-y-3">
+                      {task.todoList.map((todo) => (
+                        <div key={todo.id} className="flex items-center gap-3 p-3 rounded-lg border">
+                          <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-medium ${
+                            todo.status === 'completed' 
+                              ? 'bg-green-500' 
+                              : todo.status === 'in_progress'
+                              ? 'bg-blue-500'
+                              : 'bg-gray-400'
+                          }`}>
+                            {todo.status === 'completed' ? (
+                              <CheckCircle className="w-4 h-4" />
+                            ) : todo.status === 'in_progress' ? (
+                              <Clock className="w-4 h-4" />
+                            ) : (
+                              <AlertCircle className="w-4 h-4" />
+                            )}
+                          </div>
+                          <span className={`flex-1 text-sm ${todo.status === 'completed' ? 'line-through text-muted-foreground' : ''}`}>
+                            {todo.text}
                           </span>
+                          <Select 
+                            value={todo.status} 
+                            onValueChange={(status: 'pending' | 'in_progress' | 'completed') => 
+                              handleTodoStatusChange(todo.id, status)
+                            }
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pending">Pending</SelectItem>
+                              <SelectItem value="in_progress">In Progress</SelectItem>
+                              <SelectItem value="completed">Completed</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                       ))}
                     </div>
