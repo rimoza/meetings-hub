@@ -1,12 +1,21 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
+import { useAuth } from "@/contexts/auth-context"
 import type { Task, TaskFilters } from "@/types/task"
-
-const STORAGE_KEY = "meetings-hub-tasks"
+import {
+  subscribeTasks,
+  createTask as createTaskFirebase,
+  updateTask as updateTaskFirebase,
+  deleteTask as deleteTaskFirebase,
+  toggleTaskCompletion as toggleTaskFirebase
+} from "@/lib/firebase/tasks"
 
 export function useTasks() {
+  const { user } = useAuth()
   const [tasks, setTasks] = useState<Task[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [filters, setFilters] = useState<TaskFilters>({
     search: "",
     status: "all",
@@ -14,22 +23,25 @@ export function useTasks() {
     priority: "all",
   })
 
+  // Subscribe to real-time task updates
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored)
-        setTasks(parsed)
-      } catch (error) {
-        console.error("Failed to parse stored tasks:", error)
-      }
+    if (!user?.uid) {
+      setTasks([])
+      setIsLoading(false)
+      return
     }
-  }, [])
 
-  const saveTasks = (newTasks: Task[]) => {
-    setTasks(newTasks)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newTasks))
-  }
+    setIsLoading(true)
+    
+    const unsubscribe = subscribeTasks(user.uid, (tasks) => {
+      console.log(`Received ${tasks.length} tasks from Firebase`)
+      setTasks(tasks)
+      setIsLoading(false)
+    })
+
+    return () => unsubscribe()
+  }, [user?.uid])
+
 
   const filteredTasks = useMemo(() => {
     return tasks.filter((task) => {
@@ -73,72 +85,104 @@ export function useTasks() {
     [tasks]
   )
 
-  const createTask = (taskData: Omit<Task, "id">) => {
-    const newTask: Task = {
-      ...taskData,
-      id: Date.now().toString(),
+  // Create a new task
+  const createTask = async (taskData: Omit<Task, "id" | "createdAt" | "updatedAt" | "completedAt">) => {
+    if (!user?.uid) {
+      setError("User not authenticated")
+      return
     }
-    saveTasks([...tasks, newTask])
-    return newTask
-  }
 
-  const updateTask = (id: string, updates: Partial<Omit<Task, "id">>) => {
-    const updatedTasks = tasks.map((task) => {
-      if (task.id === id) {
-        const updatedTask = { 
-          ...task, 
-          ...updates,
-          updatedAt: new Date()
-        }
-        if (updates.status === "completed" && task.status !== "completed") {
-          updatedTask.completedAt = new Date()
-        }
-        return updatedTask
+    try {
+      setError(null)
+      await createTaskFirebase(user.uid, taskData)
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message)
+        throw err
+      } else {
+        setError("An unknown error occurred")
+        throw err
       }
-      return task
-    })
-    saveTasks(updatedTasks)
-  }
-
-  const deleteTask = (id: string) => {
-    saveTasks(tasks.filter((task) => task.id !== id))
-  }
-
-  const toggleTaskCompletion = (id: string) => {
-    const task = tasks.find(t => t.id === id)
-    if (task) {
-      updateTask(id, {
-        status: task.status === "completed" ? "pending" : "completed"
-      })
     }
   }
 
-  const addTodoItem = (taskId: string, todoItem: string) => {
+  // Update a task
+  const updateTask = async (id: string, updates: Partial<Omit<Task, "id" | "createdAt">>) => {
+    try {
+      setError(null)
+      await updateTaskFirebase(id, updates)
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message)
+        throw err
+      } else {
+        setError("An unknown error occurred")
+        throw err
+      }
+    }
+  }
+
+  // Delete a task
+  const deleteTask = async (id: string) => {
+    try {
+      setError(null)
+      await deleteTaskFirebase(id)
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message)
+        throw err
+      } else {
+        setError("An unknown error occurred")
+        throw err
+      }
+    }
+  }
+
+  // Toggle task completion
+  const toggleTaskCompletion = async (id: string) => {
+    const task = tasks.find(t => t.id === id)
+    if (!task) return
+
+    try {
+      setError(null)
+      await toggleTaskFirebase(id, task.status === "completed" ? "pending" : "completed")
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message)
+        throw err
+      } else {
+        setError("An unknown error occurred")
+        throw err
+      }
+    }
+  }
+
+  const addTodoItem = async (taskId: string, todoItem: string) => {
     const task = tasks.find(t => t.id === taskId)
     if (task) {
       const currentTodos = task.todoList || []
-      updateTask(taskId, {
+      await updateTask(taskId, {
         todoList: [...currentTodos, todoItem]
       })
     }
   }
 
-  const removeTodoItem = (taskId: string, todoIndex: number) => {
+  const removeTodoItem = async (taskId: string, todoIndex: number) => {
     const task = tasks.find(t => t.id === taskId)
     if (task && task.todoList) {
       const updatedTodos = task.todoList.filter((_, index) => index !== todoIndex)
-      updateTask(taskId, {
+      await updateTask(taskId, {
         todoList: updatedTodos
       })
     }
   }
 
-  const updateTodoItem = (taskId: string, todoIndex: number, newValue: string) => {
+  const updateTodoItem = async (taskId: string, todoIndex: number, newValue: string) => {
     const task = tasks.find(t => t.id === taskId)
     if (task && task.todoList) {
       const updatedTodos = [...task.todoList]
       updatedTodos[todoIndex] = newValue
-      updateTask(taskId, {
+      await updateTask(taskId, {
         todoList: updatedTodos
       })
     }
@@ -160,5 +204,7 @@ export function useTasks() {
     addTodoItem,
     removeTodoItem,
     updateTodoItem,
+    isLoading,
+    error,
   }
 }

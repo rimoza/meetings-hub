@@ -52,12 +52,19 @@ export const createTask = async (
   }
   
   try {
-    const docRef = await addDoc(collection(db, COLLECTION_NAME), {
+    // Ensure required fields are present and clean undefined values
+    const cleanTaskData = {
       ...taskData,
       userId,
+      todoList: taskData.todoList || [],
+      labels: taskData.labels || [],
+      tags: taskData.tags || [],
+      assignee: taskData.assignee || null,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
-    });
+    };
+    
+    const docRef = await addDoc(collection(db, COLLECTION_NAME), cleanTaskData);
     return docRef.id;
   } catch (error) {
     console.error('Error creating task:', error);
@@ -125,8 +132,10 @@ export const createTaskFromMeetingNote = async (
       type: 'follow_up' as const,
       meetingId,
       priority,
-      assignee: assignee || undefined,
-      todoList: todoList.length > 0 ? todoList : undefined,
+      assignee: assignee || null,
+      todoList: todoList.length > 0 ? todoList : [],
+      labels: [],
+      tags: [],
       userId,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
