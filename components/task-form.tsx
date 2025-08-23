@@ -61,7 +61,7 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, meetingId }: TaskFor
         assignee: task.assignee || "",
         type: task.type,
         priority: task.priority,
-        meetingId: task.meetingId || "",
+        meetingId: task.meetingId || "none",
         todoList: task.todoList || [],
         labels: task.labels || [],
         tags: task.tags || [],
@@ -77,7 +77,7 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, meetingId }: TaskFor
         assignee: "",
         type: "task",
         priority: "medium",
-        meetingId: "",
+        meetingId: "none",
         todoList: [],
         labels: [],
         tags: [],
@@ -89,6 +89,7 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, meetingId }: TaskFor
     e.preventDefault()
     onSubmit({
       ...formData,
+      meetingId: formData.meetingId === "none" ? "" : formData.meetingId,
       createdAt: task?.createdAt || new Date(),
       updatedAt: new Date(),
     })
@@ -263,7 +264,7 @@ export function TaskForm({ task, isOpen, onClose, onSubmit, meetingId }: TaskFor
                     <SelectValue placeholder="Select meeting" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                     {meetings.map((meeting) => (
                       <SelectItem key={meeting.id} value={meeting.id}>
                         {meeting.title}
