@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Plus } from "lucide-react"
+import { Plus, LogOut, User as UserIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { SidebarTrigger } from "@/components/ui/sidebar"
@@ -22,7 +22,6 @@ import { toast } from "sonner"
 import { SidebarNav } from "@/components/sidebar-nav"
 import { MeetingForm } from "@/components/meeting-form"
 import { ProtectedRoute } from "@/components/protected-route"
-import { LogOut, User as UserIcon } from "lucide-react"
 
 export default function TodayMeetingsPage() {
   const { user, logout } = useAuth()

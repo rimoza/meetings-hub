@@ -14,7 +14,6 @@ import { Input } from "@/components/ui/input"
 import { useMeetings } from "@/hooks/use-meetings"
 import { useAuth } from "@/contexts/auth-context"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { SidebarTrigger } from "@/components/ui/sidebar"
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -23,7 +22,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel
 } from "@/components/ui/dropdown-menu"
-import { SidebarNav } from "@/components/sidebar-nav"
 import { ProtectedRoute } from "@/components/protected-route"
 import type { Task } from "@/types/task"
 import { toast } from "sonner"
@@ -34,8 +32,8 @@ export default function TaskDetailsPage() {
   const taskId = params.id as string
   
   const { user, logout } = useAuth()
-  const { todayMeetings, upcomingMeetings, meetings } = useMeetings()
-  const { tasks, updateTask, deleteTask, toggleTaskCompletion, pendingTasks, inProgressTasks } = useTasks()
+  const { meetings } = useMeetings()
+  const { tasks, updateTask, deleteTask, toggleTaskCompletion } = useTasks()
   
   const [task, setTask] = useState<Task | null>(null)
   const [isEditFormOpen, setIsEditFormOpen] = useState(false)
@@ -207,95 +205,90 @@ export default function TaskDetailsPage() {
 
   return (
     <ProtectedRoute>
-      <div className="flex w-full h-screen">
-        {/* Sidebar */}
-        <SidebarNav 
-          onCreateMeeting={() => {}} 
-          todayCount={todayMeetings.length}
-          upcomingCount={upcomingMeetings.length}
-          tasksCount={pendingTasks.length + inProgressTasks.length}
-        />
-
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Header */}
-          <header className="border-b bg-card">
-            <div className="px-3 py-3 sm:px-4 sm:py-4">
-              <div className="flex items-center gap-2">
-                <SidebarTrigger className="md:hidden" />
-                <div className="flex-1">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => router.push("/tasks")}
-                          className="p-1"
-                        >
-                          <ArrowLeft className="h-4 w-4" />
-                        </Button>
-                        <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground truncate">
-                          {task.title}
-                        </h1>
-                      </div>
-                      <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
-                        Task Details
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 ml-2">
-                      <Button 
-                        onClick={handleEdit}
-                        size="sm"
-                        variant="outline"
-                        className="hidden sm:inline-flex"
-                      >
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
-                      </Button>
-                      <Button
-                        onClick={handleEdit}
-                        size="icon"
-                        variant="outline"
-                        className="sm:hidden h-8 w-8"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      
-                      {/* User Menu */}
-                      {user && (
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                              <UserIcon className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-56">
-                            <DropdownMenuLabel>
-                              <div className="flex flex-col space-y-1">
-                                <p className="text-sm font-medium">{user.name}</p>
-                                <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-                              </div>
-                            </DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={handleLogout} className="text-red-600 dark:text-red-400">
-                              <LogOut className="mr-2 h-4 w-4" />
-                              <span>Logout</span>
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      )}
-                      
-                      <ThemeToggle />
-                    </div>
-                  </div>
+      <div className="min-h-screen w-full max-w-4xl mx-auto bg-background">
+        {/* Header with Back Button */}
+        <header className="border-b bg-card sticky top-0 z-50">
+          <div className="px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => router.push("/tasks")}
+                  className="flex items-center gap-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  <span className="hidden sm:inline">Back to Tasks</span>
+                  <span className="sm:hidden">Back</span>
+                </Button>
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground truncate">
+                    {task.title}
+                  </h1>
+                  <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
+                    Task Details
+                  </p>
                 </div>
               </div>
+              
+              {/* Action buttons and User Menu */}
+              <div className="flex items-center gap-2">
+                <Button 
+                  onClick={handleEdit}
+                  size="sm"
+                  variant="outline"
+                  className="hidden sm:inline-flex"
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit
+                </Button>
+                <Button
+                  onClick={handleEdit}
+                  size="icon"
+                  variant="outline"
+                  className="sm:hidden h-8 w-8"
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+                
+                <ThemeToggle />
+                
+                {/* User Menu */}
+                {user && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="relative h-9 w-9 rounded-full bg-primary/10">
+                        <UserIcon className="h-4 w-4" />
+                        <span className="sr-only">Toggle user menu</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                      <DropdownMenuLabel className="font-normal">
+                        <div className="flex flex-col space-y-1">
+                          <p className="text-sm font-medium leading-none">
+                            {user?.name || user?.email}
+                          </p>
+                          <p className="text-xs leading-none text-muted-foreground">
+                            {user?.email}
+                          </p>
+                        </div>
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Log out
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
             </div>
-          </header>
+          </div>
+        </header>
 
-          <main className="flex-1 overflow-auto px-3 py-4 sm:px-4 sm:py-6 md:px-6 md:py-8">
-            <div className="max-w-4xl mx-auto space-y-6">
+        {/* Main Content Area */}
+        <main className="w-full max-w-4xl mx-auto my-4">
+            <div className="w-full space-y-6">
               
               {/* Task Overview Card */}
               <Card>
@@ -532,8 +525,7 @@ export default function TaskDetailsPage() {
               </Card>
 
             </div>
-          </main>
-        </div>
+        </main>
       </div>
 
       {/* Edit Task Form */}

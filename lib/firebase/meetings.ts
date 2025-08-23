@@ -243,6 +243,34 @@ export const toggleMeetingCompletion = async (meetingId: string, completed: bool
   }
 };
 
+// Get a specific meeting for a user
+export const getMeeting = async (meetingId: string, userId: string): Promise<Meeting | null> => {
+  if (!db) {
+    throw new Error('Firebase is not properly configured');
+  }
+  
+  try {
+    const meetingRef = doc(db, COLLECTION_NAME, meetingId);
+    const meetingDoc = await getDoc(meetingRef);
+    
+    if (!meetingDoc.exists()) {
+      return null;
+    }
+    
+    const meetingData = meetingDoc.data();
+    
+    // Ensure this meeting belongs to the requesting user
+    if (meetingData.userId !== userId) {
+      throw new Error('Unauthorized access to meeting');
+    }
+    
+    return convertDocToMeeting(meetingDoc);
+  } catch (error) {
+    console.error('Error fetching meeting:', error);
+    throw error;
+  }
+};
+
 // Add a note to a meeting and create task if it's a follow-up
 export const addMeetingNote = async (
   userId: string,
