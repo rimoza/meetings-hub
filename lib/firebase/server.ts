@@ -1,28 +1,30 @@
-import { initializeApp, getApps, cert } from 'firebase-admin/app'
-import { getFirestore } from 'firebase-admin/firestore'
+import { initializeApp, getApps } from 'firebase/app'
+import { getFirestore, collection, query, where, orderBy, getDocs, doc, getDoc } from 'firebase/firestore'
 import type { Meeting } from '@/types/meeting'
 import type { Task } from '@/types/task'
 
-// Initialize Firebase Admin SDK for server-side operations
-if (!getApps().length) {
-  initializeApp({
-    credential: cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    })
-  })
+// Firebase configuration - use the same config as client
+const firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 }
 
-const db = getFirestore()
+// Initialize Firebase for server-side operations
+const app = getApps().length === 0 ? initializeApp(firebaseConfig, 'server') : getApps()[0]
+const db = getFirestore(app)
 
 export async function getMeetings(userId: string): Promise<Meeting[]> {
   try {
-    const snapshot = await db
-      .collection('meetings')
-      .where('userId', '==', userId)
-      .orderBy('date', 'desc')
-      .get()
+    const q = query(
+      collection(db, 'meetings'),
+      where('userId', '==', userId),
+      orderBy('date', 'desc')
+    )
+    const snapshot = await getDocs(q)
     
     return snapshot.docs.map(doc => {
       const data = doc.data()
@@ -42,13 +44,14 @@ export async function getMeetings(userId: string): Promise<Meeting[]> {
 
 export async function getMeeting(id: string): Promise<Meeting | null> {
   try {
-    const doc = await db.collection('meetings').doc(id).get()
+    const docRef = doc(db, 'meetings', id)
+    const docSnap = await getDoc(docRef)
     
-    if (!doc.exists) return null
+    if (!docSnap.exists()) return null
     
-    const data = doc.data()!
+    const data = docSnap.data()
     return {
-      id: doc.id,
+      id: docSnap.id,
       ...data,
       date: data.date?.toDate ? data.date.toDate().toISOString().split('T')[0] : data.date,
       createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
@@ -62,11 +65,12 @@ export async function getMeeting(id: string): Promise<Meeting | null> {
 
 export async function getTasks(userId: string): Promise<Task[]> {
   try {
-    const snapshot = await db
-      .collection('tasks')
-      .where('userId', '==', userId)
-      .orderBy('createdAt', 'desc')
-      .get()
+    const q = query(
+      collection(db, 'tasks'),
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc')
+    )
+    const snapshot = await getDocs(q)
     
     return snapshot.docs.map(doc => {
       const data = doc.data()
@@ -86,13 +90,14 @@ export async function getTasks(userId: string): Promise<Task[]> {
 
 export async function getTask(id: string): Promise<Task | null> {
   try {
-    const doc = await db.collection('tasks').doc(id).get()
+    const docRef = doc(db, 'tasks', id)
+    const docSnap = await getDoc(docRef)
     
-    if (!doc.exists) return null
+    if (!docSnap.exists()) return null
     
-    const data = doc.data()!
+    const data = docSnap.data()
     return {
-      id: doc.id,
+      id: docSnap.id,
       ...data,
       createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
       updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : new Date(data.updatedAt),

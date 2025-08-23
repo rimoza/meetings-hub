@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createTask as createTaskFirebase, updateTask as updateTaskFirebase, deleteTask as deleteTaskFirebase, toggleTaskCompletion as toggleTaskFirebase } from '@/lib/firebase/tasks'
+import { createTask as createTaskFirebase, updateTask as updateTaskFirebase, deleteTask as deleteTaskFirebase } from '@/lib/firebase/tasks'
 import type { Task } from '@/types/task'
 
 export async function createTask(userId: string, taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'completedAt'>) {
@@ -58,7 +58,7 @@ export async function deleteTask(taskId: string) {
 
 export async function toggleTaskCompletion(taskId: string, status: 'pending' | 'in_progress' | 'completed' | 'cancelled') {
   try {
-    await toggleTaskFirebase(taskId, status)
+    await updateTaskFirebase(taskId, { status })
     
     revalidatePath('/')
     revalidatePath('/tasks')

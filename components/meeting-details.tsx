@@ -155,7 +155,7 @@ export function MeetingDetails({ meeting, onBack, onEdit, onDelete, onToggleComp
         dueDate: taskDueDate || undefined
       } : undefined
 
-      onAddNote(meeting.id, newNoteText.trim(), noteType, undefined, taskDetails)
+      onAddNote(meeting.id, newNoteText.trim(), noteType as 'regular' | 'follow-up', undefined, taskDetails)
       setNewNoteText("")
       setNoteType('regular')
       setTaskAssignee("")

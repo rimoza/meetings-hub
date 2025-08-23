@@ -40,7 +40,6 @@ export function DashboardClient() {
     filters,
     setMeetings,
     setFilters,
-    addMeeting,
     updateMeeting,
     removeMeeting,
     getTodayMeetings,
@@ -104,11 +103,9 @@ export function DashboardClient() {
         updateMeeting(editingMeeting.id, meetingData)
         toast.success("Meeting updated successfully")
       } else {
-        const newMeeting = await createMeetingFirebase(user!.uid, meetingData)
-        if (newMeeting) {
-          addMeeting(newMeeting)
-          toast.success("Meeting created successfully")
-        }
+        await createMeetingFirebase(user!.uid, meetingData)
+        // Real-time subscription will automatically add the new meeting to the store
+        toast.success("Meeting created successfully")
       }
       setIsFormOpen(false)
       setEditingMeeting(undefined)

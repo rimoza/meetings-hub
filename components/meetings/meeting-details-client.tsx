@@ -44,7 +44,6 @@ export function MeetingDetailsClient({ initialMeeting }: MeetingDetailsClientPro
   } = useMeetingsStore()
   
   const { 
-    tasks,
     getPendingTasks,
     getInProgressTasks,
     setTasks 
@@ -108,7 +107,7 @@ export function MeetingDetailsClient({ initialMeeting }: MeetingDetailsClientPro
   const handleFormSubmit = async (meetingData: Omit<Meeting, "id">) => {
     try {
       if (editingMeeting) {
-        const { createdAt, updatedAt, ...updateData } = meetingData
+        const { ...updateData } = meetingData
         await updateMeetingFirebase(editingMeeting.id, updateData)
         updateMeeting(editingMeeting.id, updateData)
         toast.success("Meeting updated successfully")
@@ -171,7 +170,7 @@ export function MeetingDetailsClient({ initialMeeting }: MeetingDetailsClientPro
     }
   ) => {
     try {
-      await addMeetingNoteFirebase(meetingId, noteContent, noteType, author, taskDetails)
+      await addMeetingNoteFirebase(user!.uid, meetingId, noteContent, noteType, author, taskDetails)
       // The meeting will be updated through real-time subscription
     } catch (error) {
       console.error("Error adding note:", error)

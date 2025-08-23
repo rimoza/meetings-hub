@@ -42,16 +42,12 @@ export function TasksPageClient() {
     filters,
     setTasks,
     setFilters,
-    addTask,
     updateTask,
     removeTask,
     getPendingTasks,
     getInProgressTasks,
     getCompletedTasks,
     getFollowUpTasks,
-    addTodoItem,
-    updateTodoItem,
-    removeTodoItem
   } = useTasksStore()
 
   const { 
@@ -101,6 +97,11 @@ export function TasksPageClient() {
     setIsFormOpen(true)
   }
 
+  const handleCreateMeeting = () => {
+    // Navigate to dashboard to create meeting
+    window.location.href = "/"
+  }
+
   const handleEditTask = (task: Task) => {
     setEditingTask(task)
     setIsFormOpen(true)
@@ -113,11 +114,9 @@ export function TasksPageClient() {
         updateTask(editingTask.id, taskData)
         toast.success("Task updated successfully")
       } else {
-        const newTask = await createTaskFirebase(user!.uid, taskData)
-        if (newTask) {
-          addTask(newTask)
-          toast.success("Task created successfully")
-        }
+        await createTaskFirebase(user!.uid, taskData)
+        // Real-time subscription will automatically add the new task to the store
+        toast.success("Task created successfully")
       }
       
       setIsFormOpen(false)
@@ -154,20 +153,6 @@ export function TasksPageClient() {
     }
   }
 
-  const handleAddTodoItem = (taskId: string, todoText: string) => {
-    addTodoItem(taskId, todoText)
-    toast.success("Todo item added")
-  }
-
-  const handleUpdateTodoItem = (taskId: string, todoIndex: number, updates: any) => {
-    updateTodoItem(taskId, todoIndex, updates)
-    toast.success("Todo item updated")
-  }
-
-  const handleRemoveTodoItem = (taskId: string, todoIndex: number) => {
-    removeTodoItem(taskId, todoIndex)
-    toast.success("Todo item removed")
-  }
 
   if (isLoading) {
     return <TasksLoading />
@@ -177,7 +162,7 @@ export function TasksPageClient() {
     <div className="flex w-full h-screen">
       {/* Sidebar */}
       <SidebarNav 
-        onCreateMeeting={() => {}} 
+        onCreateMeeting={handleCreateMeeting} 
         todayCount={todayMeetings.length}
         upcomingCount={upcomingMeetings.length}
         tasksCount={pendingTasks.length + inProgressTasks.length}
@@ -201,8 +186,24 @@ export function TasksPageClient() {
                     </p>
                   </div>
                   
-                  {/* User Menu */}
-                  <div className="flex items-center gap-2">
+                  {/* Action Buttons and User Menu */}
+                  <div className="flex items-center gap-2 ml-2">
+                    <Button 
+                      onClick={handleCreateTask}
+                      size="sm"
+                      className="hidden sm:inline-flex"
+                    >
+                      <CheckSquare className="h-4 w-4 mr-2" />
+                      <span className="hidden lg:inline">New Task</span>
+                      <span className="lg:hidden">New</span>
+                    </Button>
+                    <Button
+                      onClick={handleCreateTask}
+                      size="icon"
+                      className="sm:hidden h-8 w-8"
+                    >
+                      <CheckSquare className="h-4 w-4" />
+                    </Button>
                     <ThemeToggle />
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -294,13 +295,7 @@ export function TasksPageClient() {
           </div>
 
           {/* Controls */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mb-6">
-            <div className="flex gap-2">
-              <Button onClick={handleCreateTask} size="sm">
-                <CheckSquare className="h-4 w-4 mr-2" />
-                New Task
-              </Button>
-            </div>
+          <div className="flex justify-end items-center mb-6">
             <div className="flex gap-2 items-center">
               <TaskFilters filters={filters} onFiltersChange={setFilters} />
               <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
@@ -336,9 +331,6 @@ export function TasksPageClient() {
                   onEdit={handleEditTask}
                   onDelete={handleDeleteTask}
                   onToggleComplete={handleToggleCompletion}
-                  onAddTodoItem={handleAddTodoItem}
-                  onUpdateTodoItem={handleUpdateTodoItem}
-                  onRemoveTodoItem={handleRemoveTodoItem}
                 />
               ))}
             </div>
@@ -348,9 +340,6 @@ export function TasksPageClient() {
               onEdit={handleEditTask}
               onDelete={handleDeleteTask}
               onToggleComplete={handleToggleCompletion}
-              onAddTodoItem={handleAddTodoItem}
-              onUpdateTodoItem={handleUpdateTodoItem}
-              onRemoveTodoItem={handleRemoveTodoItem}
             />
           )}
         </main>

@@ -38,27 +38,17 @@ const applyFilters = (meetings: Meeting[], filters: MeetingFilters): Meeting[] =
       if (!matchesSearch) return false
     }
 
-    // Status filter
-    if (filters.status !== 'all' && meeting.status !== filters.status) return false
+    // Status filter - convert completed boolean to status string for filtering
+    if (filters.status !== 'all') {
+      const meetingStatus = meeting.completed ? 'completed' : 'pending'
+      if (meetingStatus !== filters.status) return false
+    }
 
     // Type filter  
     if (filters.type !== 'all' && meeting.type !== filters.type) return false
 
     // Priority filter
     if (filters.priority !== 'all' && meeting.priority !== filters.priority) return false
-
-    // Date range filter
-    if (filters.dateRange?.from) {
-      const meetingDate = new Date(meeting.date)
-      const fromDate = new Date(filters.dateRange.from)
-      if (meetingDate < fromDate) return false
-    }
-    
-    if (filters.dateRange?.to) {
-      const meetingDate = new Date(meeting.date)
-      const toDate = new Date(filters.dateRange.to)
-      if (meetingDate > toDate) return false
-    }
 
     return true
   })
@@ -80,8 +70,7 @@ export const useMeetingsStore = create<MeetingsStore>((set, get) => ({
     search: '',
     status: 'all',
     type: 'all',
-    priority: 'all',
-    dateRange: undefined
+    priority: 'all'
   },
 
   // Actions
