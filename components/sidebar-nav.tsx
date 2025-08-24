@@ -127,9 +127,9 @@ export function SidebarNav({
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <div className="flex items-center gap-2 px-2 py-2">
+        <div className="flex items-center gap-2">
           {/* Logo - Always visible */}
-          <div className="p-2 bg-primary rounded-lg shrink-0">
+          <div className="p-1 md:p-2 bg-primary rounded-lg shrink-0">
             <Calendar className="h-5 w-5 text-primary-foreground" />
           </div>
           
