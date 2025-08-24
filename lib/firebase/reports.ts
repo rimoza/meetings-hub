@@ -124,40 +124,52 @@ export const uploadFile = async (
   userId: string,
   file: File,
 ): Promise<{ name: string; url: string; size: number; type: string }> => {
-  if (!storage) {
-    throw new Error("Firebase Storage is not properly configured");
-  }
-
   try {
-    const fileName = `${Date.now()}-${file.name}`;
-    const filePath = `reports/${userId}/${fileName}`;
-    const fileRef = ref(storage, filePath);
-    
-    const snapshot = await uploadBytes(fileRef, file);
-    const downloadURL = await getDownloadURL(snapshot.ref);
-    
-    return {
-      name: file.name,
-      url: downloadURL,
-      size: file.size,
-      type: file.type,
-    };
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('userId', userId);
+
+    const response = await fetch('/api/upload-report', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Upload failed');
+    }
+
+    return await response.json();
   } catch (error) {
     console.error("Error uploading file:", error);
     throw error;
   }
 };
 
-export const deleteFile = async (fileUrl: string): Promise<void> => {
-  if (!storage) {
-    throw new Error("Firebase Storage is not properly configured");
-  }
+export const deleteFile = async (fileUrl: string, publicId?: string): Promise<void> => {
+  // If publicId is provided, delete from Cloudinary
+  if (publicId) {
+    try {
+      const response = await fetch(`/api/upload-report?publicId=${publicId}`, {
+        method: 'DELETE',
+      });
 
-  try {
-    const fileRef = ref(storage, fileUrl);
-    await deleteObject(fileRef);
-  } catch (error) {
-    console.error("Error deleting file:", error);
-    throw error;
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Delete failed');
+      }
+    } catch (error) {
+      console.error("Error deleting file from Cloudinary:", error);
+      throw error;
+    }
+  } else if (storage) {
+    // Fallback to Firebase Storage if no publicId
+    try {
+      const fileRef = ref(storage, fileUrl);
+      await deleteObject(fileRef);
+    } catch (error) {
+      console.error("Error deleting file from Firebase:", error);
+      throw error;
+    }
   }
 };
