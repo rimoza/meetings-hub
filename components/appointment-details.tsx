@@ -35,7 +35,7 @@ import {
   CheckCircle,
   XCircle,
   Mail,
-  Phone,
+  // Phone,
   ArrowLeft,
   FileText,
   Timer,
@@ -93,7 +93,7 @@ export default function AppointmentDetails({ appointmentId }: AppointmentDetails
           <div className="space-y-2">
             <h1 className="text-2xl font-semibold">Appointment Not Found</h1>
             <p className="text-muted-foreground">
-              The appointment you're looking for doesn't exist or may have been deleted.
+              The appointment you&apos;re looking for doesn&apos;t exist or may have been deleted.
             </p>
           </div>
           <Button onClick={() => router.push('/appointments')} className="mt-4">
@@ -276,7 +276,7 @@ export default function AppointmentDetails({ appointmentId }: AppointmentDetails
                   <AlertDialogHeader>
                     <AlertDialogTitle>Delete Appointment</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Are you sure you want to delete "{appointment.title}"? This action cannot be undone.
+                      Are you sure you want to delete &quot;{appointment.title}&quot;? This action cannot be undone.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>

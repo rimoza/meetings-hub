@@ -1,13 +1,14 @@
 import { Suspense } from 'react';
 import { Metadata } from 'next';
 import AppointmentDetails from '@/components/appointment-details';
-import { AlertCircle } from 'lucide-react';
+// import { AlertCircle } from 'lucide-react';
 
 interface AppointmentDetailsPageProps {
   params: { id: string };
 }
 
 export async function generateMetadata({ params }: AppointmentDetailsPageProps): Promise<Metadata> {
+  console.log('Generating metadata for appointment ID:', params.id);
   return {
     title: `Appointment Details - Kulan Space`,
     description: 'View and manage appointment details',
@@ -49,23 +50,23 @@ function AppointmentDetailsLoading() {
   );
 }
 
-function AppointmentDetailsError() {
-  return (
-    <div className="container mx-auto px-4 py-6 max-w-4xl">
-      <div className="text-center space-y-4">
-        <AlertCircle className="h-16 w-16 mx-auto text-destructive" />
-        <div className="space-y-2">
-          <h1 className="text-2xl font-semibold">Error Loading Appointment</h1>
-          <p className="text-muted-foreground">
-            There was an error loading the appointment details. Please try again.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
+// function AppointmentDetailsError() {
+//   return (
+//     <div className="container mx-auto px-4 py-6 max-w-4xl">
+//       <div className="text-center space-y-4">
+//         <AlertCircle className="h-16 w-16 mx-auto text-destructive" />
+//         <div className="space-y-2">
+//           <h1 className="text-2xl font-semibold">Error Loading Appointment</h1>
+//           <p className="text-muted-foreground">
+//             There was an error loading the appointment details. Please try again.
+//           </p>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
 
-export default function AppointmentDetailsPage({ params }: AppointmentDetailsPageProps) {
+export default function AppointmentDetailsPage({ params }: Readonly<AppointmentDetailsPageProps>) {
   return (
     <Suspense fallback={<AppointmentDetailsLoading />}>
       <div className="min-h-screen bg-background">
