@@ -1,0 +1,25 @@
+export interface Appointment {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  status: "scheduled" | "confirmed" | "cancelled" | "completed" | "no-show";
+  attendee: string;
+  attendeeEmail?: string;
+  duration?: number; // in minutes
+  location?: string;
+  description?: string;
+  reminderSent?: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface AppointmentFilters {
+  search: string;
+  status: "all" | "scheduled" | "confirmed" | "cancelled" | "completed" | "no-show";
+  date: "all" | "today" | "week" | "month";
+}
+
+export type AppointmentStatus = "scheduled" | "confirmed" | "cancelled" | "completed" | "no-show";
+
+export type ViewMode = "table" | "card";

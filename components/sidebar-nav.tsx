@@ -11,6 +11,7 @@ import {
   FileText,
   Users,
   CalendarDays,
+  UserCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -41,12 +42,14 @@ interface SidebarNavProps {
   todayCount?: number;
   upcomingCount?: number;
   tasksCount?: number;
+  appointmentsCount?: number;
 }
 
 export function SidebarNav({
   todayCount = 0,
   upcomingCount = 0,
   tasksCount = 0,
+  appointmentsCount = 0,
 }: Readonly<SidebarNavProps>) {
   const { isMobile, setOpenMobile } = useSidebar();
   const { isPermissionGranted, isRemindersEnabled } = useReminders();
@@ -83,6 +86,12 @@ export function SidebarNav({
       label: "Dashboard",
       icon: <Home className="h-4 w-4" />,
       count: null,
+    },
+    {
+      id: "/appointments",
+      label: "Appointments",
+      icon: <UserCheck className="h-4 w-4 text-green-500" />,
+      count: appointmentsCount,
     },
     {
       id: "/tasks",
