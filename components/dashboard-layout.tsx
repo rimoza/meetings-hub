@@ -33,7 +33,7 @@ export function DashboardLayout({ children }: Readonly<DashboardLayoutProps>) {
 
   return (
     <>
-      <div className="flex h-screen overflow-hidden">
+      <div className="flex h-screen w-full overflow-hidden">
         <SidebarNav
           onCreateMeeting={() => setIsFormOpen(true)}
           todayCount={todayMeetings.length}
