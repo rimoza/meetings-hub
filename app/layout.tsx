@@ -78,7 +78,7 @@ html {
           disableTransitionOnChange
         >
           <AuthProvider>
-            <SidebarProvider>{children}</SidebarProvider>
+            <SidebarProvider defaultOpen={true}>{children}</SidebarProvider>
             <Toaster />
           </AuthProvider>
         </ThemeProvider>

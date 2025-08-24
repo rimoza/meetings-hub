@@ -105,7 +105,7 @@ export function SidebarItem({
   active,
   className,
   ...props
-}: SidebarItemProps) {
+}: Readonly<SidebarItemProps>) {
   const { isCollapsed } = useSidebar();
 
   return (
@@ -119,7 +119,8 @@ export function SidebarItem({
       )}
       {...props}
     >
-      {icon && <div className="flex-shrink-0">{icon}</div>}
+      {icon && <div className="flex-shrink-0">{icon}
+        </div>}
       {!isCollapsed && <span className="truncate">{children}</span>}
     </div>
   );

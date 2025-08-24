@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Archive as ArchiveIcon, LogOut, User as UserIcon } from "lucide-react";
+import { Plus, Users, LogOut, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ArchiveCard } from "@/components/archive-card";
-import { ArchiveForm } from "@/components/archive-form";
-import { ArchiveFilters } from "@/components/archive-filters";
+import { ContactCard } from "@/components/contact-card";
+import { ContactForm } from "@/components/contact-form";
+import { ContactFilters } from "@/components/contact-filters";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
@@ -17,54 +17,64 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/auth-context";
-import { useArchivesStore } from "@/stores/archives-store";
+import { useContactsStore } from "@/stores/contacts-store";
 import { toast } from "sonner";
-import type { Archive } from "@/types/archive";
+import type { Contact } from "@/types/contact";
 
 // Firebase imports
 import {
-  createArchive,
-  updateArchive,
-  deleteArchive,
-  subscribeArchives,
-} from "@/lib/firebase/archives";
+  createContact,
+  updateContact,
+  deleteContact,
+  subscribeContacts,
+  toggleContactFavorite,
+  toggleContactImportant,
+} from "@/lib/firebase/contacts";
 
-export function ArchivesPageClient() {
+export function ContactsPageClient() {
   const { user, logout } = useAuth();
   const {
-    filteredArchives,
+    filteredContacts,
     isLoading,
     error,
     filters,
-    setArchives,
+    setContacts,
     setLoading,
     setError,
     setFilters,
-    removeArchive,
-  } = useArchivesStore();
+    removeContact,
+  } = useContactsStore();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingArchive, setEditingArchive] = useState<Archive | null>(null);
+  const [editingContact, setEditingContact] = useState<Contact | null>(null);
 
-  // Get available labels for filtering
-  const allLabels = Array.from(
-    new Set(filteredArchives.flatMap(archive => archive.labels))
+  // Get available filter options
+  const allTags = Array.from(
+    new Set(filteredContacts.flatMap(contact => contact.tags || []))
+  ).sort();
+  
+  const allCompanies = Array.from(
+    new Set(filteredContacts.filter(c => c.company).map(contact => contact.company!))
+  ).sort();
+  
+  const allLocations = Array.from(
+    new Set(filteredContacts.map(contact => contact.location))
   ).sort();
 
-  // Subscribe to archives data
+  // Subscribe to contacts data
   useEffect(() => {
     if (!user) {
-      setArchives([]);
+      setContacts([]);
       return;
     }
 
     setLoading(true);
     setError(null);
 
-    const unsubscribe = subscribeArchives(
+    const unsubscribe = subscribeContacts(
       user.uid,
-      (archives) => {
-        setArchives(archives);
+      (contacts) => {
+        setContacts(contacts);
         setError(null);
       }
     );
@@ -73,72 +83,100 @@ export function ArchivesPageClient() {
     return () => {
       unsubscribe();
     };
-  }, [user, setArchives, setLoading, setError]);
+  }, [user, setContacts, setLoading, setError]);
 
-  const handleCreateArchive = async (archiveData: Omit<Archive, "id" | "createdAt" | "updatedAt">) => {
+  const handleCreateContact = async (contactData: Omit<Contact, "id" | "createdAt" | "updatedAt">) => {
     if (!user) {
-      toast.error("Please sign in to create archives");
+      toast.error("Please sign in to create contacts");
       return;
     }
 
     try {
-      await createArchive(user.uid, archiveData);
-      // Don't add optimistically - let the Firebase subscription handle it
-      toast.success("Archive created successfully");
+      await createContact(user.uid, contactData);
+      toast.success("Contact created successfully");
     } catch (error) {
-      console.error("Error creating archive:", error);
-      toast.error("Failed to create archive");
+      console.error("Error creating contact:", error);
+      toast.error("Failed to create contact");
       throw error;
     }
   };
 
-  const handleUpdateArchive = async (archiveData: Omit<Archive, "id" | "createdAt" | "updatedAt">) => {
-    if (!user || !editingArchive) {
-      toast.error("Please sign in to update archives");
+  const handleUpdateContact = async (contactData: Omit<Contact, "id" | "createdAt" | "updatedAt">) => {
+    if (!user || !editingContact) {
+      toast.error("Please sign in to update contacts");
       return;
     }
 
     try {
-      await updateArchive(editingArchive.id, archiveData);
-      // Don't update optimistically - let the Firebase subscription handle it
-      toast.success("Archive updated successfully");
-      setEditingArchive(null);
+      await updateContact(editingContact.id, contactData);
+      toast.success("Contact updated successfully");
+      setEditingContact(null);
     } catch (error) {
-      console.error("Error updating archive:", error);
-      toast.error("Failed to update archive");
+      console.error("Error updating contact:", error);
+      toast.error("Failed to update contact");
       throw error;
     }
   };
 
-  const handleDeleteArchive = async (archiveId: string) => {
+  const handleDeleteContact = async (contactId: string) => {
     if (!user) {
-      toast.error("Please sign in to delete archives");
+      toast.error("Please sign in to delete contacts");
       return;
     }
 
     try {
-      await deleteArchive(archiveId);
-      removeArchive(archiveId);
-      toast.success("Archive deleted successfully");
+      await deleteContact(contactId);
+      removeContact(contactId);
+      toast.success("Contact deleted successfully");
     } catch (error) {
-      console.error("Error deleting archive:", error);
-      toast.error("Failed to delete archive");
+      console.error("Error deleting contact:", error);
+      toast.error("Failed to delete contact");
     }
   };
 
-  const handleEditArchive = (archive: Archive) => {
-    setEditingArchive(archive);
+  const handleEditContact = (contact: Contact) => {
+    setEditingContact(contact);
     setIsFormOpen(true);
   };
 
-  const handleViewArchive = (archive: Archive) => {
+  const handleViewContact = (contact: Contact) => {
     // For now, just show a toast. In the future, this could navigate to a detail page
-    toast.info(`Viewing archive: ${archive.title}`);
+    toast.info(`Viewing contact: ${contact.firstName} ${contact.lastName}`);
+  };
+
+  const handleToggleFavorite = async (contactId: string, favorite: boolean) => {
+    if (!user) {
+      toast.error("Please sign in to update contacts");
+      return;
+    }
+
+    try {
+      await toggleContactFavorite(contactId, favorite);
+      toast.success(favorite ? "Added to favorites" : "Removed from favorites");
+    } catch (error) {
+      console.error("Error updating favorite status:", error);
+      toast.error("Failed to update favorite status");
+    }
+  };
+
+  const handleToggleImportant = async (contactId: string, important: boolean) => {
+    if (!user) {
+      toast.error("Please sign in to update contacts");
+      return;
+    }
+
+    try {
+      await toggleContactImportant(contactId, important);
+      toast.success(important ? "Marked as important" : "Removed from important");
+    } catch (error) {
+      console.error("Error updating important status:", error);
+      toast.error("Failed to update important status");
+    }
   };
 
   const handleCloseForm = () => {
     setIsFormOpen(false);
-    setEditingArchive(null);
+    setEditingContact(null);
   };
 
   const handleLogout = async () => {
@@ -154,7 +192,7 @@ export function ArchivesPageClient() {
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-muted-foreground">Please sign in to view archives.</p>
+        <p className="text-muted-foreground">Please sign in to view contacts.</p>
       </div>
     );
   }
@@ -163,7 +201,7 @@ export function ArchivesPageClient() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <p className="text-destructive mb-2">Error loading archives</p>
+          <p className="text-destructive mb-2">Error loading contacts</p>
           <p className="text-sm text-muted-foreground">{error}</p>
         </div>
       </div>
@@ -181,10 +219,10 @@ export function ArchivesPageClient() {
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
                   <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">
-                    Archives
+                    Contacts
                   </h1>
                   <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
-                    Manage your archived documents and records
+                    Manage your personal and professional contacts
                   </p>
                 </div>
 
@@ -196,7 +234,7 @@ export function ArchivesPageClient() {
                     className="hidden sm:inline-flex"
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    <span className="hidden lg:inline">New Archive</span>
+                    <span className="hidden lg:inline">New Contact</span>
                     <span className="lg:hidden">New</span>
                   </Button>
                   <Button
@@ -253,63 +291,67 @@ export function ArchivesPageClient() {
       <main className="flex-1 overflow-auto px-3 py-4 sm:px-4 sm:py-6 md:px-6 md:py-8">
         {/* Filters */}
         <div className="mb-6">
-          <ArchiveFilters
+          <ContactFilters
             filters={filters}
             onFiltersChange={setFilters}
-            availableLabels={allLabels}
+            availableTags={allTags}
+            availableCompanies={allCompanies}
+            availableLocations={allLocations}
           />
         </div>
 
-        {/* Archives Display */}
+        {/* Contacts Display */}
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {Array.from({ length: 6 }, (_, i) => (
-              <div key={i} className="h-64 bg-muted animate-pulse rounded-lg" />
+              <div key={i} className="h-80 bg-muted animate-pulse rounded-lg" />
             ))}
           </div>
-        ) : filteredArchives.length === 0 ? (
+        ) : filteredContacts.length === 0 ? (
           <div className="flex flex-col items-center justify-center min-h-[400px] text-center py-12">
-            <ArchiveIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">
-              {filters.search || filters.status !== "all" || filters.labels.length > 0
-                ? "No archives found"
-                : "No archives yet"
+              {filters.search || filters.important !== "all" || filters.favorite !== "all" || filters.tags.length > 0 || filters.company || filters.location
+                ? "No contacts found"
+                : "No contacts yet"
               }
             </h3>
             <p className="text-muted-foreground mb-4 max-w-md mx-auto">
-              {filters.search || filters.status !== "all" || filters.labels.length > 0
+              {filters.search || filters.important !== "all" || filters.favorite !== "all" || filters.tags.length > 0 || filters.company || filters.location
                 ? "Try adjusting your search or filters to find what you're looking for."
-                : "Get started by creating your first archive to organize your documents and records."
+                : "Get started by adding your first contact to organize your professional and personal network."
               }
             </p>
-            {!(filters.search || filters.status !== "all" || filters.labels.length > 0) && (
+            {!(filters.search || filters.important !== "all" || filters.favorite !== "all" || filters.tags.length > 0 || filters.company || filters.location) && (
               <Button onClick={() => setIsFormOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
-                Create Your First Archive
+                Add Your First Contact
               </Button>
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredArchives.map((archive, index) => (
-              <ArchiveCard
-                key={`${archive.id}-${index}-${archive.updatedAt.getTime()}`}
-                archive={archive}
-                onEdit={handleEditArchive}
-                onDelete={handleDeleteArchive}
-                onView={handleViewArchive}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {filteredContacts.map((contact, index) => (
+              <ContactCard
+                key={`${contact.id}-${index}-${contact.updatedAt.getTime()}`}
+                contact={contact}
+                onEdit={handleEditContact}
+                onDelete={handleDeleteContact}
+                onView={handleViewContact}
+                onToggleFavorite={handleToggleFavorite}
+                onToggleImportant={handleToggleImportant}
               />
             ))}
           </div>
         )}
       </main>
 
-      {/* Archive Form Modal */}
-      <ArchiveForm
-        archive={editingArchive}
+      {/* Contact Form Modal */}
+      <ContactForm
+        contact={editingContact}
         isOpen={isFormOpen}
         onClose={handleCloseForm}
-        onSubmit={editingArchive ? handleUpdateArchive : handleCreateArchive}
+        onSubmit={editingContact ? handleUpdateContact : handleCreateContact}
       />
     </div>
   );

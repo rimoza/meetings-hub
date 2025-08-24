@@ -79,44 +79,66 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
-        const userDocRef = doc(db, "users", firebaseUser.uid);
-        const userDoc = await getDoc(userDocRef);
+        try {
+          const userDocRef = doc(db, "users", firebaseUser.uid);
+          const userDoc = await getDoc(userDocRef);
 
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          setUser({
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            name: firebaseUser.displayName || userData.name,
-            photoURL: firebaseUser.photoURL,
-            emailVerified: firebaseUser.emailVerified,
-            createdAt: userData.createdAt?.toDate(),
-            lastLoginAt: new Date(),
-          });
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            setUser({
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              name: firebaseUser.displayName || userData.name,
+              photoURL: firebaseUser.photoURL,
+              emailVerified: firebaseUser.emailVerified,
+              createdAt: userData.createdAt?.toDate(),
+              lastLoginAt: new Date(),
+            });
 
-          // Update last login
-          await setDoc(
-            userDocRef,
-            {
+            // Update last login
+            try {
+              await setDoc(
+                userDocRef,
+                {
+                  lastLoginAt: serverTimestamp(),
+                },
+                { merge: true },
+              );
+            } catch (updateError) {
+              console.warn("Failed to update last login (offline mode):", updateError);
+            }
+          } else {
+            // Create new user document
+            const newUser = {
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              name: firebaseUser.displayName,
+              photoURL: firebaseUser.photoURL,
+              emailVerified: firebaseUser.emailVerified,
+              createdAt: serverTimestamp(),
               lastLoginAt: serverTimestamp(),
-            },
-            { merge: true },
-          );
-        } else {
-          // Create new user document
-          const newUser = {
+            };
+
+            try {
+              await setDoc(userDocRef, newUser);
+            } catch (createError) {
+              console.warn("Failed to create user document (offline mode):", createError);
+            }
+            
+            setUser({
+              ...newUser,
+              createdAt: new Date(),
+              lastLoginAt: new Date(),
+            });
+          }
+        } catch (firestoreError) {
+          console.warn("Firestore unavailable, using basic user data:", firestoreError);
+          setUser({
             uid: firebaseUser.uid,
             email: firebaseUser.email,
             name: firebaseUser.displayName,
             photoURL: firebaseUser.photoURL,
             emailVerified: firebaseUser.emailVerified,
-            createdAt: serverTimestamp(),
-            lastLoginAt: serverTimestamp(),
-          };
-
-          await setDoc(userDocRef, newUser);
-          setUser({
-            ...newUser,
             createdAt: new Date(),
             lastLoginAt: new Date(),
           });

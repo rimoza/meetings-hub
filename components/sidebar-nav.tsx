@@ -2,7 +2,6 @@
 import {
   Calendar,
   Home,
-  Plus,
   Settings,
   Clock,
   Bell,
@@ -39,18 +38,16 @@ import { useRouter, usePathname } from "next/navigation";
 import { useState } from "react";
 
 interface SidebarNavProps {
-  onCreateMeeting: () => void;
   todayCount?: number;
   upcomingCount?: number;
   tasksCount?: number;
 }
 
 export function SidebarNav({
-  onCreateMeeting,
   todayCount = 0,
   upcomingCount = 0,
   tasksCount = 0,
-}: SidebarNavProps) {
+}: Readonly<SidebarNavProps>) {
   const { isMobile, setOpenMobile } = useSidebar();
   const { isPermissionGranted, isRemindersEnabled } = useReminders();
   const { upcomingMeetings } = useMeetings();
@@ -126,70 +123,56 @@ export function SidebarNav({
     }
   };
 
-  const handleCreateMeeting = () => {
-    onCreateMeeting();
-    // Only close sidebar on mobile
-    if (isMobile) {
-      setOpenMobile(false);
-    }
-  };
 
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
       <SidebarHeader>
-        <div className="flex items-center justify-between w-full px-2 py-2">
-          <div className="flex items-center space-x-2">
-            <div className="p-2 bg-primary rounded-lg">
-              <Calendar className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <h2 className="text-base sm:text-lg font-semibold text-foreground">
+        <div className="flex items-center gap-2 px-2 py-2">
+          {/* Logo - Always visible */}
+          <div className="p-2 bg-primary rounded-lg shrink-0">
+            <Calendar className="h-5 w-5 text-primary-foreground" />
+          </div>
+          
+          {/* Project title and notification - Hidden when collapsed */}
+          <div className="flex items-center justify-between w-full min-w-0 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:hidden">
+            <h2 className="text-base sm:text-lg font-semibold text-foreground truncate">
               Kulan Space
             </h2>
+            
+            {/* Notification Icon with Badge */}
+            <NotificationSidebar>
+              <Button variant="ghost" size="sm" className="relative p-2 shrink-0">
+                {isPermissionGranted && isRemindersEnabled ? (
+                  <Bell className="h-5 w-5 text-primary" />
+                ) : (
+                  <Bell className="h-5 w-5 text-muted-foreground" />
+                )}
+                {upcomingMeetings.length > 0 && (
+                  <Badge
+                    className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs min-w-[1.25rem]"
+                    variant={
+                      isPermissionGranted && isRemindersEnabled
+                        ? "default"
+                        : "secondary"
+                    }
+                  >
+                    {upcomingMeetings.length > 99
+                      ? "99+"
+                      : upcomingMeetings.length}
+                  </Badge>
+                )}
+              </Button>
+            </NotificationSidebar>
           </div>
-
-          {/* Notification Icon with Badge */}
-          <NotificationSidebar>
-            <Button variant="ghost" size="sm" className="relative p-2">
-              {isPermissionGranted && isRemindersEnabled ? (
-                <Bell className="h-5 w-5 text-primary" />
-              ) : (
-                <Bell className="h-5 w-5 text-muted-foreground" />
-              )}
-              {upcomingMeetings.length > 0 && (
-                <Badge
-                  className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs min-w-[1.25rem]"
-                  variant={
-                    isPermissionGranted && isRemindersEnabled
-                      ? "default"
-                      : "secondary"
-                  }
-                >
-                  {upcomingMeetings.length > 99
-                    ? "99+"
-                    : upcomingMeetings.length}
-                </Badge>
-              )}
-            </Button>
-          </NotificationSidebar>
         </div>
       </SidebarHeader>
 
       <SidebarContent>
         <div className="space-y-1">
-          {/* Create Meeting Button - Mobile optimized */}
-          <div className="px-2 mb-4">
-            <Button
-              onClick={handleCreateMeeting}
-              className="w-full justify-start h-10 text-sm sm:text-base"
-            >
-              <Plus className="h-4 w-4" />
-              <span className="ml-2">New Meeting</span>
-            </Button>
-          </div>
 
           {/* Notification Status Indicator */}
           {isPermissionGranted && (
-            <div className="px-2 mb-4">
+            <div className="px-2 mb-4 group-data-[collapsible=icon]:hidden">
               <div className="flex items-center justify-center p-2 bg-primary/10 rounded-lg border border-primary/20">
                 <Bell className="h-4 w-4 text-primary mr-2" />
                 <span className="text-sm font-medium text-primary">
@@ -207,11 +190,10 @@ export function SidebarNav({
                 isActive={pathname === "/"}
                 onClick={() => handleNavClick("/")}
                 className="h-10 text-sm sm:text-base"
+                tooltip="Dashboard"
               >
-                <div className="flex items-center">
-                  <Home className="h-4 w-4" />
-                  <span className="ml-2">Dashboard</span>
-                </div>
+                <Home className="h-4 w-4 shrink-0" />
+                <span className="ml-2">Dashboard</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
 
@@ -222,18 +204,15 @@ export function SidebarNav({
                   <SidebarMenuButton
                     className="h-10 text-sm sm:text-base"
                     isActive={meetingSubItems.some(item => pathname === item.id)}
+                    tooltip="Meetings"
                   >
-                    <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center">
-                        <Calendar className="h-4 w-4 text-blue-500" />
-                        <span className="ml-2">Meetings</span>
-                      </div>
-                      <ChevronDown 
-                        className={`h-4 w-4 transition-transform ${
-                          isMeetingsOpen ? "rotate-180" : ""
-                        }`}
-                      />
-                    </div>
+                    <Calendar className="h-4 w-4 text-blue-500 shrink-0" />
+                    <span className="ml-2">Meetings</span>
+                    <ChevronDown 
+                      className={`h-4 w-4 ml-auto transition-transform ${
+                        isMeetingsOpen ? "rotate-180" : ""
+                      }`}
+                    />
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
@@ -277,24 +256,23 @@ export function SidebarNav({
                   isActive={pathname === item.id}
                   onClick={() => handleNavClick(item.id)}
                   className="h-10 text-sm sm:text-base"
+                  tooltip={item.label}
                 >
-                  <div className="flex items-center justify-between w-full">
-                    <div className="flex items-center">
-                      {item.icon}
-                      <span className="ml-2">{item.label}</span>
-                    </div>
-                    {item.count !== null && (
-                      <span
-                        className={`ml-auto text-xs rounded-full px-2 py-0.5 min-w-[1.25rem] h-5 flex items-center justify-center ${
-                          item.count > 0
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted text-muted-foreground"
-                        }`}
-                      >
-                        {item.count > 99 ? "99+" : item.count}
-                      </span>
-                    )}
+                  <div className="flex items-center shrink-0">
+                    {item.icon}
                   </div>
+                  <span className="ml-2">{item.label}</span>
+                  {item.count !== null && (
+                    <span
+                      className={`ml-auto text-xs rounded-full px-2 py-0.5 min-w-[1.25rem] h-5 flex items-center justify-center ${
+                        item.count > 0
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {item.count > 99 ? "99+" : item.count}
+                    </span>
+                  )}
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
