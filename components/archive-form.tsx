@@ -35,7 +35,6 @@ interface FormData {
   title: string;
   date: Date;
   status: ArchiveStatus;
-  tags: string[];
   labels: string[];
 }
 
@@ -50,11 +49,9 @@ export function ArchiveForm({
     title: "",
     date: new Date(),
     status: "draft",
-    tags: [],
     labels: [],
   });
 
-  const [tagInput, setTagInput] = useState("");
   const [labelInput, setLabelInput] = useState("");
 
   useEffect(() => {
@@ -63,7 +60,6 @@ export function ArchiveForm({
         title: archive.title,
         date: new Date(archive.date),
         status: archive.status,
-        tags: archive.tags,
         labels: archive.labels,
       });
     } else {
@@ -72,11 +68,9 @@ export function ArchiveForm({
         title: "",
         date: new Date(),
         status: "draft",
-        tags: [],
         labels: [],
       });
     }
-    setTagInput("");
     setLabelInput("");
   }, [archive, isOpen]);
 
@@ -97,26 +91,6 @@ export function ArchiveForm({
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const addTag = () => {
-    if (
-      tagInput.trim() &&
-      !formData.tags.includes(tagInput.trim())
-    ) {
-      setFormData((prev) => ({
-        ...prev,
-        tags: [...prev.tags, tagInput.trim()],
-      }));
-      setTagInput("");
-    }
-  };
-
-  const removeTag = (tag: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      tags: prev.tags.filter((t) => t !== tag),
-    }));
   };
 
   const addLabel = () => {
@@ -205,51 +179,6 @@ export function ArchiveForm({
               </div>
             </div>
 
-            {/* Tags */}
-            <div>
-              <Label className="text-sm">Tags</Label>
-              <div className="flex gap-2 mb-2">
-                <Input
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  placeholder="Add tag"
-                  className="h-9 sm:h-10 text-sm"
-                  onKeyPress={(e) =>
-                    e.key === "Enter" && (e.preventDefault(), addTag())
-                  }
-                />
-                <Button
-                  type="button"
-                  onClick={addTag}
-                  variant="outline"
-                  size="sm"
-                  className="h-9 px-3 sm:h-10 sm:px-4"
-                >
-                  Add
-                </Button>
-              </div>
-              {formData.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
-                  {formData.tags.map((tag) => (
-                    <Badge
-                      key={tag}
-                      variant="secondary"
-                      className="flex items-center gap-1 text-xs sm:text-sm"
-                    >
-                      <span className="truncate max-w-[120px]">{tag}</span>
-                      <button
-                        type="button"
-                        onClick={() => removeTag(tag)}
-                        className="ml-1 hover:text-destructive"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </div>
-
             {/* Labels */}
             <div>
               <Label className="text-sm">Labels</Label>
@@ -278,7 +207,7 @@ export function ArchiveForm({
                   {formData.labels.map((label) => (
                     <Badge
                       key={label}
-                      variant="outline"
+                      variant="secondary"
                       className="flex items-center gap-1 text-xs sm:text-sm"
                     >
                       <span className="truncate max-w-[120px]">{label}</span>

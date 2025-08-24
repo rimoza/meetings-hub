@@ -23,32 +23,18 @@ import type { ArchiveFilters } from "@/types/archive";
 interface ArchiveFiltersProps {
   filters: ArchiveFilters;
   onFiltersChange: (filters: ArchiveFilters) => void;
-  availableTags?: string[];
   availableLabels?: string[];
 }
 
 export function ArchiveFilters({
   filters,
   onFiltersChange,
-  availableTags = [],
   availableLabels = [],
 }: Readonly<ArchiveFiltersProps>) {
-  const [tagInput, setTagInput] = useState("");
   const [labelInput, setLabelInput] = useState("");
 
   const updateFilters = (updates: Partial<ArchiveFilters>) => {
     onFiltersChange({ ...filters, ...updates });
-  };
-
-  const addTag = (tag: string) => {
-    if (tag && !filters.tags.includes(tag)) {
-      updateFilters({ tags: [...filters.tags, tag] });
-    }
-    setTagInput("");
-  };
-
-  const removeTag = (tag: string) => {
-    updateFilters({ tags: filters.tags.filter(t => t !== tag) });
   };
 
   const addLabel = (label: string) => {
@@ -66,7 +52,6 @@ export function ArchiveFilters({
     onFiltersChange({
       search: "",
       status: "all",
-      tags: [],
       labels: [],
     });
   };
@@ -74,7 +59,6 @@ export function ArchiveFilters({
   const hasActiveFilters = 
     filters.search || 
     filters.status !== "all" || 
-    filters.tags.length > 0 || 
     filters.labels.length > 0;
 
   return (
@@ -116,7 +100,7 @@ export function ArchiveFilters({
                 Filters
                 {hasActiveFilters && (
                   <Badge variant="secondary" className="ml-2 h-5 text-xs">
-                    {(filters.tags.length + filters.labels.length + 
+                    {(filters.labels.length + 
                       (filters.status !== "all" ? 1 : 0) +
                       (filters.search ? 1 : 0))}
                   </Badge>
@@ -136,73 +120,6 @@ export function ArchiveFilters({
                     >
                       Clear All
                     </Button>
-                  )}
-                </div>
-
-                {/* Tags Filter */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Tags</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Add tag filter"
-                      value={tagInput}
-                      onChange={(e) => setTagInput(e.target.value)}
-                      className="text-sm"
-                      onKeyPress={(e) =>
-                        e.key === "Enter" && (e.preventDefault(), addTag(tagInput.trim()))
-                      }
-                    />
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={() => addTag(tagInput.trim())}
-                      disabled={!tagInput.trim()}
-                    >
-                      Add
-                    </Button>
-                  </div>
-                  
-                  {/* Available Tags */}
-                  {availableTags.length > 0 && (
-                    <div className="space-y-1">
-                      <p className="text-xs text-muted-foreground">Available tags:</p>
-                      <div className="flex flex-wrap gap-1">
-                        {availableTags.map((tag) => (
-                          <Button
-                            key={tag}
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 px-2 text-xs"
-                            onClick={() => addTag(tag)}
-                            disabled={filters.tags.includes(tag)}
-                          >
-                            <Tag className="h-3 w-3 mr-1" />
-                            {tag}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Selected Tags */}
-                  {filters.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {filters.tags.map((tag) => (
-                        <Badge
-                          key={tag}
-                          variant="secondary"
-                          className="flex items-center gap-1"
-                        >
-                          {tag}
-                          <button
-                            onClick={() => removeTag(tag)}
-                            className="ml-1 hover:text-destructive"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </Badge>
-                      ))}
-                    </div>
                   )}
                 </div>
 
@@ -256,7 +173,7 @@ export function ArchiveFilters({
                       {filters.labels.map((label) => (
                         <Badge
                           key={label}
-                          variant="outline"
+                          variant="secondary"
                           className="flex items-center gap-1"
                         >
                           {label}
@@ -306,20 +223,8 @@ export function ArchiveFilters({
             </Badge>
           )}
 
-          {filters.tags.map((tag) => (
-            <Badge key={tag} variant="secondary" className="flex items-center gap-1">
-              Tag: {tag}
-              <button
-                onClick={() => removeTag(tag)}
-                className="ml-1 hover:text-destructive"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          ))}
-
           {filters.labels.map((label) => (
-            <Badge key={label} variant="outline" className="flex items-center gap-1">
+            <Badge key={label} variant="secondary" className="flex items-center gap-1">
               Label: {label}
               <button
                 onClick={() => removeLabel(label)}

@@ -32,7 +32,6 @@ const convertDocToArchive = (
     title: data.title,
     date: data.date,
     status: data.status,
-    tags: data.tags || [],
     labels: data.labels || [],
     createdAt: data.createdAt?.toDate() || new Date(),
     updatedAt: data.updatedAt?.toDate() || new Date(),

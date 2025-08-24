@@ -41,14 +41,6 @@ const applyFilters = (
     // Status filter
     if (filters.status !== "all" && archive.status !== filters.status) return false;
 
-    // Tags filter
-    if (filters.tags.length > 0) {
-      const hasMatchingTag = filters.tags.some(tag => 
-        archive.tags.includes(tag)
-      );
-      if (!hasMatchingTag) return false;
-    }
-
     // Labels filter
     if (filters.labels.length > 0) {
       const hasMatchingLabel = filters.labels.some(label => 
@@ -70,7 +62,6 @@ export const useArchivesStore = create<ArchivesStore>((set, get) => ({
   filters: {
     search: "",
     status: "all",
-    tags: [],
     labels: [],
   },
 

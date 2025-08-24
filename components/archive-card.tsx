@@ -102,15 +102,9 @@ export function ArchiveCard({
                   {archive.status}
                 </Badge>
 
-                {archive.tags.length > 0 && (
+                {archive.labels.length > 0 && (
                   <Badge variant="secondary" className="text-xs">
                     <Tag className="h-3 w-3 mr-1" />
-                    {archive.tags.length} tag{archive.tags.length !== 1 ? "s" : ""}
-                  </Badge>
-                )}
-
-                {archive.labels.length > 0 && (
-                  <Badge variant="outline" className="text-xs">
                     {archive.labels.length} label{archive.labels.length !== 1 ? "s" : ""}
                   </Badge>
                 )}
@@ -194,30 +188,16 @@ export function ArchiveCard({
             </div>
           </div>
 
-          {/* Tags */}
-          {archive.tags.length > 0 && (
-            <div className="p-2.5 bg-secondary/30 rounded-lg">
-              <p className="text-sm font-medium mb-2 flex items-center gap-1">
-                <Tag className="h-3 w-3" />
-                Tags
-              </p>
-              <div className="flex flex-wrap gap-1">
-                {archive.tags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="text-xs">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Labels */}
           {archive.labels.length > 0 && (
             <div className="p-2.5 bg-secondary/30 rounded-lg">
-              <p className="text-sm font-medium mb-2">Labels</p>
+              <p className="text-sm font-medium mb-2 flex items-center gap-1">
+                <Tag className="h-3 w-3" />
+                Labels
+              </p>
               <div className="flex flex-wrap gap-1">
                 {archive.labels.map((label) => (
-                  <Badge key={label} variant="outline" className="text-xs">
+                  <Badge key={label} variant="secondary" className="text-xs">
                     {label}
                   </Badge>
                 ))}

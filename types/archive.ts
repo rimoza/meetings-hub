@@ -3,7 +3,6 @@ export interface Archive {
   title: string;
   date: string;
   status: "active" | "archived" | "draft";
-  tags: string[];
   labels: string[];
   createdAt: Date;
   updatedAt: Date;
@@ -12,7 +11,6 @@ export interface Archive {
 export interface ArchiveFilters {
   search: string;
   status: "all" | "active" | "archived" | "draft";
-  tags: string[];
   labels: string[];
 }
 

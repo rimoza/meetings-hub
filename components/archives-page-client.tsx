@@ -39,10 +39,7 @@ export function ArchivesPageClient() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingArchive, setEditingArchive] = useState<Archive | null>(null);
 
-  // Get available tags and labels for filtering
-  const allTags = Array.from(
-    new Set(filteredArchives.flatMap(archive => archive.tags))
-  ).sort();
+  // Get available labels for filtering
   const allLabels = Array.from(
     new Set(filteredArchives.flatMap(archive => archive.labels))
   ).sort();
@@ -172,7 +169,6 @@ export function ArchivesPageClient() {
       <ArchiveFilters
         filters={filters}
         onFiltersChange={setFilters}
-        availableTags={allTags}
         availableLabels={allLabels}
       />
 
@@ -186,18 +182,18 @@ export function ArchivesPageClient() {
         <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
           <ArchiveIcon className="h-16 w-16 text-muted-foreground mb-4" />
           <h3 className="text-lg font-semibold mb-2">
-            {filters.search || filters.status !== "all" || filters.tags.length > 0 || filters.labels.length > 0
+            {filters.search || filters.status !== "all" || filters.labels.length > 0
               ? "No archives found"
               : "No archives yet"
             }
           </h3>
           <p className="text-muted-foreground mb-4 max-w-md">
-            {filters.search || filters.status !== "all" || filters.tags.length > 0 || filters.labels.length > 0
+            {filters.search || filters.status !== "all" || filters.labels.length > 0
               ? "Try adjusting your search or filters to find what you're looking for."
               : "Get started by creating your first archive to organize your documents and records."
             }
           </p>
-          {!(filters.search || filters.status !== "all" || filters.tags.length > 0 || filters.labels.length > 0) && (
+          {!(filters.search || filters.status !== "all" || filters.labels.length > 0) && (
             <Button onClick={() => setIsFormOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Create Your First Archive
