@@ -19,7 +19,7 @@ export default function InstallPrompt() {
     // Check if app is already installed
     const checkInstalled = () => {
       if (window.matchMedia('(display-mode: standalone)').matches || 
-          (window.navigator as any).standalone ||
+          (window.navigator as Navigator & { standalone?: boolean }).standalone ||
           document.referrer.includes('android-app://')) {
         setIsInstalled(true);
       }
