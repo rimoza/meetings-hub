@@ -12,6 +12,7 @@ import {
   Users,
   CalendarDays,
   UserCheck,
+  Monitor,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -92,6 +93,12 @@ export function SidebarNav({
       label: "Appointments",
       icon: <UserCheck className="h-4 w-4 text-green-500" />,
       count: appointmentsCount,
+    },
+    {
+      id: "/queue",
+      label: "Queue Display",
+      icon: <Monitor className="h-4 w-4 text-blue-500" />,
+      count: null,
     },
     {
       id: "/tasks",
