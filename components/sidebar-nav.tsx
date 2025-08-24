@@ -99,8 +99,8 @@ export function SidebarNav({
       count: null,
     },
     {
-      id: "/archive",
-      label: "Archive",
+      id: "/archives",
+      label: "Archives",
       icon: <Archive className="h-4 w-4" />,
       count: null,
     },
