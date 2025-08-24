@@ -72,7 +72,7 @@ export function SidebarNav({
       count: upcomingCount,
     },
     {
-      id: "/all-meetings",
+      id: "/meetings",
       label: "All Meetings",
       icon: <CalendarDays className="h-4 w-4" />,
       count: null,
