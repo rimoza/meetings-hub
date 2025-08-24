@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Calendar, Clock, User, Plus } from 'lucide-react';
+import { Calendar, User, Plus } from 'lucide-react';
 import { Appointment, AppointmentStatus } from '@/types/appointment';
 
 interface AppointmentFormProps {

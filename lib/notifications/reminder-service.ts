@@ -621,10 +621,10 @@ export class ReminderService {
 
     // Try to use service worker for more reliable notifications
     const useServiceWorker = this.tryScheduleWithServiceWorker(
-      meeting,
-      minutesBefore,
-      delayMs,
-      reminderId,
+      // meeting,
+      // minutesBefore,
+      // delayMs,
+      // reminderId,
     );
 
     if (!useServiceWorker) {
@@ -665,11 +665,12 @@ export class ReminderService {
   }
 
   private tryScheduleWithServiceWorker(
-    meeting: Meeting,
-    reminderTime: number,
-    delayMs: number,
-    reminderId: string,
-  ): boolean {
+    // meeting: Meeting,
+    // reminderTime: number,
+    // delayMs: number,
+    // reminderId: string,
+  ) {
+    // : boolean
     // Service worker disabled - always use setTimeout fallback
     this.log("⚠️ Service worker not available, using setTimeout for reminder scheduling");
     return false;
