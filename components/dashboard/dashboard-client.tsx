@@ -59,8 +59,8 @@ export function DashboardClient() {
     getCompletedMeetings,
   } = useMeetingsStore();
 
-  const { setTasks, getPendingTasks, getInProgressTasks } = useTasksStore();
-
+  // getPendingTasks, getInProgressTasks 
+  const { setTasks } = useTasksStore();
   // Local UI state
   const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -88,8 +88,8 @@ export function DashboardClient() {
   const todayMeetings = getTodayMeetings();
   const upcomingMeetings = getUpcomingMeetings();
   const completedMeetings = getCompletedMeetings();
-  const pendingTasks = getPendingTasks();
-  const inProgressTasks = getInProgressTasks();
+  // const pendingTasks = getPendingTasks();
+  // const inProgressTasks = getInProgressTasks();
 
   // Get next meeting
   const nextMeeting = upcomingMeetings[0]; // Assuming they're sorted by date

@@ -22,7 +22,7 @@ import { MeetingForm } from "@/components/meeting-form";
 
 export function TodayMeetingsClient() {
   const { user, logout } = useAuth();
-  const { todayMeetings, createMeeting, updateMeeting } = useMeetings();
+  const { createMeeting, updateMeeting } = useMeetings();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingMeeting, setEditingMeeting] = useState<Meeting | undefined>();
@@ -99,7 +99,7 @@ export function TodayMeetingsClient() {
                       <DropdownMenuLabel>
                         <div className="flex flex-col space-y-1">
                           <p className="text-sm font-medium">
-                            {user?.displayName || "User"}
+                            {user?.name || "User"}
                           </p>
                           <p className="text-xs text-muted-foreground">
                             {user?.email}
@@ -125,7 +125,7 @@ export function TodayMeetingsClient() {
 
       {/* Today's Meetings Content */}
       <main className="flex-1 overflow-auto p-4">
-        <TodaysMeetings meetings={todayMeetings} onEdit={handleEdit} />
+        <TodaysMeetings onEditMeeting={handleEdit} />
       </main>
 
       {/* Meeting Form Modal */}

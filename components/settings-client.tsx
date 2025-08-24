@@ -58,7 +58,7 @@ export function SettingsClient() {
                       <DropdownMenuLabel>
                         <div className="flex flex-col space-y-1">
                           <p className="text-sm font-medium">
-                            {user?.displayName || "User"}
+                            {user?.name || "User"}
                           </p>
                           <p className="text-xs text-muted-foreground">
                             {user?.email}
