@@ -1,21 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Archive as ArchiveIcon, LogOut, User as UserIcon } from "lucide-react";
+import { Plus, Archive as ArchiveIcon, } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ArchiveCard } from "@/components/archive-card";
 import { ArchiveForm } from "@/components/archive-form";
 import { ArchiveFilters } from "@/components/archive-filters";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuLabel,
-} from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/auth-context";
 import { useArchivesStore } from "@/stores/archives-store";
 import { toast } from "sonner";
@@ -30,7 +21,7 @@ import {
 } from "@/lib/firebase/archives";
 
 export function ArchivesPageClient() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const {
     filteredArchives,
     isLoading,
@@ -141,16 +132,6 @@ export function ArchivesPageClient() {
     setEditingArchive(null);
   };
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      toast.success("Logged out successfully");
-    } catch (error) {
-      console.error("Error logging out:", error);
-      toast.error("Failed to log out");
-    }
-  };
-
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -188,61 +169,6 @@ export function ArchivesPageClient() {
                   </p>
                 </div>
 
-                {/* Action Buttons and User Menu */}
-                <div className="flex items-center gap-2 ml-2">
-                  <Button
-                    onClick={() => setIsFormOpen(true)}
-                    size="sm"
-                    className="hidden sm:inline-flex"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    <span className="hidden lg:inline">New Archive</span>
-                    <span className="lg:hidden">New</span>
-                  </Button>
-                  <Button
-                    onClick={() => setIsFormOpen(true)}
-                    size="icon"
-                    className="sm:hidden h-8 w-8"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                  <ThemeToggle />
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className="relative h-9 w-9 rounded-full bg-primary/10"
-                      >
-                        <UserIcon className="h-4 w-4" />
-                        <span className="sr-only">Toggle user menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      className="w-56"
-                      align="end"
-                      forceMount
-                    >
-                      <DropdownMenuLabel className="font-normal">
-                        <div className="flex flex-col space-y-1">
-                          <p className="text-sm font-medium leading-none">
-                            {user?.name || user?.email}
-                          </p>
-                          <p className="text-xs leading-none text-muted-foreground">
-                            {user?.email}
-                          </p>
-                        </div>
-                      </DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={handleLogout}
-                        className="cursor-pointer"
-                      >
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Log out
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
               </div>
             </div>
           </div>

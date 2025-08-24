@@ -1,22 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, FileText, LogOut, User as UserIcon } from "lucide-react";
+import { Plus, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ReportFilters } from "@/components/report-filters";
 import { ReportCard } from "@/components/report-card";
 import { ReportForm } from "@/components/report-form";
 import { ReportsLoading } from "@/components/loading/reports-loading";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuLabel,
-} from "@/components/ui/dropdown-menu";
 import { useReportsStore } from "@/stores/reports-store";
 import { useAuth } from "@/contexts/auth-context";
 import { subscribeReports, createReport, updateReport as updateReportFirebase, deleteReport } from "@/lib/firebase/reports";
@@ -24,7 +15,7 @@ import type { Report } from "@/types/report";
 import { toast } from "sonner";
 
 export function ReportsPageClient() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const {
     filteredReports,
     isLoading,
@@ -47,11 +38,6 @@ export function ReportsPageClient() {
 
     return unsubscribe;
   }, [user?.uid, setReports]);
-
-  const handleLogout = () => {
-    logout();
-    window.location.href = "/login";
-  };
 
   const handleCreateReport = () => {
     setEditingReport(undefined);
@@ -116,61 +102,6 @@ export function ReportsPageClient() {
                   </p>
                 </div>
 
-                {/* Action Buttons and User Menu */}
-                <div className="flex items-center gap-2 ml-2">
-                  <Button
-                    onClick={handleCreateReport}
-                    size="sm"
-                    className="hidden sm:inline-flex"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    <span className="hidden lg:inline">New Report</span>
-                    <span className="lg:hidden">New</span>
-                  </Button>
-                  <Button
-                    onClick={handleCreateReport}
-                    size="icon"
-                    className="sm:hidden h-8 w-8"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                  <ThemeToggle />
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className="relative h-9 w-9 rounded-full bg-primary/10"
-                      >
-                        <UserIcon className="h-4 w-4" />
-                        <span className="sr-only">Toggle user menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      className="w-56"
-                      align="end"
-                      forceMount
-                    >
-                      <DropdownMenuLabel className="font-normal">
-                        <div className="flex flex-col space-y-1">
-                          <p className="text-sm font-medium leading-none">
-                            {user?.name || user?.email}
-                          </p>
-                          <p className="text-xs leading-none text-muted-foreground">
-                            {user?.email}
-                          </p>
-                        </div>
-                      </DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={handleLogout}
-                        className="cursor-pointer"
-                      >
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Log out
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
               </div>
             </div>
           </div>

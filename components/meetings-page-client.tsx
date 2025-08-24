@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Calendar, LogOut, User as UserIcon } from "lucide-react";
+import { Plus, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ViewToggle } from "@/components/view-toggle";
 import { MeetingFilters } from "@/components/meeting-filters";
@@ -9,16 +9,7 @@ import { MeetingTable } from "@/components/meeting-table";
 import { MeetingCard } from "@/components/meeting-card";
 import { MeetingForm } from "@/components/meeting-form";
 import { MeetingsLoading } from "@/components/loading/meetings-loading";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuLabel,
-} from "@/components/ui/dropdown-menu";
 import { useMeetingsStore } from "@/stores/meetings-store";
 import { useAuth } from "@/contexts/auth-context";
 import { subscribeMeetings, updateMeeting as updateMeetingFirebase, deleteMeeting } from "@/lib/firebase/meetings";
@@ -26,7 +17,7 @@ import type { Meeting, ViewMode } from "@/types/meeting";
 import { toast } from "sonner";
 
 export function MeetingsPageClient() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const {
     filteredMeetings,
     isLoading,
@@ -50,11 +41,6 @@ export function MeetingsPageClient() {
 
     return unsubscribe;
   }, [user?.uid, setMeetings]);
-
-  const handleLogout = () => {
-    logout();
-    window.location.href = "/login";
-  };
 
   const handleCreateMeeting = () => {
     setEditingMeeting(undefined);
@@ -136,62 +122,6 @@ export function MeetingsPageClient() {
                   <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
                     Manage and track all your meetings in one place
                   </p>
-                </div>
-
-                {/* Action Buttons and User Menu */}
-                <div className="flex items-center gap-2 ml-2">
-                  <Button
-                    onClick={handleCreateMeeting}
-                    size="sm"
-                    className="hidden sm:inline-flex"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    <span className="hidden lg:inline">New Meeting</span>
-                    <span className="lg:hidden">New</span>
-                  </Button>
-                  <Button
-                    onClick={handleCreateMeeting}
-                    size="icon"
-                    className="sm:hidden h-8 w-8"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                  <ThemeToggle />
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className="relative h-9 w-9 rounded-full bg-primary/10"
-                      >
-                        <UserIcon className="h-4 w-4" />
-                        <span className="sr-only">Toggle user menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      className="w-56"
-                      align="end"
-                      forceMount
-                    >
-                      <DropdownMenuLabel className="font-normal">
-                        <div className="flex flex-col space-y-1">
-                          <p className="text-sm font-medium leading-none">
-                            {user?.name || user?.email}
-                          </p>
-                          <p className="text-xs leading-none text-muted-foreground">
-                            {user?.email}
-                          </p>
-                        </div>
-                      </DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={handleLogout}
-                        className="cursor-pointer"
-                      >
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Log out
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </div>
               </div>
             </div>
