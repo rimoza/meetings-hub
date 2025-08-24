@@ -4,11 +4,12 @@ import AppointmentDetails from '@/components/appointment-details';
 // import { AlertCircle } from 'lucide-react';
 
 interface AppointmentDetailsPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export async function generateMetadata({ params }: AppointmentDetailsPageProps): Promise<Metadata> {
-  console.log('Generating metadata for appointment ID:', params.id);
+  const resolvedParams = await params;
+  console.log('Generating metadata for appointment ID:', resolvedParams.id);
   return {
     title: `Appointment Details - Kulan Space`,
     description: 'View and manage appointment details',
@@ -66,11 +67,12 @@ function AppointmentDetailsLoading() {
 //   );
 // }
 
-export default function AppointmentDetailsPage({ params }: Readonly<AppointmentDetailsPageProps>) {
+export default async function AppointmentDetailsPage({ params }: Readonly<AppointmentDetailsPageProps>) {
+  const resolvedParams = await params;
   return (
     <Suspense fallback={<AppointmentDetailsLoading />}>
       <div className="min-h-screen bg-background">
-        <AppointmentDetails appointmentId={params.id} />
+        <AppointmentDetails appointmentId={resolvedParams.id} />
       </div>
     </Suspense>
   );
