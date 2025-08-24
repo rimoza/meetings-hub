@@ -1,0 +1,18 @@
+<svg width="384" height="384" xmlns="http://www.w3.org/2000/svg">
+    <rect width="384" height="384" rx="72" fill="url(#gradient)"/>
+    <path d="M96 125.952C96 114.048 104.44800000000001 107.90400000000001 114.048 107.90400000000001H269.952C279.552 107.90400000000001 288 114.048 288 125.952V269.952C288 279.552 279.552 288 269.952 288H114.048C104.44800000000001 288 96 279.552 96 269.952V125.952Z" stroke="white" stroke-width="18.048000000000002" fill="none"/>
+    <path d="M288 155.904L96 155.904" stroke="white" stroke-width="18.048000000000002"/>
+    <path d="M144 72L144 144" stroke="white" stroke-width="18.048000000000002" stroke-linecap="round"/>
+    <path d="M240 72L240 144" stroke="white" stroke-width="18.048000000000002" stroke-linecap="round"/>
+    <circle cx="144" cy="203.904" r="11.904" fill="white"/>
+    <circle cx="192" cy="203.904" r="11.904" fill="white"/>
+    <circle cx="240" cy="203.904" r="11.904" fill="white"/>
+    <circle cx="144" cy="240" r="11.904" fill="white"/>
+    <circle cx="192" cy="240" r="11.904" fill="white"/>
+    <defs>
+      <linearGradient id="gradient" x1="0" y1="0" x2="384" y2="384" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#B68D2C"/>
+        <stop offset="1" stop-color="#D4A943"/>
+      </linearGradient>
+    </defs>
+  </svg>

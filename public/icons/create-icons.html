@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate PWA Icons</title>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        sizes.forEach(size => {
+            canvas.width = size;
+            canvas.height = size;
+            
+            // Create gradient background
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#B68D2C');
+            gradient.addColorStop(1, '#D4A943');
+            
+            // Fill background with gradient
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Add rounded corners effect
+            ctx.globalCompositeOperation = 'destination-in';
+            ctx.beginPath();
+            ctx.roundRect(0, 0, size, size, size * 0.1875); // 6/32 ratio for rounded corners
+            ctx.fill();
+            ctx.globalCompositeOperation = 'source-over';
+            
+            // Draw calendar icon (simplified version)
+            ctx.strokeStyle = 'white';
+            ctx.fillStyle = 'white';
+            ctx.lineWidth = size * 0.047; // 1.5/32 ratio
+            
+            // Calendar body
+            const margin = size * 0.25;
+            const width = size * 0.5;
+            const height = size * 0.46875;
+            
+            ctx.beginPath();
+            ctx.roundRect(margin, margin + size * 0.09375, width, height, size * 0.046875);
+            ctx.stroke();
+            
+            // Calendar header line
+            ctx.beginPath();
+            ctx.moveTo(margin, margin + size * 0.21875);
+            ctx.lineTo(margin + width, margin + size * 0.21875);
+            ctx.stroke();
+            
+            // Calendar tabs
+            ctx.beginPath();
+            ctx.moveTo(margin + width * 0.25, margin);
+            ctx.lineTo(margin + width * 0.25, margin + size * 0.1875);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(margin + width * 0.75, margin);
+            ctx.lineTo(margin + width * 0.75, margin + size * 0.1875);
+            ctx.stroke();
+            
+            // Calendar dots (simplified)
+            const dotSize = size * 0.03125;
+            const dotPositions = [
+                [margin + width * 0.25, margin + size * 0.34375],
+                [margin + width * 0.5, margin + size * 0.34375],
+                [margin + width * 0.75, margin + size * 0.34375],
+                [margin + width * 0.25, margin + size * 0.46875],
+                [margin + width * 0.5, margin + size * 0.46875]
+            ];
+            
+            dotPositions.forEach(([x, y]) => {
+                ctx.beginPath();
+                ctx.arc(x, y, dotSize, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+            
+            // Download the image
+            const link = document.createElement('a');
+            link.download = `icon-${size}x${size}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+    </script>
+</body>
+</html>

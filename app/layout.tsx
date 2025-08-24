@@ -7,10 +7,12 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AuthProvider } from "@/contexts/auth-context";
+import InstallPrompt from "@/components/install-prompt";
 
 export const metadata: Metadata = {
   title: "Kulan Space - Meeting Management",
   description: "Modern meeting management application with meeting reminders",
+  applicationName: "Kulan Space",
   generator: "v0.app",
   icons: {
     icon: [
@@ -19,12 +21,12 @@ export const metadata: Metadata = {
         type: "image/svg+xml",
       },
       {
-        url: "/favicon-32x32.png",
+        url: "/icons/icon-32x32.png",
         sizes: "32x32",
         type: "image/png",
       },
       {
-        url: "/favicon-16x16.png",
+        url: "/icons/icon-16x16.png",
         sizes: "16x16",
         type: "image/png",
       },
@@ -32,7 +34,12 @@ export const metadata: Metadata = {
     shortcut: "/favicon.svg",
     apple: [
       {
-        url: "/apple-touch-icon.png",
+        url: "/icons/icon-152x152.svg",
+        sizes: "152x152",
+        type: "image/svg+xml",
+      },
+      {
+        url: "/icons/icon-180x180.png",
         sizes: "180x180",
         type: "image/png",
       },
@@ -40,17 +47,23 @@ export const metadata: Metadata = {
     other: [
       {
         rel: "mask-icon",
-        url: "/safari-pinned-tab.svg",
+        url: "/favicon.svg",
         color: "#B68D2C",
       },
     ],
   },
   manifest: "/manifest.json",
+  formatDetection: {
+    telephone: false,
+  },
   other: {
-    "theme-color": "#3b82f6",
+    "theme-color": "#000000",
     "apple-mobile-web-app-capable": "yes",
     "apple-mobile-web-app-status-bar-style": "default",
+    "apple-mobile-web-app-title": "Kulan Space",
     "mobile-web-app-capable": "yes",
+    "msapplication-TileColor": "#000000",
+    "msapplication-tap-highlight": "no",
   },
 };
 
@@ -80,6 +93,7 @@ html {
           <AuthProvider>
             <SidebarProvider defaultOpen={true}>{children}</SidebarProvider>
             <Toaster />
+            <InstallPrompt />
           </AuthProvider>
         </ThemeProvider>
       </body>

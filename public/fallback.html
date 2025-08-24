@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kulan Space - Offline</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #B68D2C 0%, #D4A943 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        .icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #B68D2C, #D4A943);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+            box-shadow: 0 10px 20px rgba(182, 141, 44, 0.3);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        
+        .subtitle {
+            color: #B68D2C;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        p {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 12px;
+            flex-direction: column;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #B68D2C, #D4A943);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(182, 141, 44, 0.3);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(182, 141, 44, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .secondary-button {
+            background: transparent;
+            color: #B68D2C;
+            border: 2px solid #B68D2C;
+            box-shadow: none;
+        }
+        
+        .secondary-button:hover {
+            background: #B68D2C;
+            color: white;
+            box-shadow: 0 4px 12px rgba(182, 141, 44, 0.3);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #ef4444;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .features {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .feature-icon {
+            margin-right: 8px;
+            color: #B68D2C;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .subtitle {
+                font-size: 16px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">📅</div>
+        <h1>You're Offline</h1>
+        <p class="subtitle">Kulan Space</p>
+        <p>
+            <span class="status-indicator"></span>
+            No internet connection detected. Please check your network settings and try again.
+        </p>
+        
+        <div class="button-group">
+            <button onclick="window.location.reload()">
+                🔄 Try Again
+            </button>
+            <button class="secondary-button" onclick="goHome()">
+                🏠 Go to Home
+            </button>
+        </div>
+        
+        <div class="features">
+            <div class="feature-item">
+                <span class="feature-icon">⚡</span>
+                Fast & Reliable Meeting Management
+            </div>
+            <div class="feature-item">
+                <span class="feature-icon">🔔</span>
+                Smart Reminders & Notifications
+            </div>
+            <div class="feature-item">
+                <span class="feature-icon">📊</span>
+                Detailed Analytics & Reports
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function goHome() {
+            window.location.href = '/';
+        }
+        
+        // Check for online status
+        function checkOnlineStatus() {
+            if (navigator.onLine) {
+                window.location.reload();
+            }
+        }
+        
+        // Listen for online event
+        window.addEventListener('online', checkOnlineStatus);
+        
+        // Periodic check for connectivity (every 30 seconds)
+        setInterval(checkOnlineStatus, 30000);
+        
+        // Service worker check
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then(function(registration) {
+                console.log('Service Worker is ready:', registration);
+            }).catch(function(error) {
+                console.log('Service Worker registration failed:', error);
+            });
+        }
+        
+        // Add visual feedback for button clicks
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('click', function() {
+                this.style.transform = 'translateY(0)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+        });
+    </script>
+</body>
+</html>
