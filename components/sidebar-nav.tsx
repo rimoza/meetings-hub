@@ -53,9 +53,16 @@ export function SidebarNav({
   const { upcomingMeetings } = useMeetings();
   const router = useRouter();
   const pathname = usePathname();
-  const [isMeetingsOpen, setIsMeetingsOpen] = useState(true);
+  const [isMeetingsOpen, setIsMeetingsOpen] = useState(false);
 
   const meetingSubItems = [
+    
+    {
+      id: "/meetings",
+      label: "All Meetings",
+      icon: <CalendarDays className="h-4 w-4" />,
+      count: null,
+    },
     {
       id: "/today-meetings",
       label: "Today's Meetings",
@@ -67,13 +74,7 @@ export function SidebarNav({
       label: "Upcoming Meetings",
       icon: <Clock className="h-4 w-4" />,
       count: upcomingCount,
-    },
-    {
-      id: "/meetings",
-      label: "All Meetings",
-      icon: <CalendarDays className="h-4 w-4" />,
-      count: null,
-    },
+    }
   ];
 
   const menuItems = [
@@ -202,7 +203,7 @@ export function SidebarNav({
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton
-                    className="h-10 text-sm sm:text-base"
+                    className="h-10 text-sm sm:text-base cursor-pointer"
                     isActive={meetingSubItems.some(item => pathname === item.id)}
                     tooltip="Meetings"
                   >

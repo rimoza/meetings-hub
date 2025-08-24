@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+// import { SidebarTrigger } from "@/components/ui/sidebar";
 import { TodaysMeetings } from "@/components/todays-meetings";
 import { useMeetings } from "@/hooks/use-meetings";
 import type { Meeting } from "@/types/meeting";
@@ -38,7 +38,7 @@ export function TodayMeetingsClient() {
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="border-b bg-card">
+      {/* <header className="border-b bg-card">
         <div className="px-3 py-3 sm:px-4 sm:py-4">
           <div className="flex items-center gap-2">
             <SidebarTrigger className="md:hidden" />
@@ -56,7 +56,7 @@ export function TodayMeetingsClient() {
             </div>
           </div>
         </div>
-      </header>
+      </header> */}
 
       {/* Today's Meetings Content */}
       <main className="flex-1 overflow-auto p-4">

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { UpcomingMeetings } from "@/components/upcoming-meetings";
 import { useMeetings } from "@/hooks/use-meetings";
 import type { Meeting } from "@/types/meeting";
@@ -37,26 +36,6 @@ export function UpcomingMeetingsClient() {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Header */}
-      <header className="border-b bg-card">
-        <div className="px-3 py-3 sm:px-4 sm:py-4">
-          <div className="flex items-center gap-2">
-            <SidebarTrigger className="md:hidden" />
-            <div className="flex-1">
-              <div className="flex items-start justify-between">
-                <div className="flex-1 min-w-0">
-                  <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground truncate">
-                    Upcoming Meetings
-                  </h1>
-                  <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
-                    All your upcoming meetings
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
 
       {/* Upcoming Meetings Content */}
       <main className="flex-1 overflow-auto p-4">
