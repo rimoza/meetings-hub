@@ -28,7 +28,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-import { SidebarNav } from "@/components/sidebar-nav";
 import type { Task } from "@/types/task";
 import { toast } from "sonner";
 import {
@@ -62,7 +61,8 @@ export function TasksPageClient() {
     getFollowUpTasks,
   } = useTasksStore();
 
-  const { getTodayMeetings, getUpcomingMeetings, setMeetings } =
+  // getTodayMeetings, getUpcomingMeetings,
+  const { setMeetings } =
     useMeetingsStore();
 
   // Local UI state
@@ -93,8 +93,8 @@ export function TasksPageClient() {
   const inProgressTasks = getInProgressTasks();
   const completedTasks = getCompletedTasks();
   const followUpTasks = getFollowUpTasks();
-  const todayMeetings = getTodayMeetings();
-  const upcomingMeetings = getUpcomingMeetings();
+  // const todayMeetings = getTodayMeetings();
+  // const upcomingMeetings = getUpcomingMeetings();
 
   const handleLogout = () => {
     logout();
@@ -106,10 +106,6 @@ export function TasksPageClient() {
     setIsFormOpen(true);
   };
 
-  const handleCreateMeeting = () => {
-    // Navigate to dashboard to create meeting
-    window.location.href = "/";
-  };
 
   const handleEditTask = (task: Task) => {
     setEditingTask(task);
@@ -171,17 +167,7 @@ export function TasksPageClient() {
   }
 
   return (
-    <div className="flex w-full h-screen">
-      {/* Sidebar */}
-      <SidebarNav
-        onCreateMeeting={handleCreateMeeting}
-        todayCount={todayMeetings.length}
-        upcomingCount={upcomingMeetings.length}
-        tasksCount={pendingTasks.length + inProgressTasks.length}
-      />
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <header className="border-b bg-card">
           <div className="px-3 py-3 sm:px-4 sm:py-4">
@@ -367,7 +353,6 @@ export function TasksPageClient() {
             />
           )}
         </main>
-      </div>
 
       {/* Task Form Modal */}
       <TaskForm

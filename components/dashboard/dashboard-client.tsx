@@ -30,7 +30,6 @@ import { useMeetingsStore } from "@/stores/meetings-store";
 import { useTasksStore } from "@/stores/tasks-store";
 import type { ViewMode, Meeting } from "@/types/meeting";
 import { toast } from "sonner";
-import { SidebarNav } from "@/components/sidebar-nav";
 import { MeetingForm } from "@/components/meeting-form";
 import { DashboardLoading } from "@/components/loading/dashboard-loading";
 import {
@@ -271,17 +270,7 @@ export function DashboardClient() {
   );
 
   return (
-    <div className="flex w-full h-screen">
-      {/* Sidebar */}
-      <SidebarNav
-        onCreateMeeting={handleCreateMeeting}
-        todayCount={todayMeetings.length}
-        upcomingCount={upcomingMeetings.length}
-        tasksCount={pendingTasks.length + inProgressTasks.length}
-      />
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header - Mobile First */}
         <header className="border-b bg-card">
           <div className="px-3 py-3 sm:px-4 sm:py-4">
@@ -359,7 +348,6 @@ export function DashboardClient() {
         <main className="flex-1 overflow-auto px-3 py-4 sm:px-4 sm:py-6 md:px-6 md:py-8">
           {dashboardContent}
         </main>
-      </div>
 
       {/* Meeting Form Modal */}
       <MeetingForm

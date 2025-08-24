@@ -1,13 +1,7 @@
 import { TasksPageClient } from "@/components/tasks/tasks-page-client";
-import { ProtectedRoute } from "@/components/protected-route";
 
 export default async function TasksPage() {
-  return (
-    <ProtectedRoute>
-      {/* Use full-screen layout with sidebar and header like other pages */}
-      <TasksPageClient />
-    </ProtectedRoute>
-  );
+  return <TasksPageClient />;
 }
 
 export const metadata = {
