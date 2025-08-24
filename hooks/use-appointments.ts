@@ -12,14 +12,20 @@ export function useAppointments() {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchAppointments = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('useAppointments: No user, skipping fetch');
+      return;
+    }
+    
+    console.log('useAppointments: Fetching appointments for user:', user.uid);
     
     try {
       setIsLoading(true);
       const fetchedAppointments = await appointmentsService.getAll(user.uid);
+      console.log('useAppointments: Fetched appointments:', fetchedAppointments.length);
       setAppointments(fetchedAppointments);
     } catch (error) {
-      console.error('Error fetching appointments:', error);
+      console.error('useAppointments: Error fetching appointments:', error);
       toast.error('Failed to fetch appointments');
     } finally {
       setIsLoading(false);
@@ -27,10 +33,12 @@ export function useAppointments() {
   };
 
   useEffect(() => {
+    console.log('useAppointments: useEffect - user:', !!user, 'loading:', loading);
     if (user) {
       fetchAppointments();
     } else if (!loading) {
       setIsLoading(false);
+      console.log('useAppointments: No user and not loading, setting isLoading to false');
     }
   }, [user, loading]);
 

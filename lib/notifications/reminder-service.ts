@@ -45,31 +45,8 @@ export class ReminderService {
   }
 
   private async initializeServiceWorker(): Promise<void> {
-    try {
-      if ("serviceWorker" in navigator) {
-        this.log("🔧 Registering service worker...");
-
-        const registration = await navigator.serviceWorker.register("/sw.js", {
-          scope: "/",
-        });
-
-        this.log("✅ Service worker registered successfully:", registration);
-
-        // Listen for service worker updates
-        registration.addEventListener("updatefound", () => {
-          this.log("🔄 Service worker update found");
-        });
-
-        // Check if service worker is already active
-        if (registration.active) {
-          this.log("🟢 Service worker is active");
-        }
-      } else {
-        this.log("❌ Service worker not supported in this browser");
-      }
-    } catch (error) {
-      this.logError("💥 Service worker registration failed:", error);
-    }
+    // Service worker disabled - sw.js file was removed
+    this.log("⚠️ Service worker registration skipped - sw.js not available");
   }
 
   private log(...args: unknown[]): void {
@@ -693,27 +670,8 @@ export class ReminderService {
     delayMs: number,
     reminderId: string,
   ): boolean {
-    try {
-      if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
-        this.log("📡 Using service worker for reminder scheduling");
-
-        navigator.serviceWorker.controller.postMessage({
-          type: "SCHEDULE_REMINDER",
-          payload: {
-            meeting,
-            reminderTime,
-            delayMs,
-            reminderId,
-          },
-        });
-
-        return true;
-      }
-    } catch (error) {
-      this.logError("💥 Failed to schedule with service worker:", error);
-    }
-
-    this.log("⚠️ Falling back to setTimeout for reminder scheduling");
+    // Service worker disabled - always use setTimeout fallback
+    this.log("⚠️ Service worker not available, using setTimeout for reminder scheduling");
     return false;
   }
 

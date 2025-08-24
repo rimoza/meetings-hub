@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import {
   Table,
   TableBody,
@@ -17,14 +16,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,7 +29,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import { 
   MoreHorizontal, 
-  Search, 
   Calendar, 
   Clock, 
   User,
@@ -49,6 +39,7 @@ import {
   Phone
 } from 'lucide-react';
 import { format } from 'date-fns';
+import Link from 'next/link';
 import { Appointment, AppointmentStatus } from '@/types/appointment';
 import AppointmentForm from './appointment-form';
 
@@ -63,7 +54,7 @@ const statusConfig = {
   scheduled: { label: 'Scheduled', variant: 'secondary' as const, icon: Calendar },
   confirmed: { label: 'Confirmed', variant: 'default' as const, icon: CheckCircle },
   cancelled: { label: 'Cancelled', variant: 'destructive' as const, icon: XCircle },
-  completed: { label: 'Completed', variant: 'success' as const, icon: CheckCircle },
+  completed: { label: 'Completed', variant: 'default' as const, icon: CheckCircle },
   'no-show': { label: 'No Show', variant: 'outline' as const, icon: XCircle },
 };
 
@@ -73,41 +64,6 @@ export default function AppointmentTable({
   onDelete, 
   isLoading = false 
 }: AppointmentTableProps) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [dateFilter, setDateFilter] = useState<string>('all');
-
-  const filteredAppointments = appointments.filter(appointment => {
-    const matchesSearch = 
-      appointment.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      appointment.attendee.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      appointment.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      '';
-
-    const matchesStatus = statusFilter === 'all' || appointment.status === statusFilter;
-
-    let matchesDate = true;
-    if (dateFilter !== 'all') {
-      const today = new Date();
-      const appointmentDate = new Date(appointment.date);
-      
-      switch (dateFilter) {
-        case 'today':
-          matchesDate = appointmentDate.toDateString() === today.toDateString();
-          break;
-        case 'week':
-          const weekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
-          matchesDate = appointmentDate >= today && appointmentDate <= weekFromNow;
-          break;
-        case 'month':
-          const monthFromNow = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
-          matchesDate = appointmentDate >= today && appointmentDate <= monthFromNow;
-          break;
-      }
-    }
-
-    return matchesSearch && matchesStatus && matchesDate;
-  });
 
   const handleQuickStatusChange = async (appointment: Appointment, newStatus: AppointmentStatus) => {
     try {
@@ -151,45 +107,6 @@ export default function AppointmentTable({
 
   return (
     <div className="space-y-4">
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search appointments..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            {Object.entries(statusConfig).map(([status, config]) => (
-              <SelectItem key={status} value={status}>
-                {config.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        
-        <Select value={dateFilter} onValueChange={setDateFilter}>
-          <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="Filter by date" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Dates</SelectItem>
-            <SelectItem value="today">Today</SelectItem>
-            <SelectItem value="week">This Week</SelectItem>
-            <SelectItem value="month">This Month</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
       {/* Table */}
       <div className="rounded-md border">
         <Table>
@@ -204,14 +121,14 @@ export default function AppointmentTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredAppointments.length === 0 ? (
+            {appointments.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                   No appointments found
                 </TableCell>
               </TableRow>
             ) : (
-              filteredAppointments.map((appointment) => {
+              appointments.map((appointment) => {
                 const statusInfo = statusConfig[appointment.status];
                 const StatusIcon = statusInfo.icon;
                 
@@ -219,7 +136,12 @@ export default function AppointmentTable({
                   <TableRow key={appointment.id}>
                     <TableCell className="font-medium">
                       <div>
-                        <div className="font-semibold">{appointment.title}</div>
+                        <Link 
+                          href={`/appointments/${appointment.id}`}
+                          className="font-semibold hover:underline hover:text-primary transition-colors"
+                        >
+                          {appointment.title}
+                        </Link>
                         {appointment.duration && (
                           <div className="text-sm text-muted-foreground flex items-center gap-1">
                             <Clock className="h-3 w-3" />
@@ -326,7 +248,7 @@ export default function AppointmentTable({
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Delete Appointment</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Are you sure you want to delete "{appointment.title}"? This action cannot be undone.
+                                  Are you sure you want to delete &quot;{appointment.title}&quot;? This action cannot be undone.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
@@ -350,12 +272,6 @@ export default function AppointmentTable({
           </TableBody>
         </Table>
       </div>
-      
-      {filteredAppointments.length > 0 && (
-        <div className="text-sm text-muted-foreground">
-          Showing {filteredAppointments.length} of {appointments.length} appointments
-        </div>
-      )}
     </div>
   );
 }

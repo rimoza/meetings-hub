@@ -29,18 +29,19 @@ export const appointmentsService = {
       const appointmentsRef = collection(db, COLLECTION_NAME);
       const q = query(
         appointmentsRef, 
-        where('userId', '==', userId),
-        orderBy('date', 'desc'),
-        orderBy('time', 'desc')
+        where('userId', '==', userId)
       );
       const snapshot = await getDocs(q);
       
-      return snapshot.docs.map(doc => ({
+      const appointments = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
         createdAt: doc.data().createdAt?.toDate() || new Date(),
         updatedAt: doc.data().updatedAt?.toDate() || new Date(),
       })) as Appointment[];
+      
+      // Sort by date in descending order on the client side
+      return appointments.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     } catch (error) {
       console.error('Error fetching appointments:', error);
       throw error;

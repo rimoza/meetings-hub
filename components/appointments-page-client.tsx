@@ -16,7 +16,7 @@ import AppointmentForm from './appointment-form';
 import AppointmentTable from './appointment-table';
 import AppointmentCard from './appointment-card';
 import { useAppointments } from '@/hooks/use-appointments';
-import { ViewMode as AppointmentViewMode } from '@/types/appointment';
+import { Appointment, ViewMode as AppointmentViewMode } from '@/types/appointment';
 
 export default function AppointmentsPageClient() {
   const {
@@ -29,6 +29,14 @@ export default function AppointmentsPageClient() {
     getUpcomingAppointments,
     getAppointmentsByStatus,
   } = useAppointments();
+
+  // Debug logging
+  console.log('Appointments page - isLoading:', isLoading, 'appointments count:', appointments.length);
+
+  // Wrapper function to handle the return type mismatch
+  const handleCreateAppointment = async (appointment: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>) => {
+    await createAppointment(appointment);
+  };
 
   const [viewMode, setViewMode] = useState<AppointmentViewMode>('table');
   const [searchTerm, setSearchTerm] = useState('');
@@ -122,7 +130,7 @@ export default function AppointmentsPageClient() {
         
         <div className="flex items-center gap-3">
           <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
-          <AppointmentForm onSubmit={createAppointment} />
+          <AppointmentForm onSubmit={handleCreateAppointment} />
         </div>
       </div>
 
@@ -209,7 +217,7 @@ export default function AppointmentsPageClient() {
                 : "No appointments match your current filters"}
             </p>
             <AppointmentForm 
-              onSubmit={createAppointment}
+              onSubmit={handleCreateAppointment}
               trigger={
                 <Button className="gap-2">
                   <Plus className="h-4 w-4" />

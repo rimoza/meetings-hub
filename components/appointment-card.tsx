@@ -30,10 +30,13 @@ import {
   Trash2,
   CheckCircle,
   XCircle,
-  Phone,
-  Mail
+  // Phone,
+  Mail,
+  Eye
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Appointment, AppointmentStatus } from '@/types/appointment';
 import AppointmentForm from './appointment-form';
 
@@ -47,11 +50,12 @@ const statusConfig = {
   scheduled: { label: 'Scheduled', variant: 'secondary' as const, icon: Calendar, color: 'text-blue-600' },
   confirmed: { label: 'Confirmed', variant: 'default' as const, icon: CheckCircle, color: 'text-green-600' },
   cancelled: { label: 'Cancelled', variant: 'destructive' as const, icon: XCircle, color: 'text-red-600' },
-  completed: { label: 'Completed', variant: 'success' as const, icon: CheckCircle, color: 'text-green-700' },
+  completed: { label: 'Completed', variant: 'default' as const, icon: CheckCircle, color: 'text-green-700' },
   'no-show': { label: 'No Show', variant: 'outline' as const, icon: XCircle, color: 'text-orange-600' },
 };
 
 export default function AppointmentCard({ appointment, onUpdate, onDelete }: AppointmentCardProps) {
+  const router = useRouter();
   const statusInfo = statusConfig[appointment.status];
   const StatusIcon = statusInfo.icon;
 
@@ -99,15 +103,22 @@ export default function AppointmentCard({ appointment, onUpdate, onDelete }: App
   };
 
   return (
-    <Card className={`relative transition-all duration-200 hover:shadow-md ${
-      isUpcoming() ? 'border-l-4 border-l-primary' : ''
-    }`}>
+    <Card 
+      className={`relative transition-all duration-200 hover:shadow-md cursor-pointer ${
+        isUpcoming() ? 'border-l-4 border-l-primary' : ''
+      }`}
+      onClick={() => router.push(`/appointments/${appointment.id}`)}
+    >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="space-y-1">
-            <h3 className="font-semibold text-lg leading-none tracking-tight">
+            <Link 
+              href={`/appointments/${appointment.id}`}
+              className="font-semibold text-lg leading-none tracking-tight hover:underline hover:text-primary transition-colors"
+              onClick={(e) => e.stopPropagation()}
+            >
               {appointment.title}
-            </h3>
+            </Link>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
@@ -131,11 +142,21 @@ export default function AppointmentCard({ appointment, onUpdate, onDelete }: App
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => router.push(`/appointments/${appointment.id}`)}>
+                  <Eye className="mr-2 h-4 w-4" />
+                  View Details
+                </DropdownMenuItem>
+                
                 <AppointmentForm
                   appointment={appointment}
                   onSubmit={(updates) => onUpdate(appointment.id, updates)}
@@ -185,7 +206,7 @@ export default function AppointmentCard({ appointment, onUpdate, onDelete }: App
                     <AlertDialogHeader>
                       <AlertDialogTitle>Delete Appointment</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Are you sure you want to delete "{appointment.title}"? This action cannot be undone.
+                        Are you sure you want to delete &quot;{appointment.title}&quot;? This action cannot be undone.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -243,7 +264,10 @@ export default function AppointmentCard({ appointment, onUpdate, onDelete }: App
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => handleQuickStatusChange('confirmed')}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleQuickStatusChange('confirmed');
+                }}
                 className="h-7 text-xs"
               >
                 <CheckCircle className="h-3 w-3 mr-1" />
@@ -255,7 +279,10 @@ export default function AppointmentCard({ appointment, onUpdate, onDelete }: App
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => handleQuickStatusChange('completed')}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleQuickStatusChange('completed');
+                }}
                 className="h-7 text-xs"
               >
                 <CheckCircle className="h-3 w-3 mr-1" />
@@ -267,7 +294,10 @@ export default function AppointmentCard({ appointment, onUpdate, onDelete }: App
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => window.open(`mailto:${appointment.attendeeEmail}`, '_blank')}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.open(`mailto:${appointment.attendeeEmail}`, '_blank');
+                }}
                 className="h-7 text-xs"
               >
                 <Mail className="h-3 w-3 mr-1" />
