@@ -31,8 +31,6 @@ export function ArchivesPageClient() {
     setLoading,
     setError,
     setFilters,
-    addArchive,
-    updateArchive: updateStoreArchive,
     removeArchive,
   } = useArchivesStore();
 

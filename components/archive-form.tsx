@@ -25,7 +25,7 @@ import { X } from "lucide-react";
 import type { Archive, ArchiveStatus } from "@/types/archive";
 
 interface ArchiveFormProps {
-  archive?: Archive;
+  archive?: Archive | null;
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (archive: Omit<Archive, "id" | "createdAt" | "updatedAt">) => Promise<void>;
