@@ -307,7 +307,7 @@ export function TasksPageClient() {
 
           {/* Controls */}
           <div className="flex justify-end items-center mb-6">
-            <div className="flex gap-2 items-center">
+            <div className="flex gap-2 items-center w-full">
               <TaskFilters filters={filters} onFiltersChange={setFilters} />
               <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
             </div>

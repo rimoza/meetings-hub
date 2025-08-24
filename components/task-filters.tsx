@@ -64,9 +64,9 @@ export function TaskFilters({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+    <div className="flex flex-col justify-between flex-1 sm:flex-row gap-3 sm:items-center">
       {/* Search Bar */}
-      <div className="relative flex-1 min-w-[200px]">
+      <div className="relative flex-1 min-w-[200px] w-full">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search tasks..."

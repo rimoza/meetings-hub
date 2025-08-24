@@ -7,6 +7,11 @@ import {
   Clock,
   Bell,
   CheckSquare,
+  ChevronDown,
+  Archive,
+  FileText,
+  Users,
+  CalendarDays,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,12 +22,21 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
   useSidebar,
 } from "@/components/ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { useReminders } from "@/hooks/use-reminders";
 import { useMeetings } from "@/hooks/use-meetings";
 import { NotificationSidebar } from "@/components/notification-sidebar";
 import { useRouter, usePathname } from "next/navigation";
+import { useState } from "react";
 
 interface SidebarNavProps {
   onCreateMeeting: () => void;
@@ -42,18 +56,13 @@ export function SidebarNav({
   const { upcomingMeetings } = useMeetings();
   const router = useRouter();
   const pathname = usePathname();
+  const [isMeetingsOpen, setIsMeetingsOpen] = useState(true);
 
-  const menuItems = [
-    {
-      id: "/",
-      label: "Dashboard",
-      icon: <Home className="h-4 w-4" />,
-      count: null,
-    },
+  const meetingSubItems = [
     {
       id: "/today-meetings",
       label: "Today's Meetings",
-      icon: <Calendar className="h-4 w-4 text-blue-500" />,
+      icon: <Calendar className="h-4 w-4" />,
       count: todayCount,
     },
     {
@@ -63,10 +72,43 @@ export function SidebarNav({
       count: upcomingCount,
     },
     {
+      id: "/all-meetings",
+      label: "All Meetings",
+      icon: <CalendarDays className="h-4 w-4" />,
+      count: null,
+    },
+  ];
+
+  const menuItems = [
+    {
+      id: "/",
+      label: "Dashboard",
+      icon: <Home className="h-4 w-4" />,
+      count: null,
+    },
+    {
       id: "/tasks",
       label: "Tasks",
       icon: <CheckSquare className="h-4 w-4 text-purple-500" />,
       count: tasksCount,
+    },
+    {
+      id: "/contacts",
+      label: "Contacts",
+      icon: <Users className="h-4 w-4" />,
+      count: null,
+    },
+    {
+      id: "/archive",
+      label: "Archive",
+      icon: <Archive className="h-4 w-4" />,
+      count: null,
+    },
+    {
+      id: "/reports",
+      label: "Reports",
+      icon: <FileText className="h-4 w-4" />,
+      count: null,
     },
     {
       id: "/settings",
@@ -159,7 +201,77 @@ export function SidebarNav({
 
           {/* Navigation Items - Mobile optimized */}
           <SidebarMenu>
-            {menuItems.map((item) => (
+            {/* Dashboard */}
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                isActive={pathname === "/"}
+                onClick={() => handleNavClick("/")}
+                className="h-10 text-sm sm:text-base"
+              >
+                <div className="flex items-center">
+                  <Home className="h-4 w-4" />
+                  <span className="ml-2">Dashboard</span>
+                </div>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            {/* Meetings Dropdown */}
+            <Collapsible open={isMeetingsOpen} onOpenChange={setIsMeetingsOpen}>
+              <SidebarMenuItem>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton
+                    className="h-10 text-sm sm:text-base"
+                    isActive={meetingSubItems.some(item => pathname === item.id)}
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center">
+                        <Calendar className="h-4 w-4 text-blue-500" />
+                        <span className="ml-2">Meetings</span>
+                      </div>
+                      <ChevronDown 
+                        className={`h-4 w-4 transition-transform ${
+                          isMeetingsOpen ? "rotate-180" : ""
+                        }`}
+                      />
+                    </div>
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenuSub>
+                    {meetingSubItems.map((item) => (
+                      <SidebarMenuSubItem key={item.id}>
+                        <SidebarMenuSubButton
+                          isActive={pathname === item.id}
+                          onClick={() => handleNavClick(item.id)}
+                          className="h-9 text-sm"
+                        >
+                          <div className="flex items-center justify-between w-full">
+                            <div className="flex items-center">
+                              {item.icon}
+                              <span className="ml-2">{item.label}</span>
+                            </div>
+                            {item.count !== null && (
+                              <span
+                                className={`ml-auto text-xs rounded-full px-2 py-0.5 min-w-[1.25rem] h-5 flex items-center justify-center ${
+                                  item.count > 0
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-muted text-muted-foreground"
+                                }`}
+                              >
+                                {item.count > 99 ? "99+" : item.count}
+                              </span>
+                            )}
+                          </div>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    ))}
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </Collapsible>
+
+            {/* Other Menu Items */}
+            {menuItems.slice(1).map((item) => (
               <SidebarMenuItem key={item.id}>
                 <SidebarMenuButton
                   isActive={pathname === item.id}
