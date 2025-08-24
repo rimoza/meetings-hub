@@ -5,6 +5,8 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/auth-context";
 import { useMeetingsStore } from "@/stores/meetings-store";
 import { useTasksStore } from "@/stores/tasks-store";
+import { useArchivesStore } from "@/stores/archives-store";
+import { useReportsStore } from "@/stores/reports-store";
 import type { Meeting } from "@/types/meeting";
 import { toast } from "sonner";
 import { MeetingForm } from "@/components/meeting-form";
@@ -15,10 +17,17 @@ import {
   updateMeeting as updateMeetingFirebase,
 } from "@/lib/firebase/meetings";
 import { subscribeTasks } from "@/lib/firebase/tasks";
+import { subscribeArchives } from "@/lib/firebase/archives";
+import { subscribeReports } from "@/lib/firebase/reports";
 import { StatsOverview } from "@/components/analytics/stats-overview";
 import { UpcomingTimeline } from "@/components/analytics/upcoming-timeline";
 import { CompletionRate } from "@/components/analytics/completion-rate";
 import { RecentActivity } from "@/components/analytics/recent-activity";
+import { MeetingsTrendChart } from "@/components/analytics/meetings-trend-chart";
+import { MeetingDurationChart } from "@/components/analytics/meeting-duration-chart";
+import { TaskCompletionChart } from "@/components/analytics/task-completion-chart";
+import { ArchiveStatusChart } from "@/components/analytics/archive-status-chart";
+import { ReportMetricsChart } from "@/components/analytics/report-metrics-chart";
 
 export function DashboardClient() {
   const { user } = useAuth();
@@ -30,6 +39,8 @@ export function DashboardClient() {
   } = useMeetingsStore();
 
   const { setTasks } = useTasksStore();
+  const { setArchives } = useArchivesStore();
+  const { setReports } = useReportsStore();
   
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingMeeting, setEditingMeeting] = useState<Meeting | undefined>();
@@ -45,11 +56,21 @@ export function DashboardClient() {
       setTasks(tasks);
     });
 
+    const unsubscribeArchives = subscribeArchives(user.uid, (archives) => {
+      setArchives(archives);
+    });
+
+    const unsubscribeReports = subscribeReports(user.uid, (reports) => {
+      setReports(reports);
+    });
+
     return () => {
       unsubscribeMeetings();
       unsubscribeTasks();
+      unsubscribeArchives();
+      unsubscribeReports();
     };
-  }, [user?.uid, setMeetings, setTasks]);
+  }, [user?.uid, setMeetings, setTasks, setArchives, setReports]);
 
   const handleFormSubmit = async (meetingData: Omit<Meeting, "id">) => {
     try {
@@ -106,12 +127,23 @@ export function DashboardClient() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               <CompletionRate />
+              <MeetingsTrendChart />
             </div>
             
             <div className="space-y-6">
               <UpcomingTimeline />
               <RecentActivity />
             </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <MeetingDurationChart />
+            <TaskCompletionChart />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <ArchiveStatusChart />
+            <ReportMetricsChart />
           </div>
         </div>
       </main>
