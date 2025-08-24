@@ -5,6 +5,7 @@ import {
   CheckSquare,
   Clock,
   AlertCircle,
+  Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -165,6 +166,10 @@ export function TasksPageClient() {
                       Manage your tasks and follow-ups
                     </p>
                   </div>
+                  <Button onClick={handleCreateTask} className="shrink-0">
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Task
+                  </Button>
                 </div>
               </div>
             </div>

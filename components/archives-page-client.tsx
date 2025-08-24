@@ -168,7 +168,10 @@ export function ArchivesPageClient() {
                     Manage your archived documents and records
                   </p>
                 </div>
-
+                <Button onClick={() => setIsFormOpen(true)} className="shrink-0">
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Archive
+                </Button>
               </div>
             </div>
           </div>

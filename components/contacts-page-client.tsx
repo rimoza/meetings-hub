@@ -206,6 +206,10 @@ export function ContactsPageClient() {
                     Manage your personal and professional contacts
                   </p>
                 </div>
+                <Button onClick={() => setIsFormOpen(true)} className="shrink-0">
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Contact
+                </Button>
               </div>
             </div>
           </div>

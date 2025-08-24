@@ -123,6 +123,10 @@ export function MeetingsPageClient() {
                     Manage and track all your meetings in one place
                   </p>
                 </div>
+                <Button onClick={handleCreateMeeting} className="shrink-0">
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Meeting
+                </Button>
               </div>
             </div>
           </div>
