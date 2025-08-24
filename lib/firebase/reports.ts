@@ -12,7 +12,8 @@ import {
   getFirestore,
   type Firestore,
 } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL, deleteObject, getStorage, type FirebaseStorage } from "firebase/storage";
+//uploadBytes, getDownloadURL
+import { ref, deleteObject, getStorage, type FirebaseStorage } from "firebase/storage";
 import { app, isFirebaseConfigured } from "./config";
 import type { Report } from "@/types/report";
 
