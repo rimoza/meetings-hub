@@ -84,11 +84,13 @@ export function SettingsClient() {
 
       {/* Settings Content */}
       <main className="flex-1 overflow-auto p-4">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <NotificationSettings />
-          <ThemeSettings />
-          <AppSettings />
-        </div>
+          <div className="flex gap-6">
+            <div className="space-y-6">
+              <NotificationSettings />
+            <ThemeSettings />
+            </div>
+            <AppSettings />
+          </div>
       </main>
     </div>
   );

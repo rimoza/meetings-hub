@@ -17,7 +17,7 @@ export function AppSettings() {
   const { user } = useAuth();
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-1 space-y-6">
       {/* <NotificationDiagnostic /> */}
 
       <Card className="w-full">

@@ -33,7 +33,7 @@ export function NotificationSettings() {
   };
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full">
       <CardHeader className="pb-4">
         <div className="flex items-center space-x-2">
           <div className="p-2 bg-primary/10 rounded-lg">
