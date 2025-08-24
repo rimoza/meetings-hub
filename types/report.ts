@@ -2,6 +2,7 @@ export interface Report {
   id: string;
   title: string;
   description: string;
+  tags?: string[];
   file?: {
     name: string;
     url: string;
@@ -9,6 +10,7 @@ export interface Report {
     type: string;
   };
   createdBy: string;
+  createdByName?: string;
   createdAt: Date;
   updatedAt: Date;
 }

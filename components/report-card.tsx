@@ -64,15 +64,18 @@ export function ReportCard({
                 </h3>
               </div>
 
-              {/* File Badge */}
-              {report.file && (
-                <div className="flex items-center gap-2">
+              {/* Badges */}
+              <div className="flex items-center gap-2 flex-wrap">
+                {report.file && (
                   <Badge variant="outline" className="text-xs border-green-200 dark:border-green-800">
                     <File className="h-3 w-3 mr-1" />
                     Has Document
                   </Badge>
-                </div>
-              )}
+                )}
+                <Badge variant="secondary" className="text-xs">
+                  ID: {report.id.slice(0, 8)}
+                </Badge>
+              </div>
             </div>
 
             {/* Action Buttons */}
@@ -145,6 +148,17 @@ export function ReportCard({
             {report.description}
           </p>
 
+          {/* Tags */}
+          {report.tags && report.tags.length > 0 && (
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {report.tags.map((tag, index) => (
+                <Badge key={index} variant="outline" className="text-xs">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          )}
+
           {/* File Info */}
           {report.file && (
             <div className="flex items-center gap-3 p-2.5 bg-secondary/30 rounded-lg">
@@ -174,7 +188,7 @@ export function ReportCard({
               <div className="text-sm">
                 <p className="font-medium">Created By</p>
                 <p className="text-xs text-muted-foreground truncate">
-                  {report.createdBy}
+                  {report.createdByName || report.createdBy}
                 </p>
               </div>
             </div>

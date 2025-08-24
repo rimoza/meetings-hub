@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Upload, File, X, Loader2 } from "lucide-react";
+import { Upload, File, X, Loader2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -40,8 +41,10 @@ export function ReportForm({
   const [formData, setFormData] = useState({
     title: report?.title || "",
     description: report?.description || "",
+    tags: report?.tags || [],
     file: report?.file || null,
   });
+  const [tagInput, setTagInput] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,6 +55,7 @@ export function ReportForm({
       await onSubmit({
         title: formData.title,
         description: formData.description,
+        tags: formData.tags,
         file: formData.file || undefined,
         createdBy: user.uid,
       });
@@ -59,13 +63,37 @@ export function ReportForm({
       setFormData({
         title: "",
         description: "",
+        tags: [],
         file: null,
       });
+      setTagInput("");
       onClose();
     } catch (error) {
       console.error("Error submitting report:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleAddTag = () => {
+    const trimmedTag = tagInput.trim();
+    if (trimmedTag && !formData.tags.includes(trimmedTag)) {
+      setFormData(prev => ({ ...prev, tags: [...prev.tags, trimmedTag] }));
+      setTagInput("");
+    }
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      tags: prev.tags.filter(tag => tag !== tagToRemove)
+    }));
+  };
+
+  const handleTagInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleAddTag();
     }
   };
 
@@ -164,6 +192,50 @@ export function ReportForm({
                 rows={4}
                 required
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="tags">Tags (Optional)</Label>
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <Input
+                    id="tags"
+                    placeholder="Add a tag and press Enter"
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyDown={handleTagInputKeyDown}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAddTag}
+                    disabled={!tagInput.trim()}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                {formData.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {formData.tags.map((tag) => (
+                      <Badge
+                        key={tag}
+                        variant="secondary"
+                        className="px-2 py-1"
+                      >
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveTag(tag)}
+                          className="ml-2 hover:text-destructive"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">

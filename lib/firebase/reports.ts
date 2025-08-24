@@ -45,8 +45,10 @@ export const subscribeReports = (
         id: doc.id,
         title: data.title,
         description: data.description,
+        tags: data.tags,
         file: data.file,
         createdBy: data.createdBy,
+        createdByName: data.createdByName,
         createdAt: data.createdAt.toDate(),
         updatedAt: data.updatedAt.toDate(),
       });
@@ -66,6 +68,7 @@ export const subscribeReports = (
 export const createReport = async (
   userId: string,
   reportData: Omit<Report, "id" | "createdAt" | "updatedAt">,
+  userName?: string,
 ): Promise<string> => {
   if (!db) {
     throw new Error("Firebase is not properly configured");
@@ -76,6 +79,7 @@ export const createReport = async (
     const docRef = await addDoc(collection(db, REPORTS_COLLECTION), {
       ...reportData,
       createdBy: userId,
+      createdByName: userName || "Unknown User",
       createdAt: now,
       updatedAt: now,
     });

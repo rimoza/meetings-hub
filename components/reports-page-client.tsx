@@ -67,7 +67,7 @@ export function ReportsPageClient() {
         updateReport(editingReport.id, reportData);
         toast.success("Report updated successfully");
       } else {
-        await createReport(user!.uid, reportData);
+        await createReport(user!.uid, reportData, user?.name || user?.email || "Unknown User");
         toast.success("Report created successfully");
       }
       setIsFormOpen(false);
@@ -101,7 +101,10 @@ export function ReportsPageClient() {
                     Manage and organize your reports and documents
                   </p>
                 </div>
-
+                <Button onClick={handleCreateReport} className="shrink-0">
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Report
+                </Button>
               </div>
             </div>
           </div>
