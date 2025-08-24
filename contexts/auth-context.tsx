@@ -7,6 +7,11 @@ import {
   onAuthStateChanged,
   GoogleAuthProvider,
   signInWithPopup,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  updateProfile,
   getAuth,
 } from "firebase/auth";
 import { app, isFirebaseConfigured } from "@/lib/firebase/config";
@@ -21,6 +26,32 @@ import { useRouter } from "next/navigation";
 
 const auth = app ? getAuth(app) : null;
 const db = app ? getFirestore(app) : null;
+
+// Helper function to convert Firebase error codes to user-friendly messages
+const getAuthErrorMessage = (errorCode: string): string => {
+  switch (errorCode) {
+    case 'auth/email-already-in-use':
+      return 'An account with this email already exists.';
+    case 'auth/invalid-email':
+      return 'Please enter a valid email address.';
+    case 'auth/operation-not-allowed':
+      return 'Email/password authentication is not enabled.';
+    case 'auth/weak-password':
+      return 'Password should be at least 6 characters long.';
+    case 'auth/user-disabled':
+      return 'This account has been disabled.';
+    case 'auth/user-not-found':
+      return 'No account found with this email address.';
+    case 'auth/wrong-password':
+      return 'Incorrect password. Please try again.';
+    case 'auth/invalid-credential':
+      return 'Invalid email or password. Please try again.';
+    case 'auth/too-many-requests':
+      return 'Too many failed attempts. Please try again later.';
+    default:
+      return 'An error occurred. Please try again.';
+  }
+};
 interface User {
   uid: string;
   email: string | null;
@@ -37,6 +68,9 @@ interface AuthContextType {
   isLoading: boolean;
   error: string | null;
   loginWithGoogle: () => Promise<void>;
+  loginWithEmail: (email: string, password: string) => Promise<void>;
+  signupWithEmail: (email: string, password: string, name: string) => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
 }
@@ -196,6 +230,89 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Email/Password Sign-In
+  const loginWithEmail = async (email: string, password: string) => {
+    if (!auth || !isFirebaseConfigured()) {
+      setError(
+        "Firebase is not properly configured. Please set up your Firebase project.",
+      );
+      return;
+    }
+
+    try {
+      setError(null);
+      await signInWithEmailAndPassword(auth, email, password);
+      router.push("/");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        const errorMessage = getAuthErrorMessage(error.message);
+        setError(errorMessage);
+        throw error;
+      } else {
+        setError("An unknown error occurred");
+        throw error;
+      }
+    }
+  };
+
+  // Email/Password Sign-Up
+  const signupWithEmail = async (email: string, password: string, name: string) => {
+    if (!auth || !isFirebaseConfigured()) {
+      setError(
+        "Firebase is not properly configured. Please set up your Firebase project.",
+      );
+      return;
+    }
+
+    try {
+      setError(null);
+      const result = await createUserWithEmailAndPassword(auth, email, password);
+      
+      // Update profile with display name
+      await updateProfile(result.user, {
+        displayName: name,
+      });
+
+      // Send email verification
+      await sendEmailVerification(result.user);
+      
+      router.push("/");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        const errorMessage = getAuthErrorMessage(error.message);
+        setError(errorMessage);
+        throw error;
+      } else {
+        setError("An unknown error occurred");
+        throw error;
+      }
+    }
+  };
+
+  // Reset Password
+  const resetPassword = async (email: string) => {
+    if (!auth || !isFirebaseConfigured()) {
+      setError(
+        "Firebase is not properly configured. Please set up your Firebase project.",
+      );
+      return;
+    }
+
+    try {
+      setError(null);
+      await sendPasswordResetEmail(auth, email);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        const errorMessage = getAuthErrorMessage(error.message);
+        setError(errorMessage);
+        throw error;
+      } else {
+        setError("An unknown error occurred");
+        throw error;
+      }
+    }
+  };
+
   // Sign Out
   const logout = async () => {
     if (!auth) {
@@ -223,6 +340,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isLoading,
     error,
     loginWithGoogle,
+    loginWithEmail,
+    signupWithEmail,
+    resetPassword,
     logout,
     isAuthenticated: !!user,
   };
