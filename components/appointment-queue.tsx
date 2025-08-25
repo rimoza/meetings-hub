@@ -176,112 +176,95 @@ export default function AppointmentQueue() {
             <p className="text-2xl md:text-3xl lg:text-4xl text-gray-300">Please check back later or contact reception.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-12 w-full max-w-none">
-            {/* Current Appointment */}
-            <Card className="shadow-2xl border-0 bg-gradient-to-br from-white/95 to-gray-50/95 backdrop-blur-sm h-full relative overflow-hidden group hover:scale-105 transition-transform duration-500">
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-green-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <CardHeader className="bg-gradient-to-r from-emerald-500 to-green-500 text-white text-center py-8 relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/20 to-green-400/20 animate-pulse"></div>
-                <CardTitle className="text-3xl md:text-5xl lg:text-6xl font-bold flex items-center justify-center gap-4 relative z-10">
-                  <div className="relative">
-                    <User className="h-8 md:h-12 lg:h-16 w-8 md:w-12 lg:w-16 animate-pulse" />
-                    <div className="absolute inset-0 bg-white/30 rounded-full blur-md animate-ping"></div>
-                  </div>
-                  <span className="bg-gradient-to-r from-white to-green-100 bg-clip-text text-transparent">Now Seeing</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-8 md:p-12 text-center flex-1 flex flex-col justify-center relative z-10">
-                {currentAppointment ? (
-                  <div className="space-y-6 md:space-y-8 animate-fade-in">
-                    <div className="relative">
-                      <div className="text-4xl md:text-6xl lg:text-8xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-4 animate-pulse">
-                        #{currentAppointment.id.slice(-4).toUpperCase()}
+          <div className="w-full h-full relative">
+            {/* Current Appointment - Full Screen */}
+            {currentAppointment ? (
+              <div className="w-full h-full flex items-center justify-center">
+                <Card className="shadow-2xl border-0 bg-gradient-to-br from-white/95 to-gray-50/95 backdrop-blur-sm w-full max-w-7xl relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-green-500/10"></div>
+                  <CardHeader className="bg-gradient-to-r from-emerald-500 to-green-500 text-white text-center py-12 relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/20 to-green-400/20 animate-pulse"></div>
+                    <CardTitle className="text-5xl md:text-7xl lg:text-8xl font-bold flex items-center justify-center gap-6 relative z-10">
+                      <div className="relative">
+                        <User className="h-12 md:h-20 lg:h-24 w-12 md:w-20 lg:w-24 animate-pulse" />
+                        <div className="absolute inset-0 bg-white/30 rounded-full blur-md animate-ping"></div>
                       </div>
-                      <div className="relative inline-block">
-                        <Badge variant="default" className="text-lg md:text-2xl lg:text-3xl px-6 md:px-8 py-2 md:py-3 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 transition-all duration-300 shadow-lg">
-                          {currentAppointment.status === 'confirmed' ? '✓ Confirmed' : '⏱ Scheduled'}
-                        </Badge>
-                        <div className="absolute inset-0 bg-emerald-400/30 blur-md rounded-full animate-pulse"></div>
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-3xl md:text-5xl lg:text-7xl font-semibold bg-gradient-to-r from-gray-700 to-gray-500 bg-clip-text text-transparent mb-4">
-                        {currentAppointment.attendee}
-                      </div>
-                      <div className="text-2xl md:text-3xl lg:text-4xl text-gray-500 mb-6 italic">
-                        {currentAppointment.title}
-                      </div>
-                      <div className="flex items-center justify-center text-2xl md:text-3xl lg:text-4xl text-gray-600 bg-gray-100/80 rounded-full px-8 py-4 shadow-lg">
-                        <div className="relative mr-3">
-                          <Clock className="h-6 md:h-8 lg:h-10 w-6 md:w-8 lg:w-10 animate-spin" style={{animationDuration: '8s'}} />
-                          <div className="absolute inset-0 bg-emerald-400/20 blur-sm rounded-full animate-pulse"></div>
+                      <span className="bg-gradient-to-r from-white to-green-100 bg-clip-text text-transparent">Now Seeing</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-16 md:p-20 text-center">
+                    <div className="space-y-10 animate-fade-in">
+                      <div className="relative">
+                        <div className="text-6xl md:text-8xl lg:text-9xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-6 animate-pulse">
+                          #{currentAppointment.id.slice(-4).toUpperCase()}
                         </div>
-                        <span className="font-semibold">{formatTime(currentAppointment.time)}</span>
+                        <div className="relative inline-block">
+                          <Badge variant="default" className="text-2xl md:text-3xl lg:text-4xl px-10 py-4 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 transition-all duration-300 shadow-lg">
+                            {currentAppointment.status === 'confirmed' ? '✓ Confirmed' : '⏱ Scheduled'}
+                          </Badge>
+                          <div className="absolute inset-0 bg-emerald-400/30 blur-md rounded-full animate-pulse"></div>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-5xl md:text-7xl lg:text-8xl font-semibold bg-gradient-to-r from-gray-700 to-gray-500 bg-clip-text text-transparent mb-6">
+                          {currentAppointment.attendee}
+                        </div>
+                        <div className="text-3xl md:text-4xl lg:text-5xl text-gray-500 mb-8 italic">
+                          {currentAppointment.title}
+                        </div>
+                        <div className="flex items-center justify-center text-3xl md:text-4xl lg:text-5xl text-gray-600 bg-gray-100/80 rounded-full px-12 py-6 shadow-lg inline-flex">
+                          <div className="relative mr-4">
+                            <Clock className="h-10 md:h-12 lg:h-14 w-10 md:w-12 lg:w-14 animate-spin" style={{animationDuration: '8s'}} />
+                            <div className="absolute inset-0 bg-emerald-400/20 blur-sm rounded-full animate-pulse"></div>
+                          </div>
+                          <span className="font-semibold">{formatTime(currentAppointment.time)}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ) : (
-                  <div className="py-16 animate-pulse">
-                    <div className="text-2xl md:text-4xl lg:text-5xl text-gray-500 mb-6">No Current Appointment</div>
-                    <div className="text-xl md:text-2xl lg:text-3xl text-gray-400">Waiting for next appointment</div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <div className="py-16 animate-pulse text-center">
+                  <div className="text-4xl md:text-6xl lg:text-7xl text-gray-500 mb-6">No Current Appointment</div>
+                  <div className="text-2xl md:text-3xl lg:text-4xl text-gray-400">Waiting for next appointment</div>
+                </div>
+              </div>
+            )}
 
-            {/* Next Appointment */}
-            <Card className="shadow-2xl border-0 bg-gradient-to-br from-white/95 to-gray-50/95 backdrop-blur-sm h-full relative overflow-hidden group hover:scale-105 transition-transform duration-500">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-500 text-white text-center py-8 relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 animate-pulse"></div>
-                <CardTitle className="text-3xl md:text-5xl lg:text-6xl font-bold flex items-center justify-center gap-4 relative z-10">
-                  <div className="relative">
-                    <ChevronRight className="h-8 md:h-12 lg:h-16 w-8 md:w-12 lg:w-16 animate-bounce" />
-                    <div className="absolute inset-0 bg-white/30 rounded-full blur-md animate-ping"></div>
-                  </div>
-                  <span className="bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">Up Next</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-8 md:p-12 text-center flex-1 flex flex-col justify-center relative z-10">
-                {nextAppointment ? (
-                  <div className="space-y-6 md:space-y-8 animate-fade-in">
-                    <div className="relative">
-                      <div className="text-4xl md:text-6xl lg:text-8xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-4 animate-pulse">
+            {/* Next Appointment - Corner */}
+            {nextAppointment && (
+              <div className="absolute bottom-8 right-8 w-96 animate-fade-in">
+                <Card className="shadow-2xl border-0 bg-gradient-to-br from-white/98 to-gray-50/98 backdrop-blur-sm relative overflow-hidden hover:scale-105 transition-transform duration-300">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20"></div>
+                  <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-500 text-white text-center py-4 relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 animate-pulse"></div>
+                    <CardTitle className="text-xl font-bold flex items-center justify-center gap-2 relative z-10">
+                      <ChevronRight className="h-5 w-5" />
+                      <span>Up Next</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6 text-center relative z-10">
+                    <div className="space-y-3">
+                      <div className="text-2xl font-bold text-gray-800">
                         #{nextAppointment.id.slice(-4).toUpperCase()}
                       </div>
-                      <div className="relative inline-block">
-                        <Badge variant="secondary" className="text-lg md:text-2xl lg:text-3xl px-6 md:px-8 py-2 md:py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 transition-all duration-300 shadow-lg">
-                          {nextAppointment.status === 'confirmed' ? '✓ Confirmed' : '⏱ Scheduled'}
-                        </Badge>
-                        <div className="absolute inset-0 bg-blue-400/30 blur-md rounded-full animate-pulse"></div>
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-3xl md:text-5xl lg:text-7xl font-semibold bg-gradient-to-r from-gray-700 to-gray-500 bg-clip-text text-transparent mb-4">
+                      <div className="text-xl font-semibold text-gray-700">
                         {nextAppointment.attendee}
                       </div>
-                      <div className="text-2xl md:text-3xl lg:text-4xl text-gray-500 mb-6 italic">
+                      <div className="text-sm text-gray-500 italic">
                         {nextAppointment.title}
                       </div>
-                      <div className="flex items-center justify-center text-2xl md:text-3xl lg:text-4xl text-gray-600 bg-gray-100/80 rounded-full px-8 py-4 shadow-lg">
-                        <div className="relative mr-3">
-                          <Clock className="h-6 md:h-8 lg:h-10 w-6 md:w-8 lg:w-10 animate-spin" style={{animationDuration: '8s'}} />
-                          <div className="absolute inset-0 bg-blue-400/20 blur-sm rounded-full animate-pulse"></div>
-                        </div>
-                        <span className="font-semibold">{formatTime(nextAppointment.time)}</span>
+                      <div className="flex items-center justify-center text-lg text-gray-600 bg-gray-100/80 rounded-full px-4 py-2">
+                        <Clock className="h-4 w-4 mr-2" />
+                        <span className="font-medium">{formatTime(nextAppointment.time)}</span>
                       </div>
                     </div>
-                  </div>
-                ) : (
-                  <div className="py-16 animate-pulse">
-                    <div className="text-2xl md:text-4xl lg:text-5xl text-gray-500 mb-6">No Next Appointment</div>
-                    <div className="text-xl md:text-2xl lg:text-3xl text-gray-400">
-                      {currentAppointment ? 'Last appointment of the day' : 'No appointments scheduled'}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
           </div>
         )}
 
