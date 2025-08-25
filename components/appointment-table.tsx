@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import {
   Table,
   TableBody,
@@ -10,6 +11,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -64,12 +66,44 @@ export default function AppointmentTable({
   onDelete, 
   isLoading = false 
 }: AppointmentTableProps) {
+  const [confirmedAppointmentId, setConfirmedAppointmentId] = useState<string | null>(null);
+
+  // Initialize the confirmed appointment from existing data
+  useEffect(() => {
+    const confirmed = appointments.find(apt => apt.status === 'confirmed');
+    if (confirmed) {
+      setConfirmedAppointmentId(confirmed.id);
+    }
+  }, [appointments]);
 
   const handleQuickStatusChange = async (appointment: Appointment, newStatus: AppointmentStatus) => {
     try {
       await onUpdate(appointment.id, { status: newStatus });
     } catch (error) {
       console.error('Error updating appointment status:', error);
+    }
+  };
+
+  const handleConfirmationToggle = async (appointment: Appointment, checked: boolean) => {
+    try {
+      if (checked) {
+        // First, unconfirm the currently confirmed appointment if it exists
+        if (confirmedAppointmentId && confirmedAppointmentId !== appointment.id) {
+          const currentlyConfirmed = appointments.find(apt => apt.id === confirmedAppointmentId);
+          if (currentlyConfirmed && currentlyConfirmed.status === 'confirmed') {
+            await onUpdate(confirmedAppointmentId, { status: 'scheduled' });
+          }
+        }
+        // Then confirm the new appointment
+        await onUpdate(appointment.id, { status: 'confirmed' });
+        setConfirmedAppointmentId(appointment.id);
+      } else {
+        // Unconfirm the appointment
+        await onUpdate(appointment.id, { status: 'scheduled' });
+        setConfirmedAppointmentId(null);
+      }
+    } catch (error) {
+      console.error('Error toggling appointment confirmation:', error);
     }
   };
 
@@ -112,6 +146,7 @@ export default function AppointmentTable({
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-[100px]">Confirm</TableHead>
               <TableHead>Title</TableHead>
               <TableHead>Date & Time</TableHead>
               <TableHead>Attendee</TableHead>
@@ -123,7 +158,7 @@ export default function AppointmentTable({
           <TableBody>
             {appointments.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                   No appointments found
                 </TableCell>
               </TableRow>
@@ -134,6 +169,14 @@ export default function AppointmentTable({
                 
                 return (
                   <TableRow key={appointment.id}>
+                    <TableCell>
+                      <Switch
+                        checked={appointment.status === 'confirmed'}
+                        onCheckedChange={(checked) => handleConfirmationToggle(appointment, checked)}
+                        disabled={appointment.status === 'completed' || appointment.status === 'cancelled'}
+                        aria-label="Confirm appointment"
+                      />
+                    </TableCell>
                     <TableCell className="font-medium">
                       <div>
                         <Link 
