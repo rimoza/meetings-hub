@@ -133,7 +133,12 @@ export function SidebarNav({
   ];
 
   const handleNavClick = (path: string) => {
-    router.push(path);
+    // Open queue in new tab
+    if (path === '/queue') {
+      window.open(path, '_blank');
+    } else {
+      router.push(path);
+    }
     // Only close sidebar on mobile
     if (isMobile) {
       setOpenMobile(false);
