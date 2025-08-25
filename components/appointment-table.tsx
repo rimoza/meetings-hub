@@ -87,20 +87,25 @@ export default function AppointmentTable({
   const handleConfirmationToggle = async (appointment: Appointment, checked: boolean) => {
     try {
       if (checked) {
-        // First, unconfirm the currently confirmed appointment if it exists
-        if (confirmedAppointmentId && confirmedAppointmentId !== appointment.id) {
-          const currentlyConfirmed = appointments.find(apt => apt.id === confirmedAppointmentId);
-          if (currentlyConfirmed && currentlyConfirmed.status === 'confirmed') {
-            await onUpdate(confirmedAppointmentId, { status: 'scheduled' });
-          }
-        }
+        // First, find all currently confirmed appointments and unconfirm them
+        const currentlyConfirmed = appointments.filter(apt => 
+          apt.status === 'confirmed' && apt.id !== appointment.id
+        );
+        
+        // Unconfirm all previously confirmed appointments in parallel
+        await Promise.all(
+          currentlyConfirmed.map(apt => onUpdate(apt.id, { status: 'scheduled' }))
+        );
+        
         // Then confirm the new appointment
         await onUpdate(appointment.id, { status: 'confirmed' });
         setConfirmedAppointmentId(appointment.id);
       } else {
         // Unconfirm the appointment
         await onUpdate(appointment.id, { status: 'scheduled' });
-        setConfirmedAppointmentId(null);
+        if (confirmedAppointmentId === appointment.id) {
+          setConfirmedAppointmentId(null);
+        }
       }
     } catch (error) {
       console.error('Error toggling appointment confirmation:', error);

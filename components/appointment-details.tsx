@@ -110,6 +110,18 @@ export default function AppointmentDetails({ appointmentId }: AppointmentDetails
 
   const handleStatusChange = async (newStatus: AppointmentStatus) => {
     try {
+      // If confirming this appointment, unconfirm all others first
+      if (newStatus === 'confirmed') {
+        const currentlyConfirmed = appointments.filter(apt => 
+          apt.status === 'confirmed' && apt.id !== appointment.id
+        );
+        
+        // Unconfirm all previously confirmed appointments in parallel
+        await Promise.all(
+          currentlyConfirmed.map(apt => updateAppointment(apt.id, { status: 'scheduled' }))
+        );
+      }
+      
       await updateAppointment(appointment.id, { status: newStatus });
       toast.success(`Appointment ${newStatus === 'completed' ? 'completed' : newStatus}`);
     } catch (error) {

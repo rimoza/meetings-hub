@@ -27,31 +27,32 @@ export default function AppointmentQueue() {
   // Update current time every second
   useEffect(() => {
     const timer = setInterval(() => {
+      console.log(currentTime, ' - Timer tick');
       setCurrentTime(new Date());
     }, 1000); // Update every second
 
     return () => clearInterval(timer);
   }, []);
 
-  // Monitor for status changes in the seeing appointment
+  // Monitor for status changes in the seeing appointment - real-time response
   useEffect(() => {
     if (!seeingAppointmentId) return;
 
-    const checkInterval = setInterval(() => {
-      const seeingApt = appointments.find(apt => apt.id === seeingAppointmentId);
-      
-      // If the seeing appointment is completed or cancelled, clear it
-      if (seeingApt && (seeingApt.status === 'completed' || seeingApt.status === 'cancelled')) {
-        setSeeingAppointmentId(null);
-      }
-    }, 2000); // Check every 2 seconds
-
-    return () => clearInterval(checkInterval);
+    const seeingApt = appointments.find(apt => apt.id === seeingAppointmentId);
+    
+    // If the seeing appointment is completed or cancelled, clear it immediately
+    if (seeingApt && (seeingApt.status === 'completed' || seeingApt.status === 'cancelled')) {
+      setSeeingAppointmentId(null);
+    }
   }, [seeingAppointmentId, appointments]);
 
-  // Process appointments to find current and next
+  // Process appointments to find current and next - instant updates
   useEffect(() => {
-    if (!appointments.length) return;
+    if (!appointments.length) {
+      setCurrentAppointment(null);
+      setSeeingAppointmentId(null);
+      return;
+    }
 
     const now = new Date();
     const today = now.toISOString().split('T')[0];
@@ -71,26 +72,32 @@ export default function AppointmentQueue() {
       return;
     }
 
-    // Find the first confirmed appointment that hasn't been completed/cancelled
+    // Find all confirmed appointments
     const confirmedAppointments = todaysAppointments.filter(apt => apt.status === 'confirmed');
     
     let current: Appointment | null = null;
 
-    // If we have a seeing appointment, keep it as current until completed/cancelled
+    // Priority 1: If there's a seeing appointment that's still confirmed, keep it
     if (seeingAppointmentId) {
       const seeingApt = todaysAppointments.find(apt => apt.id === seeingAppointmentId);
-      if (seeingApt && seeingApt.status !== 'completed' && seeingApt.status !== 'cancelled') {
+      if (seeingApt && seeingApt.status === 'confirmed') {
         current = seeingApt;
-      } else {
-        // Seeing appointment was completed/cancelled, move to next confirmed
+      } else if (seeingApt && (seeingApt.status === 'completed' || seeingApt.status === 'cancelled' || seeingApt.status === 'scheduled')) {
+        // Clear the seeing appointment if it's no longer confirmed
         setSeeingAppointmentId(null);
       }
     }
 
-    // If no seeing appointment, find first confirmed appointment
+    // Priority 2: If no current seeing appointment, find the first confirmed appointment
     if (!current && confirmedAppointments.length > 0) {
+      // Always pick the earliest confirmed appointment
       current = confirmedAppointments[0];
       setSeeingAppointmentId(current.id);
+    }
+
+    // Priority 3: If no confirmed appointments, clear the queue
+    if (!current && confirmedAppointments.length === 0) {
+      setSeeingAppointmentId(null);
     }
 
     setCurrentAppointment(current ? {
@@ -101,7 +108,7 @@ export default function AppointmentQueue() {
       status: current.status,
       isSeeingNow: true
     } : null);
-  }, [appointments, currentTime, seeingAppointmentId]);
+  }, [appointments, seeingAppointmentId]); // Removed currentTime dependency for faster updates
 
   const formatTime = (time: string) => {
     try {
