@@ -11,35 +11,41 @@ export function useAppointments() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchAppointments = async () => {
-    if (!user) {
-      console.log('useAppointments: No user, skipping fetch');
-      return;
-    }
-    
-    console.log('useAppointments: Fetching appointments for user:', user.uid);
-    
-    try {
-      setIsLoading(true);
-      const fetchedAppointments = await appointmentsService.getAll(user.uid);
-      console.log('useAppointments: Fetched appointments:', fetchedAppointments.length);
-      setAppointments(fetchedAppointments);
-    } catch (error) {
-      console.error('useAppointments: Error fetching appointments:', error);
-      toast.error('Failed to fetch appointments');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
     console.log('useAppointments: useEffect - user:', !!user, 'loading:', loading);
-    if (user) {
-      fetchAppointments();
-    } else if (!loading) {
-      setIsLoading(false);
-      console.log('useAppointments: No user and not loading, setting isLoading to false');
+    
+    if (!user || loading) {
+      if (!loading) {
+        setIsLoading(false);
+        console.log('useAppointments: No user and not loading, setting isLoading to false');
+      }
+      return;
     }
+
+    console.log('useAppointments: Setting up real-time subscription for user:', user.uid);
+    setIsLoading(true);
+
+    const unsubscribe = appointmentsService.subscribeToAppointments(
+      user.uid,
+      (fetchedAppointments) => {
+        console.log('useAppointments: Real-time update - appointments:', fetchedAppointments.length);
+        setAppointments(fetchedAppointments);
+        setIsLoading(false);
+      }
+    );
+
+    if (!unsubscribe) {
+      console.error('useAppointments: Failed to set up subscription');
+      setIsLoading(false);
+      toast.error('Failed to connect to real-time updates');
+    }
+
+    return () => {
+      if (unsubscribe) {
+        console.log('useAppointments: Cleaning up subscription');
+        unsubscribe();
+      }
+    };
   }, [user, loading]);
 
   const createAppointment = async (appointment: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -47,13 +53,6 @@ export function useAppointments() {
 
     try {
       const id = await appointmentsService.create(appointment, user.uid);
-      const newAppointment = {
-        ...appointment,
-        id,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      setAppointments(prev => [newAppointment, ...prev]);
       toast.success('Appointment created successfully');
       return id;
     } catch (error) {
@@ -66,13 +65,6 @@ export function useAppointments() {
   const updateAppointment = async (id: string, updates: Partial<Appointment>) => {
     try {
       await appointmentsService.update(id, updates);
-      setAppointments(prev =>
-        prev.map(appointment =>
-          appointment.id === id
-            ? { ...appointment, ...updates, updatedAt: new Date() }
-            : appointment
-        )
-      );
       toast.success('Appointment updated successfully');
     } catch (error) {
       console.error('Error updating appointment:', error);
@@ -84,7 +76,6 @@ export function useAppointments() {
   const deleteAppointment = async (id: string) => {
     try {
       await appointmentsService.delete(id);
-      setAppointments(prev => prev.filter(appointment => appointment.id !== id));
       toast.success('Appointment deleted successfully');
     } catch (error) {
       console.error('Error deleting appointment:', error);
@@ -118,6 +109,10 @@ export function useAppointments() {
     getAppointmentsByStatus,
     getTodaysAppointments,
     getUpcomingAppointments,
-    refresh: fetchAppointments,
+    refresh: () => {
+      // With real-time updates, refresh is handled automatically
+      // This is kept for compatibility but doesn't need to do anything
+      console.log('useAppointments: Refresh called (real-time updates are automatic)');
+    },
   };
 }

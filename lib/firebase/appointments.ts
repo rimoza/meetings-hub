@@ -11,7 +11,9 @@ import {
   where,
   Timestamp,
   getFirestore,
-  type Firestore
+  onSnapshot,
+  type Firestore,
+  type Unsubscribe
 } from 'firebase/firestore';
 import { app, isFirebaseConfigured } from './config';
 import { Appointment } from '@/types/appointment';
@@ -176,6 +178,42 @@ export const appointmentsService = {
     } catch (error) {
       console.error('Error fetching today\'s appointments:', error);
       throw error;
+    }
+  },
+
+  subscribeToAppointments(userId: string, callback: (appointments: Appointment[]) => void): Unsubscribe | null {
+    if (!db) {
+      console.error("Firebase is not properly configured");
+      return null;
+    }
+
+    try {
+      const appointmentsRef = collection(db, COLLECTION_NAME);
+      const q = query(
+        appointmentsRef, 
+        where('userId', '==', userId)
+      );
+
+      return onSnapshot(q, (snapshot) => {
+        const appointments = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt?.toDate() || new Date(),
+          updatedAt: doc.data().updatedAt?.toDate() || new Date(),
+        })) as Appointment[];
+        
+        // Sort by date in descending order
+        const sortedAppointments = appointments.sort((a, b) => 
+          new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
+        
+        callback(sortedAppointments);
+      }, (error) => {
+        console.error('Error in appointments subscription:', error);
+      });
+    } catch (error) {
+      console.error('Error setting up appointments subscription:', error);
+      return null;
     }
   }
 };

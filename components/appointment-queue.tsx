@@ -15,6 +15,7 @@ interface QueuedAppointment {
   time: string;
   status: string;
   isNext?: boolean;
+  isSeeingNow?: boolean;
 }
 
 export default function AppointmentQueue() {
@@ -22,6 +23,7 @@ export default function AppointmentQueue() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentAppointment, setCurrentAppointment] = useState<QueuedAppointment | null>(null);
   const [nextAppointment, setNextAppointment] = useState<QueuedAppointment | null>(null);
+  const [seeingAppointmentId, setSeeingAppointmentId] = useState<string | null>(null);
 
   // Update current time every second
   useEffect(() => {
@@ -32,6 +34,22 @@ export default function AppointmentQueue() {
     return () => clearInterval(timer);
   }, []);
 
+  // Monitor for status changes in the seeing appointment
+  useEffect(() => {
+    if (!seeingAppointmentId) return;
+
+    const checkInterval = setInterval(() => {
+      const seeingApt = appointments.find(apt => apt.id === seeingAppointmentId);
+      
+      // If the seeing appointment is completed or cancelled, clear it
+      if (seeingApt && (seeingApt.status === 'completed' || seeingApt.status === 'cancelled')) {
+        setSeeingAppointmentId(null);
+      }
+    }, 2000); // Check every 2 seconds
+
+    return () => clearInterval(checkInterval);
+  }, [seeingAppointmentId, appointments]);
+
   // Process appointments to find current and next
   useEffect(() => {
     if (!appointments.length) return;
@@ -39,58 +57,55 @@ export default function AppointmentQueue() {
     const now = new Date();
     const today = now.toISOString().split('T')[0];
     
-    // Get today's appointments, confirmed or scheduled only
+    // Get today's appointments that are not cancelled or completed
     const todaysAppointments = appointments
       .filter(apt => 
         apt.date === today && 
-        (apt.status === 'confirmed' || apt.status === 'scheduled')
+        apt.status !== 'cancelled' && 
+        apt.status !== 'completed'
       )
       .sort((a, b) => a.time.localeCompare(b.time));
 
     if (todaysAppointments.length === 0) {
       setCurrentAppointment(null);
       setNextAppointment(null);
+      setSeeingAppointmentId(null);
       return;
     }
 
-    const currentTimeString = format(now, 'HH:mm');
+    // Find the first confirmed appointment that hasn't been completed/cancelled
+    const confirmedAppointments = todaysAppointments.filter(apt => apt.status === 'confirmed');
     
-    // Find current and next appointments
     let current: Appointment | null = null;
     let next: Appointment | null = null;
 
-    for (let i = 0; i < todaysAppointments.length; i++) {
-      const apt = todaysAppointments[i];
-      const aptTime = apt.time;
-      
-      // Calculate appointment end time
-      const [hours, minutes] = aptTime.split(':').map(Number);
-      const aptStart = new Date(now);
-      aptStart.setHours(hours, minutes, 0, 0);
-      
-      const aptEnd = new Date(aptStart);
-      aptEnd.setMinutes(aptStart.getMinutes() + (apt.duration || 30));
-      
-      const aptEndString = format(aptEnd, 'HH:mm');
-
-      // Check if appointment is currently active
-      if (aptTime <= currentTimeString && currentTimeString <= aptEndString) {
-        current = apt;
-        next = todaysAppointments[i + 1] || null;
-        break;
-      }
-      
-      // If we haven't found a current appointment and this one is in the future
-      if (aptTime > currentTimeString && !current) {
-        next = apt;
-        break;
+    // If we have a seeing appointment, keep it as current until completed/cancelled
+    if (seeingAppointmentId) {
+      const seeingApt = todaysAppointments.find(apt => apt.id === seeingAppointmentId);
+      if (seeingApt && seeingApt.status !== 'completed' && seeingApt.status !== 'cancelled') {
+        current = seeingApt;
+        // Find next confirmed appointment after the current one
+        const currentIndex = todaysAppointments.findIndex(apt => apt.id === seeingAppointmentId);
+        for (let i = currentIndex + 1; i < todaysAppointments.length; i++) {
+          if (todaysAppointments[i].status === 'confirmed') {
+            next = todaysAppointments[i];
+            break;
+          }
+        }
+      } else {
+        // Seeing appointment was completed/cancelled, move to next confirmed
+        setSeeingAppointmentId(null);
       }
     }
 
-    // If no current appointment, the next upcoming one becomes "next"
-    if (!current && todaysAppointments.length > 0) {
-      const upcoming = todaysAppointments.find(apt => apt.time > currentTimeString);
-      next = upcoming || null;
+    // If no seeing appointment, find first confirmed appointment
+    if (!current && confirmedAppointments.length > 0) {
+      current = confirmedAppointments[0];
+      setSeeingAppointmentId(current.id);
+      // Find next confirmed appointment
+      if (confirmedAppointments.length > 1) {
+        next = confirmedAppointments[1];
+      }
     }
 
     setCurrentAppointment(current ? {
@@ -98,7 +113,8 @@ export default function AppointmentQueue() {
       attendee: current.attendee,
       title: current.title,
       time: current.time,
-      status: current.status
+      status: current.status,
+      isSeeingNow: true
     } : null);
 
     setNextAppointment(next ? {
@@ -109,7 +125,7 @@ export default function AppointmentQueue() {
       status: next.status,
       isNext: true
     } : null);
-  }, [appointments, currentTime]);
+  }, [appointments, currentTime, seeingAppointmentId]);
 
   const formatTime = (time: string) => {
     try {
@@ -119,6 +135,12 @@ export default function AppointmentQueue() {
       return format(date, 'h:mm a');
     } catch {
       return time;
+    }
+  };
+
+  const handleSelectNextAppointment = () => {
+    if (nextAppointment) {
+      setSeeingAppointmentId(nextAppointment.id);
     }
   };
 
@@ -200,7 +222,7 @@ export default function AppointmentQueue() {
                         </div>
                         <div className="relative inline-block">
                           <Badge variant="default" className="text-2xl md:text-3xl lg:text-4xl px-10 py-4 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 transition-all duration-300 shadow-lg">
-                            {currentAppointment.status === 'confirmed' ? '✓ Confirmed' : '⏱ Scheduled'}
+                            {currentAppointment.isSeeingNow ? '👁️ Seeing Now' : currentAppointment.status === 'confirmed' ? '✓ Confirmed' : '⏱ Scheduled'}
                           </Badge>
                           <div className="absolute inset-0 bg-emerald-400/30 blur-md rounded-full animate-pulse"></div>
                         </div>
@@ -220,15 +242,33 @@ export default function AppointmentQueue() {
                           <span className="font-semibold">{formatTime(currentAppointment.time)}</span>
                         </div>
                       </div>
+                      {nextAppointment && (
+                        <div className="mt-8">
+                          <button
+                            onClick={handleSelectNextAppointment}
+                            className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white text-lg md:text-xl font-semibold rounded-lg shadow-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-300 hover:scale-105"
+                          >
+                            Skip to Next Appointment
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
               </div>
             ) : (
               <div className="w-full h-full flex items-center justify-center">
-                <div className="py-16 animate-pulse text-center">
+                <div className="py-16 text-center">
                   <div className="text-4xl md:text-6xl lg:text-7xl text-gray-500 mb-6">No Current Appointment</div>
-                  <div className="text-2xl md:text-3xl lg:text-4xl text-gray-400">Waiting for next appointment</div>
+                  <div className="text-2xl md:text-3xl lg:text-4xl text-gray-400 mb-8">Waiting for next appointment</div>
+                  {nextAppointment && (
+                    <button
+                      onClick={handleSelectNextAppointment}
+                      className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-green-500 text-white text-xl md:text-2xl font-semibold rounded-lg shadow-lg hover:from-emerald-600 hover:to-green-600 transition-all duration-300 hover:scale-105"
+                    >
+                      Select Next Appointment
+                    </button>
+                  )}
                 </div>
               </div>
             )}
