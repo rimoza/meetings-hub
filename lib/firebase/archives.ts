@@ -191,16 +191,17 @@ export const deleteArchive = async (archiveId: string) => {
   }
 };
 
-// Get all archives for a user
+// Get all archives for all users
 export const getUserArchives = async (userId: string): Promise<Archive[]> => {
+  console.log(userId, 'userId in getUserArchives');
   if (!db) {
     throw new Error("Firebase is not properly configured");
   }
 
   try {
+    // Get all archives regardless of userId
     const q = query(
-      collection(db, COLLECTION_NAME),
-      where("userId", "==", userId),
+      collection(db, COLLECTION_NAME)
     );
 
     const querySnapshot = await getDocs(q);
@@ -227,9 +228,9 @@ export const subscribeArchives = (
     return () => {}; // Return empty unsubscribe function
   }
 
+  // Get all archives regardless of userId
   const q = query(
-    collection(db, COLLECTION_NAME),
-    where("userId", "==", userId),
+    collection(db, COLLECTION_NAME)
   );
 
   return onSnapshot(
@@ -250,20 +251,21 @@ export const subscribeArchives = (
   );
 };
 
-// Get a specific archive for a user
+// Get a specific archive
 export const getArchive = async (
   archiveId: string,
   userId: string,
 ): Promise<Archive | null> => {
+  console.log(userId, 'userId in getArchive');
   if (!db) {
     throw new Error("Firebase is not properly configured");
   }
 
   try {
+    // Get any archive with this ID regardless of userId
     const q = query(
       collection(db, COLLECTION_NAME),
-      where("id", "==", archiveId),
-      where("userId", "==", userId),
+      where("id", "==", archiveId)
     );
     const querySnapshot = await getDocs(q);
 
@@ -289,10 +291,10 @@ export const getArchivesByStatus = async (
   }
 
   try {
+    // Get all archives with this status regardless of userId
     const q = query(
       collection(db, COLLECTION_NAME),
-      where("userId", "==", userId),
-      where("status", "==", status),
+      where("status", "==", status)
     );
 
     const querySnapshot = await getDocs(q);

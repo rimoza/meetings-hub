@@ -23,15 +23,16 @@ const db: Firestore | null = app && isFirebaseConfigured() ? getFirestore(app) :
 
 export const appointmentsService = {
   async getAll(userId: string): Promise<Appointment[]> {
+    console.log(userId, 'userId in getAll');
     if (!db) {
       throw new Error("Firebase is not properly configured");
     }
 
     try {
       const appointmentsRef = collection(db, COLLECTION_NAME);
+      // Get all appointments regardless of userId
       const q = query(
-        appointmentsRef, 
-        where('userId', '==', userId)
+        appointmentsRef
       );
       const snapshot = await getDocs(q);
       
@@ -133,9 +134,9 @@ export const appointmentsService = {
 
     try {
       const appointmentsRef = collection(db, COLLECTION_NAME);
+      // Get all appointments with this status regardless of userId
       const q = query(
         appointmentsRef,
-        where('userId', '==', userId),
         where('status', '==', status),
         orderBy('date', 'desc')
       );
@@ -154,6 +155,7 @@ export const appointmentsService = {
   },
 
   async getTodaysAppointments(userId: string): Promise<Appointment[]> {
+    console.log(userId, 'userId in getTodaysAppointments');
     if (!db) {
       throw new Error("Firebase is not properly configured");
     }
@@ -161,9 +163,9 @@ export const appointmentsService = {
     try {
       const today = new Date().toISOString().split('T')[0];
       const appointmentsRef = collection(db, COLLECTION_NAME);
+      // Get all today's appointments regardless of userId
       const q = query(
         appointmentsRef,
-        where('userId', '==', userId),
         where('date', '==', today),
         orderBy('time', 'asc')
       );
@@ -189,9 +191,9 @@ export const appointmentsService = {
 
     try {
       const appointmentsRef = collection(db, COLLECTION_NAME);
+      // Get all appointments regardless of userId
       const q = query(
-        appointmentsRef, 
-        where('userId', '==', userId)
+        appointmentsRef
       );
 
       return onSnapshot(q, (snapshot) => {

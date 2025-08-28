@@ -118,16 +118,17 @@ export const deleteMeeting = async (meetingId: string) => {
   }
 };
 
-// Get all meetings for a user
+// Get all meetings for all users
 export const getUserMeetings = async (userId: string): Promise<Meeting[]> => {
+  console.log(userId, 'userId in getUserMeetings');
   if (!db) {
     throw new Error("Firebase is not properly configured");
   }
 
   try {
+    // Get all meetings regardless of userId
     const q = query(
-      collection(db, COLLECTION_NAME),
-      where("userId", "==", userId),
+      collection(db, COLLECTION_NAME)
     );
 
     const querySnapshot = await getDocs(q);
@@ -156,10 +157,9 @@ export const subscribeMeetings = (
     return () => {}; // Return empty unsubscribe function
   }
 
-  // Simplified query that doesn't require a composite index
+  // Get all meetings regardless of userId
   const q = query(
-    collection(db, COLLECTION_NAME),
-    where("userId", "==", userId),
+    collection(db, COLLECTION_NAME)
   );
 
   return onSnapshot(
@@ -185,6 +185,7 @@ export const subscribeMeetings = (
 
 // Get today's meetings
 export const getTodayMeetings = async (userId: string): Promise<Meeting[]> => {
+  console.log(userId, 'userId in getTodayMeetings');
   if (!db) {
     throw new Error("Firebase is not properly configured");
   }
@@ -192,10 +193,10 @@ export const getTodayMeetings = async (userId: string): Promise<Meeting[]> => {
   const today = new Date().toISOString().split("T")[0];
 
   try {
+    // Get all meetings for today regardless of userId
     const q = query(
       collection(db, COLLECTION_NAME),
-      where("userId", "==", userId),
-      where("date", "==", today),
+      where("date", "==", today)
     );
 
     const querySnapshot = await getDocs(q);
@@ -213,6 +214,7 @@ export const getTodayMeetings = async (userId: string): Promise<Meeting[]> => {
 export const getUpcomingMeetings = async (
   userId: string,
 ): Promise<Meeting[]> => {
+  console.log(userId, 'userId in getUpcomingMeetings');
   if (!db) {
     throw new Error("Firebase is not properly configured");
   }
@@ -220,10 +222,10 @@ export const getUpcomingMeetings = async (
   const today = new Date().toISOString().split("T")[0];
 
   try {
+    // Get all upcoming meetings regardless of userId
     const q = query(
       collection(db, COLLECTION_NAME),
-      where("userId", "==", userId),
-      where("date", ">", today),
+      where("date", ">", today)
     );
 
     const querySnapshot = await getDocs(q);
@@ -267,6 +269,7 @@ export const getMeeting = async (
   meetingId: string,
   userId: string,
 ): Promise<Meeting | null> => {
+  console.log(userId, 'userId in getMeeting');
   if (!db) {
     throw new Error("Firebase is not properly configured");
   }
@@ -280,11 +283,12 @@ export const getMeeting = async (
     }
 
     const meetingData = meetingDoc.data();
-
-    // Ensure this meeting belongs to the requesting user
-    if (meetingData.userId !== userId) {
-      throw new Error("Unauthorized access to meeting");
+    if (!meetingData) {
+      return null;
     }
+
+    // Allow access to any meeting for any logged-in user
+    // No user check needed anymore
 
     return convertDocToMeeting(meetingDoc);
   } catch (error) {

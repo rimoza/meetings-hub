@@ -214,16 +214,17 @@ export const deleteTask = async (taskId: string) => {
   }
 };
 
-// Get all tasks for a user
+// Get all tasks for all users
 export const getUserTasks = async (userId: string): Promise<Task[]> => {
+  console.log(userId, 'userId in getUserTasks');
   if (!db) {
     throw new Error("Firebase is not properly configured");
   }
 
   try {
+    // Get all tasks regardless of userId
     const q = query(
-      collection(db, COLLECTION_NAME),
-      where("userId", "==", userId),
+      collection(db, COLLECTION_NAME)
     );
 
     const querySnapshot = await getDocs(q);
@@ -254,9 +255,9 @@ export const subscribeTasks = (
     return () => {}; // Return empty unsubscribe function
   }
 
+  // Get all tasks regardless of userId
   const q = query(
-    collection(db, COLLECTION_NAME),
-    where("userId", "==", userId),
+    collection(db, COLLECTION_NAME)
   );
 
   return onSnapshot(
@@ -291,10 +292,10 @@ export const getMeetingTasks = async (
   }
 
   try {
+    // Get all tasks for this meeting regardless of userId
     const q = query(
       collection(db, COLLECTION_NAME),
-      where("userId", "==", userId),
-      where("meetingId", "==", meetingId),
+      where("meetingId", "==", meetingId)
     );
 
     const querySnapshot = await getDocs(q);

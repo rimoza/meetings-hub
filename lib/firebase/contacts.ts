@@ -120,16 +120,17 @@ export const deleteContact = async (contactId: string) => {
   }
 };
 
-// Get all contacts for a user
+// Get all contacts for all users
 export const getUserContacts = async (userId: string): Promise<Contact[]> => {
+  console.log(userId, 'userId in getUserContacts');
   if (!db) {
     throw new Error("Firebase is not properly configured");
   }
 
   try {
+    // Get all contacts regardless of userId
     const q = query(
-      collection(db, COLLECTION_NAME),
-      where("userId", "==", userId),
+      collection(db, COLLECTION_NAME)
     );
 
     const querySnapshot = await getDocs(q);
@@ -158,9 +159,9 @@ export const subscribeContacts = (
     return () => {}; // Return empty unsubscribe function
   }
 
+  // Get all contacts regardless of userId
   const q = query(
-    collection(db, COLLECTION_NAME),
-    where("userId", "==", userId),
+    collection(db, COLLECTION_NAME)
   );
 
   return onSnapshot(
@@ -188,6 +189,7 @@ export const getContact = async (
   contactId: string,
   userId: string,
 ): Promise<Contact | null> => {
+  console.log(userId, 'userId in getContact');
   if (!db) {
     throw new Error("Firebase is not properly configured");
   }
@@ -201,11 +203,11 @@ export const getContact = async (
     }
 
     const contactData = contactDoc.data();
-
-    // Ensure this contact belongs to the requesting user
-    if (contactData.userId !== userId) {
-      throw new Error("Unauthorized access to contact");
+    if (!contactData) {
+      return null;
     }
+    // Allow access to any contact for any logged-in user
+    // No user check needed anymore
 
     return convertDocToContact(contactDoc as QueryDocumentSnapshot<DocumentData>);
   } catch (error) {
@@ -258,15 +260,16 @@ export const toggleContactImportant = async (
 
 // Get favorite contacts
 export const getFavoriteContacts = async (userId: string): Promise<Contact[]> => {
+  console.log(userId, 'userId in getFavoriteContacts');
   if (!db) {
     throw new Error("Firebase is not properly configured");
   }
 
   try {
+    // Get all favorite contacts regardless of userId
     const q = query(
       collection(db, COLLECTION_NAME),
-      where("userId", "==", userId),
-      where("favorite", "==", true),
+      where("favorite", "==", true)
     );
 
     const querySnapshot = await getDocs(q);
@@ -285,15 +288,16 @@ export const getFavoriteContacts = async (userId: string): Promise<Contact[]> =>
 
 // Get important contacts
 export const getImportantContacts = async (userId: string): Promise<Contact[]> => {
+  console.log(userId, 'userId in getImportantContacts');
   if (!db) {
     throw new Error("Firebase is not properly configured");
   }
 
   try {
+    // Get all important contacts regardless of userId
     const q = query(
       collection(db, COLLECTION_NAME),
-      where("userId", "==", userId),
-      where("important", "==", true),
+      where("important", "==", true)
     );
 
     const querySnapshot = await getDocs(q);

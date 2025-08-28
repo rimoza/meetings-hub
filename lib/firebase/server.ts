@@ -3,7 +3,7 @@ import {
   getFirestore,
   collection,
   query,
-  where,
+  // where,
   orderBy,
   getDocs,
   doc,
@@ -30,11 +30,12 @@ const app =
 const db = getFirestore(app);
 
 export async function getMeetings(userId: string): Promise<Meeting[]> {
+  console.log(userId, 'userId in getMeetings');
   try {
+    // Get all meetings regardless of userId
     const q = query(
       collection(db, "meetings"),
-      where("userId", "==", userId),
-      orderBy("date", "desc"),
+      orderBy("date", "desc")
     );
     const snapshot = await getDocs(q);
 
@@ -88,11 +89,12 @@ export async function getMeeting(id: string): Promise<Meeting | null> {
 }
 
 export async function getTasks(userId: string): Promise<Task[]> {
+  console.log(userId, 'userId in getTasks');
   try {
+    // Get all tasks regardless of userId
     const q = query(
       collection(db, "tasks"),
-      where("userId", "==", userId),
-      orderBy("createdAt", "desc"),
+      orderBy("createdAt", "desc")
     );
     const snapshot = await getDocs(q);
 

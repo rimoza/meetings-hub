@@ -6,7 +6,7 @@ import {
   deleteDoc,
   onSnapshot,
   query,
-  where,
+  // where,
   // orderBy,
   Timestamp,
   getFirestore,
@@ -32,10 +32,9 @@ export const subscribeReports = (
     return () => {}; // Return empty unsubscribe function
   }
 
-  // Simplified query that doesn't require a composite index
+  // Get all reports regardless of who created them
   const reportsQuery = query(
-    collection(db, REPORTS_COLLECTION),
-    where("createdBy", "==", userId),
+    collection(db, REPORTS_COLLECTION)
   );
 
   return onSnapshot(reportsQuery, (snapshot) => {
