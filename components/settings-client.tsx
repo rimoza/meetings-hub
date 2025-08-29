@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Select,
@@ -18,12 +17,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  User,
   Bell,
   Shield,
-  Palette,
   Globe,
-  Smartphone,
   Mail,
   Calendar,
   Clock,
@@ -77,7 +73,7 @@ export function SettingsClient() {
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
       toast.success("Profile updated successfully");
-    } catch (error) {
+    } catch {
       toast.error("Failed to update profile");
     } finally {
       setLoading(false);
@@ -89,7 +85,7 @@ export function SettingsClient() {
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
       toast.success("Notification preferences saved");
-    } catch (error) {
+    } catch {
       toast.error("Failed to save preferences");
     } finally {
       setLoading(false);

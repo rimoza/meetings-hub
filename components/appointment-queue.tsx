@@ -1,37 +1,60 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-// import { Badge } from '@/components/ui/badge';
-import { Clock, User, Calendar } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Clock, Calendar, Users, ChevronRight, Activity, Sparkles } from 'lucide-react';
 import { format } from 'date-fns';
-import { Appointment } from '@/types/appointment';
+// import { Appointment } from '@/types/appointment';
 import { useAppointments } from '@/hooks/use-appointments';
+import { cn } from '@/lib/utils';
 
 interface QueuedAppointment {
   id: string;
+  number: string;
   attendee: string;
   title: string;
   time: string;
   status: string;
   isNext?: boolean;
   isSeeingNow?: boolean;
+  estimatedWait?: number;
 }
 
 export default function AppointmentQueue() {
   const { appointments, isLoading } = useAppointments();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentAppointment, setCurrentAppointment] = useState<QueuedAppointment | null>(null);
+  const [upcomingAppointments, setUpcomingAppointments] = useState<QueuedAppointment[]>([]);
   const [seeingAppointmentId, setSeeingAppointmentId] = useState<string | null>(null);
+  const [animateNumber, setAnimateNumber] = useState(false);
+  const [announcement, setAnnouncement] = useState('Welcome to our facility. We appreciate your patience.');
+  
+  const announcements = [
+    'Welcome to our facility. We appreciate your patience.',
+    'Please be ready when your number is called.',
+    'Our staff is here to assist you with any questions.',
+    'Thank you for visiting us today.',
+    'We strive to serve you efficiently.'
+  ];
 
   // Update current time every second
   useEffect(() => {
     const timer = setInterval(() => {
-      console.log(currentTime, ' - Timer tick');
       setCurrentTime(new Date());
-    }, 1000); // Update every second
-
+    }, 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  // Rotate announcements
+  useEffect(() => {
+    const announcementTimer = setInterval(() => {
+      setAnnouncement(prev => {
+        const currentIndex = announcements.indexOf(prev);
+        return announcements[(currentIndex + 1) % announcements.length];
+      });
+    }, 8000);
+    return () => clearInterval(announcementTimer);
   }, []);
 
   // Monitor for status changes in the seeing appointment - real-time response
@@ -72,26 +95,39 @@ export default function AppointmentQueue() {
       return;
     }
 
+    // Create queue items
+    const queueItems: QueuedAppointment[] = todaysAppointments.map((apt, index) => ({
+      id: apt.id,
+      number: `#${apt.id.slice(-4).toUpperCase()}`,
+      attendee: apt.attendee,
+      title: apt.title,
+      time: apt.time,
+      status: apt.status,
+      isSeeingNow: false,
+      isNext: false,
+      estimatedWait: index * 15
+    }));
+
     // Find all confirmed appointments
-    const confirmedAppointments = todaysAppointments.filter(apt => apt.status === 'confirmed');
+    const confirmedAppointments = queueItems.filter(apt => apt.status === 'confirmed');
     
-    let current: Appointment | null = null;
+    let current: QueuedAppointment | null = null;
 
     // Priority 1: If there's a seeing appointment that's still confirmed, keep it
     if (seeingAppointmentId) {
-      const seeingApt = todaysAppointments.find(apt => apt.id === seeingAppointmentId);
+      const seeingApt = queueItems.find(apt => apt.id === seeingAppointmentId);
       if (seeingApt && seeingApt.status === 'confirmed') {
         current = seeingApt;
+        current.isSeeingNow = true;
       } else if (seeingApt && (seeingApt.status === 'completed' || seeingApt.status === 'cancelled' || seeingApt.status === 'scheduled')) {
-        // Clear the seeing appointment if it's no longer confirmed
         setSeeingAppointmentId(null);
       }
     }
 
     // Priority 2: If no current seeing appointment, find the first confirmed appointment
     if (!current && confirmedAppointments.length > 0) {
-      // Always pick the earliest confirmed appointment
       current = confirmedAppointments[0];
+      current.isSeeingNow = true;
       setSeeingAppointmentId(current.id);
     }
 
@@ -100,14 +136,25 @@ export default function AppointmentQueue() {
       setSeeingAppointmentId(null);
     }
 
-    setCurrentAppointment(current ? {
-      id: current.id,
-      attendee: current.attendee,
-      title: current.title,
-      time: current.time,
-      status: current.status,
-      isSeeingNow: true
-    } : null);
+    // Check if current appointment changed for animation
+    if (current && current.id !== currentAppointment?.id) {
+      setAnimateNumber(true);
+      setTimeout(() => setAnimateNumber(false), 1000);
+    }
+
+    setCurrentAppointment(current);
+    
+    // Set upcoming appointments (excluding current)
+    const upcoming = queueItems.filter(apt => 
+      apt.id !== current?.id && 
+      (apt.status === 'confirmed' || apt.status === 'scheduled')
+    ).slice(0, 5);
+    
+    if (upcoming.length > 0) {
+      upcoming[0].isNext = true;
+    }
+    
+    setUpcomingAppointments(upcoming);
   }, [appointments, seeingAppointmentId]); // Removed currentTime dependency for faster updates
 
   const formatTime = (time: string) => {
@@ -124,127 +171,229 @@ export default function AppointmentQueue() {
 
   if (isLoading) {
     return (
-      <div className="h-screen w-screen bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 flex items-center justify-center">
+      <div className="h-screen w-screen bg-gradient-to-br from-teal-50 via-blue-50 to-green-50 flex items-center justify-center">
         <div className="text-center">
           <div className="relative">
-            <div className="animate-spin rounded-full h-32 w-32 border-4 border-transparent border-t-emerald-400 border-r-blue-400 mx-auto"></div>
-            <div className="absolute inset-0 animate-ping rounded-full h-32 w-32 border-4 border-emerald-400/30 mx-auto"></div>
+            <div className="animate-spin rounded-full h-32 w-32 border-4 border-transparent border-t-teal-500 border-r-blue-500 mx-auto"></div>
+            <div className="absolute inset-0 animate-ping rounded-full h-32 w-32 border-4 border-teal-400/30 mx-auto"></div>
           </div>
-          <p className="mt-8 text-2xl text-white font-medium animate-pulse">Loading appointment queue...</p>
+          <p className="mt-8 text-2xl text-gray-700 font-medium animate-pulse">Loading appointment queue...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex flex-col relative overflow-hidden">
+    <div className="h-screen w-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 flex flex-col overflow-hidden">
       {/* Animated background elements */}
-      <div className="absolute inset-0 opacity-5 dark:opacity-10">
-        <div className="absolute top-10 md:top-20 left-10 md:left-20 w-48 h-48 md:w-96 md:h-96 bg-primary rounded-full filter blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-10 md:bottom-20 right-10 md:right-20 w-48 h-48 md:w-96 md:h-96 bg-primary/80 rounded-full filter blur-3xl animate-pulse animation-delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 md:w-96 md:h-96 bg-primary/60 rounded-full filter blur-3xl animate-pulse animation-delay-2000"></div>
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -left-40 w-80 h-80 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+        <div className="absolute -bottom-40 -right-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/3 w-80 h-80 bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
       </div>
       
-      {/* Header */}
-      {/* <header className="text-center py-3 sm:py-4 md:py-6 lg:py-8 flex-shrink-0 relative z-10 px-4 border-b border-border">
-        <div className="max-w-6xl mx-auto">
-          <div className="relative inline-block mb-2 md:mb-4">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent animate-gradient-text leading-tight">
-              ⚡ Appointment Queue ⚡
-            </h1>
-            <div className="absolute -inset-2 bg-primary/10 blur-lg rounded-lg -z-10"></div>
-          </div>
-          <div className="space-y-1 md:space-y-2">
-            <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl text-foreground/90 font-medium">
-              {format(currentTime, 'EEEE, MMMM d, yyyy')}
+      {/* Header with branding */}
+      <header className="relative z-10 bg-white/80 backdrop-blur-sm border-b border-gray-200 px-8 py-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 bg-gradient-to-br from-teal-400 to-blue-500 rounded-2xl flex items-center justify-center shadow-lg">
+              <Activity className="w-8 h-8 text-white animate-pulse" />
             </div>
-            <div className="relative inline-block">
-              <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent tabular-nums">
-                {format(currentTime, 'h:mm:ss a')}
-              </div>
-              <div className="absolute inset-0 bg-primary/10 blur-sm rounded-lg animate-pulse -z-10"></div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800">Service Center</h1>
+              <p className="text-gray-600">Professional Service Queue</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-2xl font-semibold text-gray-700">
+              {format(currentTime, 'EEEE, MMMM d')}
+            </div>
+            <div className="text-4xl font-bold text-teal-600 tabular-nums">
+              {format(currentTime, 'h:mm:ss a')}
             </div>
           </div>
         </div>
-      </header> */}
+      </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center px-4 sm:px-6 md:px-8 relative z-10 py-4 sm:py-6 md:py-8 pb-24 sm:pb-28 md:pb-32">
-        {!currentAppointment ? (
-          <div className="text-center max-w-2xl mx-auto">
-            <div className="relative mb-6 md:mb-8">
-              <Calendar className="mx-auto h-16 sm:h-20 md:h-24 lg:h-32 w-16 sm:w-20 md:w-24 lg:w-32 text-emerald-400 animate-bounce" />
-              <div className="absolute inset-0 bg-emerald-400/20 blur-2xl rounded-full animate-pulse"></div>
+      <div className="flex-1 flex relative z-10">
+        {/* Left side - Current serving number */}
+        <div className="flex-1 flex items-center justify-center p-12">
+          {!currentAppointment ? (
+            <div className="text-center">
+              <Calendar className="w-32 h-32 text-gray-300 mx-auto mb-8 animate-pulse" />
+              <h2 className="text-4xl font-semibold text-gray-400 mb-4">No Active Queue</h2>
+              <p className="text-xl text-gray-500">Please check with reception</p>
             </div>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent mb-4 md:mb-6">No Appointments Today</h2>
-            <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-300">Please check back later or contact reception.</p>
+          ) : (
+            <div className={cn(
+              "text-center transition-all duration-1000",
+              animateNumber && "animate-slideUp"
+            )}>
+              <div className="mb-8">
+                <span className="text-2xl font-medium text-gray-600 uppercase tracking-wider">
+                  Now Serving
+                </span>
+              </div>
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-teal-400 to-blue-400 blur-3xl opacity-30 animate-pulse"></div>
+                <div className={cn(
+                  "relative bg-white rounded-3xl shadow-2xl p-16 border-4 border-teal-100",
+                  animateNumber && "animate-scaleIn"
+                )}>
+                  <div className="text-9xl font-bold bg-gradient-to-r from-teal-500 to-blue-500 bg-clip-text text-transparent">
+                    {currentAppointment.number}
+                  </div>
+                  <div className="mt-8 text-3xl font-semibold text-gray-700">
+                    {currentAppointment.attendee}
+                  </div>
+                  <div className="mt-4 flex items-center justify-center gap-2 text-xl text-gray-600">
+                    <Clock className="w-6 h-6" />
+                    <span>{formatTime(currentAppointment.time)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Right side - Upcoming queue */}
+        <div className="w-1/3 bg-white/60 backdrop-blur-sm border-l border-gray-200 p-8 overflow-y-auto">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
+              <Users className="w-8 h-8 text-teal-500" />
+              Upcoming Queue
+            </h2>
           </div>
-        ) : (
-          <div className="w-full h-full flex items-center justify-center px-4 sm:px-6 md:px-8">
-            {/* Current Appointment - Full Screen Card */}
-            {currentAppointment ? (
-              <Card className="">
-                {/* <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-green-500/10"></div> */}
-                <CardHeader className="">
-                  {/* <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/20 to-green-400/20"></div> */}
-                  <CardTitle className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-bold flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 md:gap-5 relative z-10">
-                    <div className="relative">
-                      <User className="h-8 sm:h-10 md:h-12 lg:h-14 xl:h-16 2xl:h-20 w-8 sm:w-10 md:w-12 lg:w-14 xl:w-16 2xl:w-20 animate-pulse" />
-                      {/* <div className="absolute inset-0 bg-white/30 rounded-full blur-md animate-ping"></div> */}
-                    </div>
-                    <span className="bg-gradient-to-r from-white to-green-100 bg-clip-text text-transparent">Now Seeing</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6 sm:p-8 md:p-12 lg:p-16 xl:p-20 text-center">
-                  <div className="space-y-6 sm:space-y-8 md:space-y-10 lg:space-y-12 animate-fade-in">
-                    <div className="relative">
-                      <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 dark:from-gray-200 dark:to-gray-400 bg-clip-text text-transparent mb-4 sm:mb-6 animate-pulse">
-                        #{currentAppointment.id.slice(-4).toUpperCase()}
+
+          <div className="space-y-4">
+            {upcomingAppointments.map((item, index) => (
+              <Card 
+                key={item.id}
+                className={cn(
+                  "transition-all duration-500 animate-fadeIn",
+                  item.isNext 
+                    ? "bg-gradient-to-r from-teal-50 to-blue-50 border-teal-300 shadow-lg scale-105" 
+                    : "bg-white hover:shadow-md"
+                )}
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className={cn(
+                        "text-2xl font-bold",
+                        item.isNext ? "text-teal-600" : "text-gray-500"
+                      )}>
+                        {item.number}
                       </div>
-                      {/* <div className="relative inline-block">
-                        <Badge variant="default" className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl px-4 sm:px-6 md:px-8 lg:px-10 py-2 sm:py-3 md:py-4 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 transition-all duration-300 shadow-lg">
-                          {currentAppointment.isSeeingNow ? '👁️ Seeing Now' : currentAppointment.status === 'confirmed' ? '✓ Confirmed' : '⏱ Scheduled'}
+                      {item.isNext && (
+                        <Badge className="bg-teal-100 text-teal-700 animate-pulse">
+                          Next
                         </Badge>
-                        <div className="absolute inset-0 bg-emerald-400/30 blur-md rounded-full animate-pulse"></div>
-                      </div> */}
+                      )}
                     </div>
-                    <div>
-                      <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-semibold text-gray-800 dark:text-gray-200 mb-3 sm:mb-4 md:mb-6">
-                        {currentAppointment.attendee}
-                      </div>
-                      <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl text-gray-600 dark:text-gray-400 mb-6 sm:mb-8 md:mb-10 italic">
-                        {/* {currentAppointment.title} */}
-                      </div>
-                      <div className="inline-flex items-center justify-center text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-full px-6 sm:px-8 md:px-10 lg:px-12 py-3 sm:py-4 md:py-5 lg:py-6 shadow-lg">
-                        <div className="relative mr-3 sm:mr-4">
-                          <Clock className="h-6 sm:h-8 md:h-10 lg:h-12 xl:h-14 2xl:h-16 w-6 sm:w-8 md:w-10 lg:w-12 xl:w-14 2xl:w-16 animate-spin" style={{animationDuration: '8s'}} />
-                          <div className="absolute inset-0 bg-emerald-400/20 blur-sm rounded-full animate-pulse"></div>
-                        </div>
-                        <span className="font-semibold">{formatTime(currentAppointment.time)}</span>
-                      </div>
+                    <ChevronRight className={cn(
+                      "w-6 h-6",
+                      item.isNext ? "text-teal-500 animate-pulse" : "text-gray-400"
+                    )} />
+                  </div>
+                  <div className="mt-3">
+                    <div className="font-medium text-gray-700">{item.attendee}</div>
+                    <div className="text-sm text-gray-500 mt-1">
+                      {formatTime(item.time)} • Est. wait: {item.estimatedWait} min
                     </div>
                   </div>
                 </CardContent>
               </Card>
-            ) : (
-              <div className="text-center">
-                <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl text-gray-500 dark:text-gray-400 mb-4 sm:mb-6">No Current Appointment</div>
-                <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl text-gray-400 dark:text-gray-500">Waiting for appointments</div>
+            ))}
+
+            {upcomingAppointments.length === 0 && (
+              <div className="text-center text-gray-500 py-8">
+                <Users className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                <p className="text-lg">No upcoming appointments</p>
               </div>
             )}
-
           </div>
-        )}
-      </main>
+        </div>
+      </div>
 
-      {/* Footer Info */}
-      <footer className="fixed bottom-2 sm:bottom-3 md:bottom-4 left-1/2 transform -translate-x-1/2 z-30 px-4 max-w-full">
-        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-lg shadow-xl px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 border border-gray-200 dark:border-gray-700 hover:border-emerald-500/50 transition-all duration-300">
-          <p className="text-xs sm:text-sm md:text-base text-gray-700 dark:text-gray-300 font-medium text-center tracking-wide">
-            📞 For assistance, please contact reception
-          </p>
+      {/* Footer ticker with announcements */}
+      <footer className="relative z-10 bg-gradient-to-r from-teal-600 to-blue-600 text-white">
+        <div className="px-8 py-6">
+          <div className="flex items-center gap-8">
+            <Sparkles className="w-8 h-8 flex-shrink-0 animate-pulse" />
+            <div className="flex-1 overflow-hidden">
+              <div className="animate-marquee whitespace-nowrap text-xl">
+                {announcement} • Average service time: 15 minutes • Please have your documents ready • 
+                Free WiFi available: Guest_Network • For assistance, please contact reception
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <Activity className="w-5 h-5" />
+              <span>Live Queue</span>
+            </div>
+          </div>
         </div>
       </footer>
+
+      {/* CSS Animations */}
+      <style jsx>{`
+        @keyframes blob {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          25% { transform: translate(20px, -30px) scale(1.1); }
+          50% { transform: translate(-20px, 20px) scale(0.9); }
+          75% { transform: translate(30px, 10px) scale(1.05); }
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+          from { transform: translateY(30px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes scaleIn {
+          from { transform: scale(0.9); opacity: 0.5; }
+          to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+
+        .animate-blob {
+          animation: blob 10s infinite;
+        }
+
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+
+        .animate-fadeIn {
+          animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .animate-slideUp {
+          animation: slideUp 0.8s ease-out;
+        }
+
+        .animate-scaleIn {
+          animation: scaleIn 0.6s ease-out;
+        }
+
+        .animate-marquee {
+          animation: marquee 30s linear infinite;
+        }
+      `}</style>
     </div>
   );
 }
