@@ -147,23 +147,29 @@ export function SidebarNav({
 
 
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader>
-        <div className="flex items-center gap-2">
+    <Sidebar collapsible="icon" className="border-r bg-card/50">
+      <SidebarHeader className="border-b bg-background/95 backdrop-blur">
+        <div className="flex items-center gap-3 px-3 py-4">
           {/* Logo - Always visible */}
-          <div className="p-1 md:p-2 bg-primary rounded-lg shrink-0">
-            <Calendar className="h-5 w-5 text-primary-foreground" />
+          <div className="relative">
+            <div className="p-2.5 bg-gradient-to-br from-primary to-primary/80 rounded-xl shadow-lg shrink-0">
+              <Calendar className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-background animate-pulse" />
           </div>
           
           {/* Project title and notification - Hidden when collapsed */}
           <div className="flex items-center justify-between w-full min-w-0 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:hidden">
-            <h2 className="text-base sm:text-lg font-semibold text-foreground truncate">
-              Kulan Space
-            </h2>
+            <div>
+              <h2 className="text-lg font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                Kulan Space
+              </h2>
+              <p className="text-xs text-muted-foreground">Meeting Hub</p>
+            </div>
             
             {/* Notification Icon with Badge */}
             <NotificationSidebar>
-              <Button variant="ghost" size="sm" className="relative p-2 shrink-0">
+              <Button variant="ghost" size="sm" className="relative p-2 shrink-0 hover:bg-accent rounded-lg transition-colors">
                 {isPermissionGranted && isRemindersEnabled ? (
                   <Bell className="h-5 w-5 text-primary" />
                 ) : (
@@ -171,15 +177,15 @@ export function SidebarNav({
                 )}
                 {upcomingMeetings.length > 0 && (
                   <Badge
-                    className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs min-w-[1.25rem]"
+                    className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-[10px] min-w-[1rem]"
                     variant={
                       isPermissionGranted && isRemindersEnabled
-                        ? "default"
+                        ? "destructive"
                         : "secondary"
                     }
                   >
-                    {upcomingMeetings.length > 99
-                      ? "99+"
+                    {upcomingMeetings.length > 9
+                      ? "9+"
                       : upcomingMeetings.length}
                   </Badge>
                 )}
@@ -189,13 +195,13 @@ export function SidebarNav({
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
-        <div className="space-y-1">
+      <SidebarContent className="px-3 py-4">
+        <div className="space-y-2">
 
           {/* Notification Status Indicator */}
           {isPermissionGranted && (
-            <div className="px-2 mb-4 group-data-[collapsible=icon]:hidden">
-              <div className="flex items-center justify-center p-2 bg-primary/10 rounded-lg border border-primary/20">
+            <div className="mb-4 group-data-[collapsible=icon]:hidden">
+              <div className="flex items-center justify-center p-2.5 bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl border border-primary/20">
                 <Bell className="h-4 w-4 text-primary mr-2" />
                 <span className="text-sm font-medium text-primary">
                   Reminders Active
@@ -211,11 +217,13 @@ export function SidebarNav({
               <SidebarMenuButton
                 isActive={pathname === "/"}
                 onClick={() => handleNavClick("/")}
-                className="h-10 text-sm sm:text-base"
+                className="h-11 rounded-lg hover:bg-accent transition-all duration-200 data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-medium"
                 tooltip="Dashboard"
               >
-                <Home className="h-4 w-4 shrink-0" />
-                <span className="ml-2">Dashboard</span>
+                <div className="p-1.5 rounded-md bg-background">
+                  <Home className="h-4 w-4 shrink-0" />
+                </div>
+                <span className="ml-3">Dashboard</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
 
@@ -224,43 +232,42 @@ export function SidebarNav({
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton
-                    className="h-10 text-sm sm:text-base cursor-pointer"
+                    className="h-11 rounded-lg hover:bg-accent transition-all duration-200 cursor-pointer data-[active=true]:bg-primary/10 data-[active=true]:text-primary"
                     isActive={meetingSubItems.some(item => pathname === item.id)}
                     tooltip="Meetings"
                   >
-                    <Calendar className="h-4 w-4 text-blue-500 shrink-0" />
-                    <span className="ml-2">Meetings</span>
+                    <div className="p-1.5 rounded-md bg-blue-500/10">
+                      <Calendar className="h-4 w-4 text-blue-500 shrink-0" />
+                    </div>
+                    <span className="ml-3 font-medium">Meetings</span>
                     <ChevronDown 
-                      className={`h-4 w-4 ml-auto transition-transform ${
+                      className={`h-4 w-4 ml-auto transition-transform duration-200 ${
                         isMeetingsOpen ? "rotate-180" : ""
                       }`}
                     />
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <SidebarMenuSub>
+                <CollapsibleContent className="mt-2">
+                  <SidebarMenuSub className="ml-4 space-y-1 border-l-2 border-muted pl-4">
                     {meetingSubItems.map((item) => (
                       <SidebarMenuSubItem key={item.id}>
                         <SidebarMenuSubButton
                           isActive={pathname === item.id}
                           onClick={() => handleNavClick(item.id)}
-                          className="h-9 text-sm"
+                          className="h-9 rounded-md hover:bg-accent/50 transition-colors data-[active=true]:bg-primary/10 data-[active=true]:text-primary"
                         >
                           <div className="flex items-center justify-between w-full">
                             <div className="flex items-center">
                               {item.icon}
-                              <span className="ml-2">{item.label}</span>
+                              <span className="ml-3 text-sm">{item.label}</span>
                             </div>
-                            {item.count !== null && (
-                              <span
-                                className={`ml-auto text-xs rounded-full px-2 py-0.5 min-w-[1.25rem] h-5 flex items-center justify-center ${
-                                  item.count > 0
-                                    ? "bg-primary text-primary-foreground"
-                                    : "bg-muted text-muted-foreground"
-                                }`}
+                            {item.count !== null && item.count > 0 && (
+                              <Badge
+                                variant={item.count > 0 ? "default" : "secondary"}
+                                className="h-5 min-w-[1.5rem] text-[10px]"
                               >
                                 {item.count > 99 ? "99+" : item.count}
-                              </span>
+                              </Badge>
                             )}
                           </div>
                         </SidebarMenuSubButton>
@@ -272,32 +279,38 @@ export function SidebarNav({
             </Collapsible>
 
             {/* Other Menu Items */}
-            {menuItems.slice(1).map((item) => (
-              <SidebarMenuItem key={item.id}>
-                <SidebarMenuButton
-                  isActive={pathname === item.id}
-                  onClick={() => handleNavClick(item.id)}
-                  className="h-10 text-sm sm:text-base"
-                  tooltip={item.label}
-                >
-                  <div className="flex items-center shrink-0">
-                    {item.icon}
-                  </div>
-                  <span className="ml-2">{item.label}</span>
-                  {item.count !== null && (
-                    <span
-                      className={`ml-auto text-xs rounded-full px-2 py-0.5 min-w-[1.25rem] h-5 flex items-center justify-center ${
-                        item.count > 0
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted text-muted-foreground"
-                      }`}
-                    >
-                      {item.count > 99 ? "99+" : item.count}
-                    </span>
-                  )}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
+            {menuItems.slice(1).map((item) => {
+              const getIconBackground = () => {
+                if (item.id === '/appointments') return 'bg-green-500/10';
+                if (item.id === '/queue') return 'bg-blue-500/10';
+                if (item.id === '/tasks') return 'bg-purple-500/10';
+                return 'bg-background';
+              };
+              
+              return (
+                <SidebarMenuItem key={item.id}>
+                  <SidebarMenuButton
+                    isActive={pathname === item.id}
+                    onClick={() => handleNavClick(item.id)}
+                    className="h-11 rounded-lg hover:bg-accent transition-all duration-200 data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-medium"
+                    tooltip={item.label}
+                  >
+                    <div className={`p-1.5 rounded-md ${getIconBackground()}`}>
+                      {item.icon}
+                    </div>
+                    <span className="ml-3">{item.label}</span>
+                    {item.count !== null && item.count > 0 && (
+                      <Badge
+                        variant="default"
+                        className="ml-auto h-5 min-w-[1.5rem] text-[10px]"
+                      >
+                        {item.count > 99 ? "99+" : item.count}
+                      </Badge>
+                    )}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              );
+            })}
           </SidebarMenu>
         </div>
       </SidebarContent>
