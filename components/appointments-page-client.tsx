@@ -50,14 +50,14 @@ export default function AppointmentsPageClient() {
 
   // Wrapper function to handle the return type mismatch and auto-print
   const handleCreateAppointment = async (appointment: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const createdAppointment = await createAppointment(appointment);
+    const createdAppointmentId = await createAppointment(appointment);
     
     // Trigger auto-print if the appointment was created successfully
-    if (createdAppointment && appointment.status === 'scheduled') {
+    if (createdAppointmentId && appointment.status === 'scheduled') {
       // We need to construct a full appointment object for auto-print
       const fullAppointment: Appointment = {
         ...appointment,
-        id: createdAppointment.id || 'temp-id',
+        id: typeof createdAppointmentId === 'string' ? createdAppointmentId : 'temp-id',
         createdAt: new Date(),
         updatedAt: new Date(),
       };

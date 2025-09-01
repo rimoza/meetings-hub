@@ -197,9 +197,9 @@ export default function AppointmentTable({
               <TableHead className="w-[50px]">
                 <Checkbox
                   checked={isAllSelected}
-                  indeterminate={isIndeterminate}
                   onCheckedChange={handleSelectAll}
                   aria-label="Select all appointments"
+                  className={isIndeterminate ? "data-[state=checked]:bg-primary/50" : ""}
                 />
               </TableHead>
               <TableHead className="w-[60px]">#</TableHead>
@@ -348,8 +348,8 @@ export default function AppointmentTable({
                     
                     <TableCell className="text-center">
                       {PrintService.wasAppointmentPrinted(appointment.id) ? (
-                        <div className="flex items-center justify-center">
-                          <Printer className="h-4 w-4 text-green-600" title="Card printed" />
+                        <div className="flex items-center justify-center" title="Card printed">
+                          <Printer className="h-4 w-4 text-green-600" />
                         </div>
                       ) : (
                         <div className="text-muted-foreground text-xs">-</div>
