@@ -11,13 +11,15 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { ViewToggle } from '@/components/view-toggle';
-import { Search, Plus, Calendar, Users, CheckCircle, Clock } from 'lucide-react';
+import { Search, Plus, Calendar, Users, CheckCircle, Clock, Printer } from 'lucide-react';
 import AppointmentForm from './appointment-form';
 import AppointmentTable from './appointment-table';
 import AppointmentCard from './appointment-card';
 import { useAppointments } from '@/hooks/use-appointments';
+import { usePrintAppointment } from '@/hooks/use-print-appointment';
 import { appointmentsService } from '@/lib/firebase/appointments';
 import { Appointment, ViewMode as AppointmentViewMode } from '@/types/appointment';
+import { AppointmentPrintPreview } from './appointment-print-preview';
 import { toast } from 'sonner';
 
 export default function AppointmentsPageClient() {
@@ -31,6 +33,13 @@ export default function AppointmentsPageClient() {
     getUpcomingAppointments,
     getAppointmentsByStatus,
   } = useAppointments();
+
+  const {
+    showPreview,
+    selectedAppointments,
+    printBatch,
+    closePreview,
+  } = usePrintAppointment();
 
   // Debug logging
   console.log('Appointments page - isLoading:', isLoading, 'appointments count:', appointments.length);
@@ -147,6 +156,17 @@ export default function AppointmentsPageClient() {
         
         <div className="flex items-center gap-3">
           <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
+          {filteredAppointments.length > 0 && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => printBatch(filteredAppointments)}
+              className="gap-2"
+            >
+              <Printer className="h-4 w-4" />
+              Print ({filteredAppointments.length})
+            </Button>
+          )}
           <Button 
             variant="outline" 
             size="sm" 
@@ -281,6 +301,13 @@ export default function AppointmentsPageClient() {
           </>
         )}
       </div>
+
+      {/* Print Preview Modal */}
+      <AppointmentPrintPreview
+        appointments={selectedAppointments}
+        isOpen={showPreview}
+        onClose={closePreview}
+      />
     </div>
   );
 }

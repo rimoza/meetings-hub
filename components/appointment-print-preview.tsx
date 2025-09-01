@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import { Appointment } from "@/types/appointment";
-import { AppointmentPrintCard, PrintableCardsPage } from "./appointment-print-card";
+import { AppointmentPrintCard } from "./appointment-print-card";
 import { X, Printer } from "lucide-react";
 import "@/styles/print-card.css";
 
@@ -37,8 +37,6 @@ export function AppointmentPrintPreview({
 
   if (!isOpen) return null;
 
-  const isSingleCard = appointments.length === 1;
-
   return (
     <div className="print-preview-modal">
       <div className="print-preview-content">
@@ -64,17 +62,15 @@ export function AppointmentPrintPreview({
         
         <div className="print-preview-body">
           <div ref={printRef}>
-            {isSingleCard ? (
-              <div className="print-container">
-                <div className="print-page">
-                  <div className="cards-grid">
-                    <AppointmentPrintCard appointment={appointments[0]} />
-                  </div>
+            <div className="print-container">
+              <div className="print-page">
+                <div className="cards-grid">
+                  {appointments.map((appointment) => (
+                    <AppointmentPrintCard key={appointment.id} appointment={appointment} />
+                  ))}
                 </div>
               </div>
-            ) : (
-              <PrintableCardsPage appointments={appointments} />
-            )}
+            </div>
           </div>
         </div>
       </div>

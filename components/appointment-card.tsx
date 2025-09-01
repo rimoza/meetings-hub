@@ -32,13 +32,16 @@ import {
   XCircle,
   // Phone,
   Mail,
-  Eye
+  Eye,
+  Printer
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Appointment, AppointmentStatus } from '@/types/appointment';
 import AppointmentForm from './appointment-form';
+import { usePrintAppointment } from '@/hooks/use-print-appointment';
+import { AppointmentPrintPreview } from './appointment-print-preview';
 
 interface AppointmentCardProps {
   appointment: Appointment;
@@ -58,6 +61,7 @@ export default function AppointmentCard({ appointment, onUpdate, onDelete }: App
   const router = useRouter();
   const statusInfo = statusConfig[appointment.status];
   const StatusIcon = statusInfo.icon;
+  const { showPreview, selectedAppointments, printSingle, closePreview } = usePrintAppointment();
 
   const handleQuickStatusChange = async (newStatus: AppointmentStatus) => {
     try {
@@ -103,6 +107,7 @@ export default function AppointmentCard({ appointment, onUpdate, onDelete }: App
   };
 
   return (
+    <>
     <Card 
       className={`relative transition-all duration-200 hover:shadow-md cursor-pointer ${
         isUpcoming() ? 'border-l-4 border-l-primary' : ''
@@ -194,6 +199,11 @@ export default function AppointmentCard({ appointment, onUpdate, onDelete }: App
                     Send Email
                   </DropdownMenuItem>
                 )}
+                
+                <DropdownMenuItem onClick={() => printSingle(appointment)}>
+                  <Printer className="mr-2 h-4 w-4" />
+                  Print Card
+                </DropdownMenuItem>
                 
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
@@ -330,5 +340,13 @@ export default function AppointmentCard({ appointment, onUpdate, onDelete }: App
         </div>
       </CardContent>
     </Card>
+
+    {/* Print Preview Modal */}
+    <AppointmentPrintPreview
+      appointments={selectedAppointments}
+      isOpen={showPreview}
+      onClose={closePreview}
+    />
+    </>
   );
 }

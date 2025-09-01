@@ -159,7 +159,7 @@ export default function AppointmentTable({
                 return (
                   <TableRow key={appointment.id}>
                     <TableCell className="font-semibold text-center">
-                      {appointment.dailyNumber}
+                      00{appointment.dailyNumber}
                     </TableCell>
                     <TableCell>
                       <Switch
