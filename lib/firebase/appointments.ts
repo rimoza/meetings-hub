@@ -12,8 +12,8 @@ import {
   Timestamp,
   getFirestore,
   onSnapshot,
-  startAt,
-  endAt,
+  // startAt,
+  // endAt,
   type Firestore,
   type Unsubscribe
 } from 'firebase/firestore';
@@ -106,6 +106,7 @@ async function migrateDailyNumbers(): Promise<void> {
     }
 
     // Group appointments by date
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const appointmentsByDate: { [date: string]: any[] } = {};
     
     snapshot.docs.forEach(doc => {

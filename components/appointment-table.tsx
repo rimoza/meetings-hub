@@ -47,9 +47,9 @@ const statusConfig = {
 export default function AppointmentTable({ 
   appointments, 
   onUpdate, 
-  onDelete, 
+  // onDelete, 
   isLoading = false 
-}: AppointmentTableProps) {
+}: Readonly<AppointmentTableProps>) {
   const [confirmedAppointmentId, setConfirmedAppointmentId] = useState<string | null>(null);
 
   // Initialize the confirmed appointment from existing data
