@@ -21,6 +21,7 @@ import { useAutoPrint } from '@/hooks/use-auto-print';
 import { appointmentsService } from '@/lib/firebase/appointments';
 import { Appointment, ViewMode as AppointmentViewMode } from '@/types/appointment';
 import { AppointmentPrintPreview } from './appointment-print-preview';
+import { PrintService } from '@/lib/services/print-service';
 import { toast } from 'sonner';
 
 export default function AppointmentsPageClient() {
@@ -87,6 +88,7 @@ export default function AppointmentsPageClient() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [dateFilter, setDateFilter] = useState<string>('all');
+  const [printFilter, setPrintFilter] = useState<string>('all');
 
   const filteredAppointments = appointments.filter(appointment => {
     const matchesSearch = 
@@ -122,7 +124,13 @@ export default function AppointmentsPageClient() {
       }
     }
 
-    return matchesSearch && matchesStatus && matchesDate;
+    let matchesPrint = true;
+    if (printFilter !== 'all') {
+      const wasPrinted = PrintService.wasAppointmentPrinted(appointment.id);
+      matchesPrint = printFilter === 'printed' ? wasPrinted : !wasPrinted;
+    }
+
+    return matchesSearch && matchesStatus && matchesDate && matchesPrint;
   });
 
   // Statistics
@@ -258,6 +266,17 @@ export default function AppointmentsPageClient() {
             <SelectItem value="week">This Week</SelectItem>
             <SelectItem value="month">This Month</SelectItem>
             <SelectItem value="upcoming">Upcoming</SelectItem>
+          </SelectContent>
+        </Select>
+        
+        <Select value={printFilter} onValueChange={setPrintFilter}>
+          <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectValue placeholder="Filter by print status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Cards</SelectItem>
+            <SelectItem value="printed">Printed</SelectItem>
+            <SelectItem value="not-printed">Not Printed</SelectItem>
           </SelectContent>
         </Select>
       </div>

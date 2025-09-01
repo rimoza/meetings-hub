@@ -12,6 +12,7 @@ import {
   CalendarDays,
   UserCheck,
   Monitor,
+  Printer,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -114,6 +115,12 @@ export function SidebarNav({
       id: "/reports",
       label: "Reports",
       icon: <FileText className="h-4 w-4" />,
+      count: null,
+    },
+    {
+      id: "/print-settings",
+      label: "Print Settings",
+      icon: <Printer className="h-4 w-4 text-indigo-500" />,
       count: null,
     },
     {
@@ -240,6 +247,7 @@ export function SidebarNav({
                 if (item.id === '/appointments') return 'bg-green-500/10';
                 if (item.id === '/queue') return 'bg-blue-500/10';
                 if (item.id === '/tasks') return 'bg-purple-500/10';
+                if (item.id === '/print-settings') return 'bg-indigo-500/10';
                 return 'bg-background';
               };
               

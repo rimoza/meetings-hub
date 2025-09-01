@@ -3,12 +3,15 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Calendar, Users, ChevronRight, Activity, Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Clock, Calendar, Users, ChevronRight, Activity, Sparkles, Printer } from 'lucide-react';
 import { format } from 'date-fns';
 // import { Appointment } from '@/types/appointment';
 import { useAppointments } from '@/hooks/use-appointments';
+import { usePrintAppointment } from '@/hooks/use-print-appointment';
 import { cn } from '@/lib/utils';
 import { formatAppointmentNumber } from '@/lib/firebase/appointments';
+import { AppointmentPrintPreview } from './appointment-print-preview';
 
 // Somali day names
 const somaliDays = {
@@ -60,6 +63,7 @@ interface QueuedAppointment {
 
 export default function AppointmentQueue() {
   const { appointments, isLoading } = useAppointments();
+  const { showPreview, selectedAppointments, printBatch, closePreview } = usePrintAppointment();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentAppointment, setCurrentAppointment] = useState<QueuedAppointment | null>(null);
   const [upcomingAppointments, setUpcomingAppointments] = useState<QueuedAppointment[]>([]);
@@ -243,12 +247,28 @@ export default function AppointmentQueue() {
               <p className="text-2xl text-gray-600">Ballamaha dadweynaha</p>
             </div>
           </div>
-          <div className="text-right">
-            <div className="text-2xl font-semibold text-gray-700">
-              {formatSomaliDate(currentTime)}
+          <div className="flex items-center gap-6">
+            <div className="flex gap-3">
+              {appointments.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => printBatch(appointments.filter(apt => apt.date === new Date().toISOString().split('T')[0]))}
+                  className="bg-white/90 hover:bg-white border-teal-200 text-teal-700 hover:text-teal-800"
+                >
+                  <Printer className="w-4 h-4 mr-2" />
+                  Print Today's Cards
+                </Button>
+              )}
             </div>
-            <div className="text-4xl font-bold text-teal-600 tabular-nums">
-              {format(currentTime, 'h:mm:ss a')}
+            
+            <div className="text-right">
+              <div className="text-2xl font-semibold text-gray-700">
+                {formatSomaliDate(currentTime)}
+              </div>
+              <div className="text-4xl font-bold text-teal-600 tabular-nums">
+                {format(currentTime, 'h:mm:ss a')}
+              </div>
             </div>
           </div>
         </div>
@@ -433,6 +453,13 @@ export default function AppointmentQueue() {
           animation: marquee 30s linear infinite;
         }
       `}</style>
+
+      {/* Print Preview Modal */}
+      <AppointmentPrintPreview
+        appointments={selectedAppointments}
+        isOpen={showPreview}
+        onClose={closePreview}
+      />
     </div>
   );
 }

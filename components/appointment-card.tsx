@@ -42,6 +42,7 @@ import { Appointment, AppointmentStatus } from '@/types/appointment';
 import AppointmentForm from './appointment-form';
 import { usePrintAppointment } from '@/hooks/use-print-appointment';
 import { AppointmentPrintPreview } from './appointment-print-preview';
+import { PrintService } from '@/lib/services/print-service';
 
 interface AppointmentCardProps {
   appointment: Appointment;
@@ -101,6 +102,8 @@ export default function AppointmentCard({ appointment, onUpdate, onDelete }: App
     }
   };
 
+  const wasPrinted = PrintService.wasAppointmentPrinted(appointment.id);
+
   const isUpcoming = () => {
     const appointmentDateTime = new Date(`${appointment.date} ${appointment.time}`);
     return appointmentDateTime > new Date() && appointment.status !== 'cancelled' && appointment.status !== 'completed';
@@ -144,6 +147,13 @@ export default function AppointmentCard({ appointment, onUpdate, onDelete }: App
               <StatusIcon className="h-3 w-3" />
               {statusInfo.label}
             </Badge>
+            
+            {wasPrinted && (
+              <Badge variant="outline" className="gap-1 text-xs">
+                <Printer className="h-3 w-3" />
+                Printed
+              </Badge>
+            )}
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
