@@ -8,6 +8,7 @@ import { format } from 'date-fns';
 // import { Appointment } from '@/types/appointment';
 import { useAppointments } from '@/hooks/use-appointments';
 import { cn } from '@/lib/utils';
+import { formatAppointmentNumber } from '@/lib/firebase/appointments';
 
 // Somali day names
 const somaliDays = {
@@ -134,7 +135,7 @@ export default function AppointmentQueue() {
     // Create queue items
     const queueItems: QueuedAppointment[] = todaysAppointments.map((apt, index) => ({
       id: apt.id,
-      number: `#${apt.id.slice(-4).toUpperCase()}`,
+      number: `#${formatAppointmentNumber(apt.dailyNumber || 1)}`,
       attendee: apt.attendee,
       title: apt.title,
       time: apt.time,

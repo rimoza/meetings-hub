@@ -1,5 +1,6 @@
 export interface Appointment {
   id: string;
+  dailyNumber: number; // Daily appointment number (resets each day)
   title: string;
   date: string;
   time: string;

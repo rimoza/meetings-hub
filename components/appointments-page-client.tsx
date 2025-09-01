@@ -16,7 +16,9 @@ import AppointmentForm from './appointment-form';
 import AppointmentTable from './appointment-table';
 import AppointmentCard from './appointment-card';
 import { useAppointments } from '@/hooks/use-appointments';
+import { appointmentsService } from '@/lib/firebase/appointments';
 import { Appointment, ViewMode as AppointmentViewMode } from '@/types/appointment';
+import { toast } from 'sonner';
 
 export default function AppointmentsPageClient() {
   const {
@@ -36,6 +38,21 @@ export default function AppointmentsPageClient() {
   // Wrapper function to handle the return type mismatch
   const handleCreateAppointment = async (appointment: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>) => {
     await createAppointment(appointment);
+  };
+
+  const [isMigrating, setIsMigrating] = useState(false);
+  const handleMigration = async () => {
+    setIsMigrating(true);
+    try {
+      console.log('🔧 Starting migration...');
+      await appointmentsService.migrateDailyNumbers();
+      toast.success('Daily numbers migration completed successfully!');
+    } catch (error) {
+      console.error('Migration failed:', error);
+      toast.error('Migration failed. Check console for details.');
+    } finally {
+      setIsMigrating(false);
+    }
   };
 
   const [viewMode, setViewMode] = useState<AppointmentViewMode>('table');
@@ -130,6 +147,16 @@ export default function AppointmentsPageClient() {
         
         <div className="flex items-center gap-3">
           <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleMigration} 
+            disabled={isMigrating}
+            className="gap-2"
+          >
+            <Clock className="h-4 w-4" />
+            {isMigrating ? 'Migrating...' : 'Fix Numbers'}
+          </Button>
           <AppointmentForm onSubmit={handleCreateAppointment} />
         </div>
       </div>
