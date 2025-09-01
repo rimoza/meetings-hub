@@ -9,6 +9,42 @@ import { format } from 'date-fns';
 import { useAppointments } from '@/hooks/use-appointments';
 import { cn } from '@/lib/utils';
 
+// Somali day names
+const somaliDays = {
+  'Saturday': 'Sabti',
+  'Sunday': 'Axad',
+  'Monday': 'Isniin',
+  'Tuesday': 'Talaado',
+  'Wednesday': 'Arbaco',
+  'Thursday': 'Khamiis',
+  'Friday': 'Jimco'
+};
+
+// Somali month names
+const somaliMonths = {
+  'January': 'January',
+  'February': 'February',
+  'March': 'March',
+  'April': 'April',
+  'May': 'May',
+  'June': 'June',
+  'July': 'July',
+  'August': 'August',
+  'September': 'September',
+  'October': 'October',
+  'November': 'November',
+  'December': 'December'
+};
+
+// Function to format date in Somali
+const formatSomaliDate = (date: Date): string => {
+  const dayName = format(date, 'EEEE') as keyof typeof somaliDays;
+  const monthName = format(date, 'MMMM') as keyof typeof somaliMonths;
+  const dayNumber = format(date, 'd');
+  
+  return `${somaliDays[dayName]}, ${dayNumber} ${somaliMonths[monthName]}`;
+};
+
 interface QueuedAppointment {
   id: string;
   number: string;
@@ -200,13 +236,15 @@ export default function AppointmentQueue() {
               <Activity className="w-8 h-8 text-white animate-pulse" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-800">Service Center</h1>
-              <p className="text-gray-600">Professional Service Queue</p>
+              <h1 className="text-3xl font-bold text-gray-800">
+                <div>Xafiiska Guddoomiyaha</div>
+              </h1>
+              <p className="text-2xl text-gray-600">Ballamaha dadweynaha</p>
             </div>
           </div>
           <div className="text-right">
             <div className="text-2xl font-semibold text-gray-700">
-              {format(currentTime, 'EEEE, MMMM d')}
+              {formatSomaliDate(currentTime)}
             </div>
             <div className="text-4xl font-bold text-teal-600 tabular-nums">
               {format(currentTime, 'h:mm:ss a')}
