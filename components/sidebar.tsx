@@ -27,7 +27,7 @@ interface SidebarProviderProps {
 export function SidebarProvider({
   children,
   defaultCollapsed = false,
-}: SidebarProviderProps) {
+}: Readonly<SidebarProviderProps>) {
   const [isCollapsed, setIsCollapsed] = React.useState(defaultCollapsed);
 
   return (
@@ -66,7 +66,7 @@ export function SidebarHeader({
   children,
   className,
   ...props
-}: SidebarHeaderProps) {
+}: Readonly<SidebarHeaderProps>) {
   return (
     <div
       className={cn("flex h-16 items-center border-b px-4", className)}

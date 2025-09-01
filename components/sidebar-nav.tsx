@@ -4,7 +4,6 @@ import {
   Home,
   Settings,
   Clock,
-  Bell,
   CheckSquare,
   ChevronDown,
   Archive,
@@ -14,7 +13,6 @@ import {
   UserCheck,
   Monitor,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Sidebar,
@@ -33,9 +31,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { useReminders } from "@/hooks/use-reminders";
-import { useMeetings } from "@/hooks/use-meetings";
-import { NotificationSidebar } from "@/components/notification-sidebar";
 import { useRouter, usePathname } from "next/navigation";
 import { useState } from "react";
 
@@ -53,20 +48,11 @@ export function SidebarNav({
   appointmentsCount = 0,
 }: Readonly<SidebarNavProps>) {
   const { isMobile, setOpenMobile } = useSidebar();
-  const { isPermissionGranted, isRemindersEnabled } = useReminders();
-  const { upcomingMeetings } = useMeetings();
   const router = useRouter();
   const pathname = usePathname();
   const [isMeetingsOpen, setIsMeetingsOpen] = useState(false);
 
   const meetingSubItems = [
-    
-    {
-      id: "/meetings",
-      label: "All Meetings",
-      icon: <CalendarDays className="h-4 w-4" />,
-      count: null,
-    },
     {
       id: "/today-meetings",
       label: "Today's Meetings",
@@ -78,6 +64,12 @@ export function SidebarNav({
       label: "Upcoming Meetings",
       icon: <Clock className="h-4 w-4" />,
       count: upcomingCount,
+    },
+    {
+      id: "/meetings",
+      label: "All Meetings",
+      icon: <CalendarDays className="h-4 w-4" />,
+      count: null,
     }
   ];
 
@@ -158,39 +150,14 @@ export function SidebarNav({
             <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-background animate-pulse" />
           </div>
           
-          {/* Project title and notification - Hidden when collapsed */}
-          <div className="flex items-center justify-between w-full min-w-0 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:hidden">
-            <div>
-              <h2 className="text-lg font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+          {/* Project title - Hidden when collapsed */}
+          <div className="flex items-center w-full min-w-0 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:hidden">
+            <div className="min-w-0">
+              <h2 className="text-base font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent whitespace-nowrap truncate">
                 Chairman Office
               </h2>
               <p className="text-xs text-muted-foreground">Meeting Hub</p>
             </div>
-            
-            {/* Notification Icon with Badge */}
-            <NotificationSidebar>
-              <Button variant="ghost" size="sm" className="relative p-2 shrink-0 hover:bg-accent rounded-lg transition-colors">
-                {isPermissionGranted && isRemindersEnabled ? (
-                  <Bell className="h-5 w-5 text-primary" />
-                ) : (
-                  <Bell className="h-5 w-5 text-muted-foreground" />
-                )}
-                {upcomingMeetings.length > 0 && (
-                  <Badge
-                    className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-[10px] min-w-[1rem]"
-                    variant={
-                      isPermissionGranted && isRemindersEnabled
-                        ? "destructive"
-                        : "secondary"
-                    }
-                  >
-                    {upcomingMeetings.length > 9
-                      ? "9+"
-                      : upcomingMeetings.length}
-                  </Badge>
-                )}
-              </Button>
-            </NotificationSidebar>
           </div>
         </div>
       </SidebarHeader>
@@ -198,17 +165,6 @@ export function SidebarNav({
       <SidebarContent className="px-3 py-4">
         <div className="space-y-2">
 
-          {/* Notification Status Indicator */}
-          {isPermissionGranted && (
-            <div className="mb-4 group-data-[collapsible=icon]:hidden">
-              <div className="flex items-center justify-center p-2.5 bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl border border-primary/20">
-                <Bell className="h-4 w-4 text-primary mr-2" />
-                <span className="text-sm font-medium text-primary">
-                  Reminders Active
-                </span>
-              </div>
-            </div>
-          )}
 
           {/* Navigation Items - Mobile optimized */}
           <SidebarMenu>
