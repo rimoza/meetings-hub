@@ -135,6 +135,7 @@ export default function AppointmentTable({
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-[60px]">#</TableHead>
               <TableHead className="w-[100px]">Confirm</TableHead>
               <TableHead>Title</TableHead>
               <TableHead>Date & Time</TableHead>
@@ -146,7 +147,7 @@ export default function AppointmentTable({
           <TableBody>
             {appointments.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                   No appointments found
                 </TableCell>
               </TableRow>
@@ -157,6 +158,9 @@ export default function AppointmentTable({
                 
                 return (
                   <TableRow key={appointment.id}>
+                    <TableCell className="font-semibold text-center">
+                      {appointment.dailyNumber}
+                    </TableCell>
                     <TableCell>
                       <Switch
                         checked={appointment.status === 'confirmed'}

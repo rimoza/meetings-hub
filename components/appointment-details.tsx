@@ -40,11 +40,13 @@ import {
   FileText,
   Timer,
   AlertCircle,
+  Printer,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Appointment, AppointmentStatus } from '@/types/appointment';
 import { useAppointments } from '@/hooks/use-appointments';
 import AppointmentForm from './appointment-form';
+import { AppointmentPrintPreview } from './appointment-print-preview';
 import { toast } from 'sonner';
 
 interface AppointmentDetailsProps {
@@ -63,6 +65,7 @@ export default function AppointmentDetails({ appointmentId }: AppointmentDetails
   const router = useRouter();
   const { appointments, updateAppointment, deleteAppointment, isLoading } = useAppointments();
   const [appointment, setAppointment] = useState<Appointment | null>(null);
+  const [showPrintPreview, setShowPrintPreview] = useState(false);
 
   useEffect(() => {
     const found = appointments.find(apt => apt.id === appointmentId);
@@ -274,6 +277,11 @@ export default function AppointmentDetails({ appointmentId }: AppointmentDetails
                   Send Email
                 </DropdownMenuItem>
               )}
+              
+              <DropdownMenuItem onClick={() => setShowPrintPreview(true)}>
+                <Printer className="mr-2 h-4 w-4" />
+                Print Card
+              </DropdownMenuItem>
               
               <DropdownMenuSeparator />
               
@@ -510,6 +518,13 @@ export default function AppointmentDetails({ appointmentId }: AppointmentDetails
           </Card>
         </div>
       </div>
+
+      {/* Print Preview Modal */}
+      <AppointmentPrintPreview
+        appointments={[appointment]}
+        isOpen={showPrintPreview}
+        onClose={() => setShowPrintPreview(false)}
+      />
     </div>
   );
 }
