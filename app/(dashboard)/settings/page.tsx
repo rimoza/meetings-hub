@@ -5,6 +5,6 @@ export default function SettingsPage() {
 }
 
 export const metadata = {
-  title: "Settings - Kulan Space",
+  title: "Settings - Chairman Office",
   description: "Manage your application preferences",
 };

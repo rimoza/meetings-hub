@@ -5,6 +5,6 @@ export default async function DashboardPage() {
 }
 
 export const metadata = {
-  title: "Dashboard - Kulan Space",
+  title: "Dashboard - Chairman Office",
   description: "Your meeting management dashboard",
 };

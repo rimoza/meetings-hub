@@ -12,7 +12,6 @@ import {
   Users,
   // TrendingUp,
   CheckCircle2,
-  ArrowUpRight,
   ArrowDownRight,
   MoreHorizontal,
   // Activity,
@@ -20,6 +19,7 @@ import {
   CalendarDays,
   Timer,
   UserCheck,
+  ArrowUpRight,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -47,18 +47,14 @@ import { useArchivesStore } from "@/stores/archives-store";
 import { useReportsStore } from "@/stores/reports-store";
 import { useAuth } from "@/contexts/auth-context";
 import { format } from "date-fns";
-import { toast } from "sonner";
-import { MeetingForm } from "@/components/meeting-form";
+// import { toast } from "sonner";
 import { DashboardLoading } from "@/components/loading/dashboard-loading";
 import {
   subscribeMeetings,
-  createMeeting as createMeetingFirebase,
-  updateMeeting as updateMeetingFirebase,
 } from "@/lib/firebase/meetings";
 import { subscribeTasks } from "@/lib/firebase/tasks";
 import { subscribeArchives } from "@/lib/firebase/archives";
 import { subscribeReports } from "@/lib/firebase/reports";
-import type { Meeting } from "@/types/meeting";
 
 const meetingData = [
   { day: "Mon", meetings: 4, completed: 3 },
@@ -90,15 +86,13 @@ const activityData = [
 
 export function DashboardClient() {
   const { user } = useAuth();
-  const { getTodayMeetings, getUpcomingMeetings, setMeetings, updateMeeting, isLoading } = useMeetingsStore();
+  const { getTodayMeetings, getUpcomingMeetings, setMeetings, isLoading } = useMeetingsStore();
   const { getPendingTasks, tasks, setTasks } = useTasksStore();
   const { archives, setArchives } = useArchivesStore();
   const { reports, setReports } = useReportsStore();
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingMeeting, setEditingMeeting] = useState<Meeting | undefined>();
 
-  console.log(archives, 'archives');
+  console.log(archives, 'archives from dashboard');
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -133,27 +127,6 @@ export function DashboardClient() {
     };
   }, [user?.uid, setMeetings, setTasks, setArchives, setReports]);
 
-  const handleFormSubmit = async (meetingData: Omit<Meeting, "id">) => {
-    try {
-      if (editingMeeting) {
-        await updateMeetingFirebase(editingMeeting.id, meetingData);
-        updateMeeting(editingMeeting.id, meetingData);
-        toast.success("Meeting updated successfully");
-      } else {
-        await createMeetingFirebase(user!.uid, meetingData);
-        toast.success("Meeting created successfully");
-      }
-      setIsFormOpen(false);
-      setEditingMeeting(undefined);
-    } catch (error) {
-      console.error("Error submitting meeting:", error);
-      toast.error(
-        editingMeeting
-          ? "Failed to update meeting"
-          : "Failed to create meeting",
-      );
-    }
-  };
 
   if (isLoading) {
     return <DashboardLoading />;
@@ -261,13 +234,6 @@ export function DashboardClient() {
               {format(currentTime, "HH:mm:ss")}
             </p>
           </div>
-          <Button 
-            onClick={() => setIsFormOpen(true)}
-            className="bg-primary hover:bg-primary/90 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
-          >
-            New Meeting
-            <ArrowUpRight className="ml-2 h-4 w-4" />
-          </Button>
         </div>
       </div>
 
@@ -572,15 +538,6 @@ export function DashboardClient() {
         </CardContent>
       </Card>
 
-      <MeetingForm
-        meeting={editingMeeting}
-        isOpen={isFormOpen}
-        onClose={() => {
-          setIsFormOpen(false);
-          setEditingMeeting(undefined);
-        }}
-        onSubmit={handleFormSubmit}
-      />
     </div>
   );
 }

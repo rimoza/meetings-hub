@@ -5,6 +5,6 @@ export default function UpcomingMeetingsPage() {
 }
 
 export const metadata = {
-  title: "Upcoming Meetings - Kulan Space",
+  title: "Upcoming Meetings - Chairman Office",
   description: "All your upcoming meetings",
 };

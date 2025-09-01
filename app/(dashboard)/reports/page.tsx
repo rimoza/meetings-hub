@@ -5,6 +5,6 @@ export default function ReportsPage() {
 }
 
 export const metadata = {
-  title: "Reports - Kulan Space",
+  title: "Reports - Chairman Office",
   description: "Manage and organize your reports and documents",
 };

@@ -5,6 +5,6 @@ export default async function TasksPage() {
 }
 
 export const metadata = {
-  title: "Tasks - Kulan Space",
+  title: "Tasks - Chairman Office",
   description: "Manage your tasks and follow-ups effectively",
 };

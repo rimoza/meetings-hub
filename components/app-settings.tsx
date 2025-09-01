@@ -77,7 +77,7 @@ export function AppSettings() {
             <div className="pl-6 space-y-2">
               <div className="flex items-center justify-between p-2 bg-secondary/30 rounded text-sm">
                 <span className="text-muted-foreground">Application</span>
-                <span className="font-medium">Kulan Space</span>
+                <span className="font-medium">Chairman Office</span>
               </div>
               <div className="flex items-center justify-between p-2 bg-secondary/30 rounded text-sm">
                 <span className="text-muted-foreground">Version</span>

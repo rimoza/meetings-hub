@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 import AppointmentsPageClient from '@/components/appointments-page-client';
 
 export const metadata: Metadata = {
-  title: 'Appointments - Kulan Space',
+  title: 'Appointments - Chairman Office',
   description: 'Manage your appointments and schedule',
 };
 

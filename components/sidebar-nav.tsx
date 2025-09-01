@@ -162,7 +162,7 @@ export function SidebarNav({
           <div className="flex items-center justify-between w-full min-w-0 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:hidden">
             <div>
               <h2 className="text-lg font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                Kulan Space
+                Chairman Office
               </h2>
               <p className="text-xs text-muted-foreground">Meeting Hub</p>
             </div>

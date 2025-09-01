@@ -137,7 +137,7 @@ export default function LoginPage() {
               </div>
             </div>
             <h1 className="text-4xl font-bold tracking-tight text-foreground">
-              Kulan Space
+              Chairman Office
             </h1>
             <p className="text-lg text-muted-foreground max-w-sm mx-auto leading-relaxed">
               Modern meeting management application

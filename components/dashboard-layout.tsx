@@ -1,11 +1,11 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
 import { SidebarNav } from "@/components/sidebar-nav";
-import { MeetingForm } from "@/components/meeting-form";
+import { NewItemDropdown } from "@/components/new-item-dropdown";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { Plus, User, LogOut, Settings, Search, Bell } from "lucide-react";
+import { User, LogOut, Settings, Search, Bell } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useMeetingsStore } from "@/stores/meetings-store";
 import { useTasksStore } from "@/stores/tasks-store";
@@ -21,6 +21,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import type { Meeting } from "@/types/meeting";
+import type { Task } from "@/types/task";
+import type { Appointment } from "@/types/appointment";
+import type { Contact } from "@/types/contact";
+import type { Archive } from "@/types/archive";
+import type { Report } from "@/types/report";
 // import Image from "next/image";
 
 interface DashboardLayoutProps {
@@ -28,10 +33,8 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children }: Readonly<DashboardLayoutProps>) {
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  
   const { getTodayMeetings, getUpcomingMeetings, addMeeting } = useMeetingsStore();
-  const { getPendingTasks } = useTasksStore();
+  const { getPendingTasks, addTask } = useTasksStore();
   const { user, logout } = useAuth();
 
   // Computed values for sidebar counts
@@ -39,13 +42,41 @@ export function DashboardLayout({ children }: Readonly<DashboardLayoutProps>) {
   const upcomingMeetings = getUpcomingMeetings();
   const pendingTasks = getPendingTasks();
 
-  // Handle meeting submission
+  // Handle submissions for different item types
   const handleMeetingSubmit = async (meetingData: Omit<Meeting, "id">) => {
     const newMeeting: Meeting = {
       ...meetingData,
       id: `meeting-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     };
     addMeeting(newMeeting);
+  };
+
+  const handleTaskSubmit = async (taskData: Omit<Task, "id">) => {
+    const newTask: Task = {
+      ...taskData,
+      id: `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    };
+    addTask(newTask);
+  };
+
+  const handleAppointmentSubmit = async (appointmentData: Omit<Appointment, "id">) => {
+    // TODO: Implement appointment submission
+    console.log("Appointment:", appointmentData);
+  };
+
+  const handleContactSubmit = async (contactData: Omit<Contact, "id">) => {
+    // TODO: Implement contact submission
+    console.log("Contact:", contactData);
+  };
+
+  const handleArchiveSubmit = async (archiveData: Omit<Archive, "id">) => {
+    // TODO: Implement archive submission
+    console.log("Archive:", archiveData);
+  };
+
+  const handleReportSubmit = async (reportData: Omit<Report, "id">) => {
+    // TODO: Implement report submission
+    console.log("Report:", reportData);
   };
 
   return (
@@ -79,14 +110,15 @@ export function DashboardLayout({ children }: Readonly<DashboardLayoutProps>) {
               </Badge>
             </Button>
             
-            {/* New Meeting Button */}
-            <Button
-              onClick={() => setIsFormOpen(true)}
-              className="gap-2 bg-primary hover:bg-primary/90 shadow-sm transition-all hover:shadow-md"
-            >
-              <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">New Meeting</span>
-            </Button>
+            {/* New Item Dropdown */}
+            <NewItemDropdown
+              onMeetingSubmit={handleMeetingSubmit}
+              onTaskSubmit={handleTaskSubmit}
+              onAppointmentSubmit={handleAppointmentSubmit}
+              onContactSubmit={handleContactSubmit}
+              onArchiveSubmit={handleArchiveSubmit}
+              onReportSubmit={handleReportSubmit}
+            />
             
             {/* Theme Toggle */}
             <ThemeToggle />
@@ -157,11 +189,6 @@ export function DashboardLayout({ children }: Readonly<DashboardLayoutProps>) {
           </div>
         </main>
       </SidebarInset>
-      <MeetingForm 
-        isOpen={isFormOpen} 
-        onClose={() => setIsFormOpen(false)}
-        onSubmit={handleMeetingSubmit}
-      />
     </>
   );
 }

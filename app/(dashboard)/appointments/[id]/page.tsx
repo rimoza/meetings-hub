@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: AppointmentDetailsPageProps):
   const resolvedParams = await params;
   console.log('Generating metadata for appointment ID:', resolvedParams.id);
   return {
-    title: `Appointment Details - Kulan Space`,
+    title: `Appointment Details - Chairman Office`,
     description: 'View and manage appointment details',
   };
 }

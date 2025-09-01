@@ -96,7 +96,7 @@ export default function InstallPrompt() {
             
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-foreground mb-1">
-                Install Kulan Space
+                Install Chairman Office
               </h3>
               <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
                 Add to your home screen for quick access and offline functionality

@@ -10,9 +10,9 @@ import { AuthProvider } from "@/contexts/auth-context";
 import InstallPrompt from "@/components/install-prompt";
 
 export const metadata: Metadata = {
-  title: "Kulan Space - Meeting Management",
+  title: "Chairman Office - Work Management System",
   description: "Modern meeting management application with meeting reminders",
-  applicationName: "Kulan Space",
+  applicationName: "Chairman Office",
   generator: "v0.app",
   icons: {
     icon: [
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
     "theme-color": "#000000",
     "apple-mobile-web-app-capable": "yes",
     "apple-mobile-web-app-status-bar-style": "default",
-    "apple-mobile-web-app-title": "Kulan Space",
+    "apple-mobile-web-app-title": "Chairman Office",
     "mobile-web-app-capable": "yes",
     "msapplication-TileColor": "#000000",
     "msapplication-tap-highlight": "no",
