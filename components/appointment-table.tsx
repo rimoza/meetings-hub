@@ -18,32 +18,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { 
-  MoreHorizontal, 
   Calendar, 
   Clock, 
   User,
-  Edit,
-  Trash2,
   CheckCircle,
-  XCircle,
-  Phone
+  XCircle
 } from 'lucide-react';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { Appointment, AppointmentStatus } from '@/types/appointment';
-import AppointmentForm from './appointment-form';
 
 interface AppointmentTableProps {
   appointments: Appointment[];
@@ -157,13 +141,12 @@ export default function AppointmentTable({
               <TableHead>Attendee</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Location</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {appointments.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                   No appointments found
                 </TableCell>
               </TableRow>
@@ -227,10 +210,55 @@ export default function AppointmentTable({
                     </TableCell>
                     
                     <TableCell>
-                      <Badge variant={statusInfo.variant} className="gap-1">
-                        <StatusIcon className="h-3 w-3" />
-                        {statusInfo.label}
-                      </Badge>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-auto p-0 hover:bg-transparent">
+                            <Badge variant={statusInfo.variant} className="gap-1 cursor-pointer hover:opacity-80">
+                              <StatusIcon className="h-3 w-3" />
+                              {statusInfo.label}
+                            </Badge>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start">
+                          <DropdownMenuItem
+                            onClick={() => handleQuickStatusChange(appointment, 'scheduled')}
+                            disabled={appointment.status === 'scheduled'}
+                          >
+                            <Calendar className="mr-2 h-4 w-4" />
+                            Scheduled
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleQuickStatusChange(appointment, 'confirmed')}
+                            disabled={appointment.status === 'confirmed'}
+                          >
+                            <CheckCircle className="mr-2 h-4 w-4" />
+                            Confirmed
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleQuickStatusChange(appointment, 'completed')}
+                            disabled={appointment.status === 'completed'}
+                          >
+                            <CheckCircle className="mr-2 h-4 w-4" />
+                            Completed
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleQuickStatusChange(appointment, 'cancelled')}
+                            disabled={appointment.status === 'cancelled'}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <XCircle className="mr-2 h-4 w-4" />
+                            Cancelled
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleQuickStatusChange(appointment, 'no-show')}
+                            disabled={appointment.status === 'no-show'}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <XCircle className="mr-2 h-4 w-4" />
+                            No Show
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                     
                     <TableCell>
@@ -239,80 +267,6 @@ export default function AppointmentTable({
                       </div>
                     </TableCell>
                     
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <AppointmentForm
-                            appointment={appointment}
-                            onSubmit={(updates) => onUpdate(appointment.id, updates)}
-                            trigger={
-                              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit
-                              </DropdownMenuItem>
-                            }
-                          />
-                          
-                          {appointment.status !== 'confirmed' && (
-                            <DropdownMenuItem
-                              onClick={() => handleQuickStatusChange(appointment, 'confirmed')}
-                            >
-                              <CheckCircle className="mr-2 h-4 w-4" />
-                              Mark Confirmed
-                            </DropdownMenuItem>
-                          )}
-                          
-                          {appointment.status !== 'completed' && (
-                            <DropdownMenuItem
-                              onClick={() => handleQuickStatusChange(appointment, 'completed')}
-                            >
-                              <CheckCircle className="mr-2 h-4 w-4" />
-                              Mark Completed
-                            </DropdownMenuItem>
-                          )}
-                          
-                          {appointment.attendeeEmail && (
-                            <DropdownMenuItem
-                              onClick={() => window.open(`mailto:${appointment.attendeeEmail}`, '_blank')}
-                            >
-                              <Phone className="mr-2 h-4 w-4" />
-                              Send Email
-                            </DropdownMenuItem>
-                          )}
-                          
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
-                              </DropdownMenuItem>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Appointment</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Are you sure you want to delete &quot;{appointment.title}&quot;? This action cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => onDelete(appointment.id)}
-                                  className="bg-destructive text-destructive-foreground"
-                                >
-                                  Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
                   </TableRow>
                 );
               })
