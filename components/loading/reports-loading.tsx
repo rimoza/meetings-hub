@@ -41,8 +41,8 @@ export function ReportsLoading() {
         </div>
 
         {/* Cards Grid Skeleton */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 lg:gap-6">
+          {Array.from({ length: 10 }).map((_, i) => (
             <Card key={i} className="border-l-4 border-l-muted">
               <CardHeader className="p-4 sm:p-5">
                 <div className="space-y-3">

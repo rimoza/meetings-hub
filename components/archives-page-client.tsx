@@ -191,8 +191,8 @@ export function ArchivesPageClient() {
 
         {/* Archives Display */}
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {Array.from({ length: 6 }, (_, i) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 lg:gap-6">
+            {Array.from({ length: 10 }, (_, i) => (
               <div key={i} className="h-64 bg-muted animate-pulse rounded-lg" />
             ))}
           </div>
@@ -219,7 +219,7 @@ export function ArchivesPageClient() {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 lg:gap-6">
             {filteredArchives.map((archive, index) => (
               <ArchiveCard
                 key={`${archive.id}-${index}-${archive.updatedAt.getTime()}`}

@@ -156,7 +156,7 @@ export function SidebarNav({
               <h2 className="text-base font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent whitespace-nowrap truncate">
                 Chairman Office
               </h2>
-              <p className="text-xs text-muted-foreground">Meeting Hub</p>
+              <p className="text-xs text-muted-foreground">Work Management System</p>
             </div>
           </div>
         </div>

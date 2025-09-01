@@ -224,7 +224,7 @@ export function DashboardClient() {
             Welcome back, {user?.name?.split(' ')[0] || 'there'}!
           </h1>
           <p className="text-muted-foreground mt-1">
-            Here&apos;s what&apos;s happening with your meetings today.
+            Here&apos;s a summary of your dashboard stats and activities.
           </p>
         </div>
         <div className="flex items-center gap-3">
