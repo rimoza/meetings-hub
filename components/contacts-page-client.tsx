@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Users } from "lucide-react";
+import { Plus, Users, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CompactContactCard } from "@/components/compact-contact-card";
 import { CONTACT_CATEGORIES } from "@/types/contact";
@@ -40,6 +40,13 @@ export function ContactsPageClient() {
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>(
+    // Initialize all categories as expanded
+    CONTACT_CATEGORIES.reduce((acc, category) => {
+      acc[category.value] = true;
+      return acc;
+    }, {} as Record<string, boolean>)
+  );
 
   // Get available filter options
   const allTags = Array.from(
@@ -172,6 +179,13 @@ export function ContactsPageClient() {
     setEditingContact(null);
   };
 
+  const toggleCategoryExpansion = (categoryValue: string) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [categoryValue]: !prev[categoryValue]
+    }));
+  };
+
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -208,10 +222,37 @@ export function ContactsPageClient() {
                     Manage your personal and professional contacts
                   </p>
                 </div>
-                <Button onClick={() => setIsFormOpen(true)} className="shrink-0">
-                  <Plus className="h-4 w-4 mr-2" />
-                  New Contact
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      const allExpanded = Object.values(expandedCategories).every(Boolean);
+                      const newState = CONTACT_CATEGORIES.reduce((acc, category) => {
+                        acc[category.value] = !allExpanded;
+                        return acc;
+                      }, {} as Record<string, boolean>);
+                      setExpandedCategories(newState);
+                    }}
+                    className="shrink-0 hidden sm:flex"
+                  >
+                    {Object.values(expandedCategories).every(Boolean) ? (
+                      <>
+                        <ChevronRight className="h-4 w-4 mr-1" />
+                        Collapse All
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown className="h-4 w-4 mr-1" />
+                        Expand All
+                      </>
+                    )}
+                  </Button>
+                  <Button onClick={() => setIsFormOpen(true)} className="shrink-0">
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Contact
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -284,35 +325,74 @@ export function ContactsPageClient() {
                 return acc;
               }, {} as Record<ContactCategory, { info: typeof CONTACT_CATEGORIES[0], contacts: Contact[] }>);
 
-              return Object.entries(contactsByCategory).map(([categoryKey, { info, contacts }]) => (
-                <div key={categoryKey} className="space-y-4">
-                  {/* Category Header */}
-                  <div className="flex items-center gap-3 pb-2 border-b">
-                    <span className="text-lg">{info.icon}</span>
-                    <h2 className="text-lg font-semibold text-foreground">
-                      {info.label}
-                    </h2>
-                    <span className="text-sm text-muted-foreground">
-                      ({contacts.length})
-                    </span>
-                  </div>
+              return Object.entries(contactsByCategory).map(([categoryKey, { info, contacts }]) => {
+                const isExpanded = expandedCategories[categoryKey];
+                
+                return (
+                  <div key={categoryKey} className="space-y-4">
+                    {/* Category Header */}
+                    <div 
+                      className="flex items-center gap-3 pb-2 border-b cursor-pointer hover:bg-accent/30 rounded-lg px-2 py-1 transition-colors group"
+                      onClick={() => toggleCategoryExpansion(categoryKey)}
+                    >
+                      <div className="flex items-center gap-2">
+                        {isExpanded ? (
+                          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                        )}
+                        <span className="text-lg">{info.icon}</span>
+                        <h2 className="text-lg font-semibold text-foreground">
+                          {info.label}
+                        </h2>
+                        <span className="text-sm text-muted-foreground">
+                          ({contacts.length})
+                        </span>
+                      </div>
+                      
+                      {/* Quick Actions */}
+                      <div className="ml-auto flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setIsFormOpen(true);
+                          }}
+                        >
+                          <Plus className="h-3 w-3 mr-1" />
+                          Add
+                        </Button>
+                      </div>
+                    </div>
 
-                  {/* Contacts Grid */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                    {contacts.map((contact, index) => (
-                      <CompactContactCard
-                        key={`${contact.id}-${index}-${contact.updatedAt.getTime()}`}
-                        contact={contact}
-                        onEdit={handleEditContact}
-                        onDelete={handleDeleteContact}
-                        onView={handleViewContact}
-                        onToggleFavorite={handleToggleFavorite}
-                        onToggleImportant={handleToggleImportant}
-                      />
-                    ))}
+                    {/* Collapsible Contacts Grid */}
+                    {isExpanded && (
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 animate-in slide-in-from-top-2 duration-200">
+                        {contacts.map((contact, index) => (
+                          <CompactContactCard
+                            key={`${contact.id}-${index}-${contact.updatedAt.getTime()}`}
+                            contact={contact}
+                            onEdit={handleEditContact}
+                            onDelete={handleDeleteContact}
+                            onView={handleViewContact}
+                            onToggleFavorite={handleToggleFavorite}
+                            onToggleImportant={handleToggleImportant}
+                          />
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* Show collapsed summary when category is collapsed */}
+                    {!isExpanded && contacts.length > 0 && (
+                      <div className="text-sm text-muted-foreground pl-6">
+                        {contacts.length} contact{contacts.length !== 1 ? 's' : ''} hidden - click to expand
+                      </div>
+                    )}
                   </div>
-                </div>
-              ));
+                );
+              });
             })()}
           </div>
         )}
