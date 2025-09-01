@@ -19,6 +19,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import type { ContactFilters } from "@/types/contact";
+import { CONTACT_CATEGORIES } from "@/types/contact";
 
 interface ContactFiltersProps {
   filters: ContactFilters;
@@ -56,6 +57,7 @@ export function ContactFilters({
     onFiltersChange({
       search: "",
       tags: [],
+      category: "all",
       important: "all",
       favorite: "all",
       company: undefined,
@@ -67,6 +69,7 @@ export function ContactFilters({
     filters.search || 
     filters.important !== "all" || 
     filters.favorite !== "all" ||
+    filters.category !== "all" ||
     filters.tags.length > 0 ||
     filters.company ||
     filters.location;
@@ -86,6 +89,24 @@ export function ContactFilters({
         </div>
 
         <div className="flex gap-2 flex-wrap sm:flex-nowrap">
+          {/* Category Filter */}
+          <Select 
+            value={filters.category} 
+            onValueChange={(value) => updateFilters({ category: value as any })}
+          >
+            <SelectTrigger className="w-fit min-w-[120px]">
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {CONTACT_CATEGORIES.map((category) => (
+                <SelectItem key={category.value} value={category.value}>
+                  {category.icon} {category.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
           {/* Quick Filter Buttons */}
           <Button
             variant={filters.favorite === true ? "default" : "outline"}
@@ -122,6 +143,7 @@ export function ContactFilters({
                     {(filters.tags.length + 
                       (filters.important !== "all" ? 1 : 0) +
                       (filters.favorite !== "all" ? 1 : 0) +
+                      (filters.category !== "all" ? 1 : 0) +
                       (filters.company ? 1 : 0) +
                       (filters.location ? 1 : 0) +
                       (filters.search ? 1 : 0))}

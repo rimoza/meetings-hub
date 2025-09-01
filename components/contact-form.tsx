@@ -24,8 +24,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { X } from "lucide-react";
-import type { Contact, ContactTitle } from "@/types/contact";
-import { CONTACT_TITLES } from "@/types/contact";
+import type { Contact, ContactTitle, ContactCategory } from "@/types/contact";
+import { CONTACT_TITLES, CONTACT_CATEGORIES } from "@/types/contact";
 
 interface ContactFormProps {
   contact?: Contact | null;
@@ -51,6 +51,7 @@ interface FormData {
   postalCode: string;
   notes: string;
   tags: string[];
+  category: ContactCategory;
   important: boolean;
   favorite: boolean;
 }
@@ -79,6 +80,7 @@ export function ContactForm({
     postalCode: "",
     notes: "",
     tags: [],
+    category: "personal",
     important: false,
     favorite: false,
   });
@@ -104,6 +106,7 @@ export function ContactForm({
         postalCode: contact.postalCode || "",
         notes: contact.notes || "",
         tags: contact.tags || [],
+        category: contact.category || "personal",
         important: contact.important,
         favorite: contact.favorite,
       });
@@ -126,6 +129,7 @@ export function ContactForm({
         postalCode: "",
         notes: "",
         tags: [],
+        category: "personal",
         important: false,
         favorite: false,
       });
@@ -278,6 +282,26 @@ export function ContactForm({
                 placeholder="+1 234 567 8901"
                 className="h-9"
               />
+            </div>
+
+            {/* Category */}
+            <div>
+              <Label htmlFor="category">Category *</Label>
+              <Select
+                value={formData.category}
+                onValueChange={(value) => updateField("category", value as ContactCategory)}
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CONTACT_CATEGORIES.map((category) => (
+                    <SelectItem key={category.value} value={category.value}>
+                      {category.icon} {category.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

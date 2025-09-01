@@ -65,6 +65,12 @@ const applyFilters = (
       return false;
     }
 
+    // Category filter
+    const contactCategory = contact.category || "personal"; // Default to "personal" if not set
+    if (filters.category !== "all" && contactCategory !== filters.category) {
+      return false;
+    }
+
     // Company filter
     if (filters.company && contact.company !== filters.company) {
       return false;
@@ -88,6 +94,7 @@ export const useContactsStore = create<ContactsStore>((set, get) => ({
   filters: {
     search: "",
     tags: [],
+    category: "all",
     important: "all",
     favorite: "all",
   },
