@@ -50,6 +50,7 @@ export default function AppointmentForm({ appointment, onSubmit, trigger }: Appo
     location: appointment?.location || '',
     description: appointment?.description || '',
     reminderSent: appointment?.reminderSent || false,
+    dailyNumber: appointment?.dailyNumber || 0,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -72,6 +73,7 @@ export default function AppointmentForm({ appointment, onSubmit, trigger }: Appo
           location: '',
           description: '',
           reminderSent: false,
+          dailyNumber: 0,
         });
       }
     } catch (error) {
