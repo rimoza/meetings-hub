@@ -12,29 +12,29 @@ import { formatAppointmentNumber } from '@/lib/firebase/appointments';
 
 // Somali day names
 const somaliDays = {
-  'Saturday': 'Sabti',
-  'Sunday': 'Axad',
-  'Monday': 'Isniin',
-  'Tuesday': 'Talaado',
-  'Wednesday': 'Arbaco',
-  'Thursday': 'Khamiis',
-  'Friday': 'Jimco'
+  Saturday: 'Sabti',
+  Sunday: 'Axad',
+  Monday: 'Isniin',
+  Tuesday: 'Salaasa',
+  Wednesday: 'Arbaco',
+  Thursday: 'Khamiis',
+  Friday: 'Jimce'
 };
 
 // Somali month names
 const somaliMonths = {
-  'January': 'January',
-  'February': 'February',
-  'March': 'March',
-  'April': 'April',
-  'May': 'May',
-  'June': 'June',
-  'July': 'July',
-  'August': 'August',
-  'September': 'September',
-  'October': 'October',
-  'November': 'November',
-  'December': 'December'
+  January: 'January',
+  February: 'February',
+  March: 'March',
+  April: 'April',
+  May: 'May',
+  June: 'June',
+  July: 'July',
+  August: 'August',
+  September: 'September',
+  October: 'October',
+  November: 'November',
+  December: 'December'
 };
 
 // Function to format date in Somali
