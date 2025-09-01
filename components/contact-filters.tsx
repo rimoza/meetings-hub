@@ -171,14 +171,14 @@ export function ContactFilters({
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Company</Label>
                   <Select
-                    value={filters.company || ""}
-                    onValueChange={(value) => updateFilters({ company: value || undefined })}
+                    value={filters.company || "all"}
+                    onValueChange={(value) => updateFilters({ company: value === "all" ? undefined : value })}
                   >
                     <SelectTrigger className="text-sm">
                       <SelectValue placeholder="Filter by company" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All companies</SelectItem>
+                      <SelectItem value="all">All companies</SelectItem>
                       {availableCompanies.map((company) => (
                         <SelectItem key={company} value={company}>
                           {company}
@@ -192,14 +192,14 @@ export function ContactFilters({
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Location</Label>
                   <Select
-                    value={filters.location || ""}
-                    onValueChange={(value) => updateFilters({ location: value || undefined })}
+                    value={filters.location || "all"}
+                    onValueChange={(value) => updateFilters({ location: value === "all" ? undefined : value })}
                   >
                     <SelectTrigger className="text-sm">
                       <SelectValue placeholder="Filter by location" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All locations</SelectItem>
+                      <SelectItem value="all">All locations</SelectItem>
                       {availableLocations.map((location) => (
                         <SelectItem key={location} value={location}>
                           {location}

@@ -45,6 +45,7 @@ const convertDocToContact = (
     postalCode: data.postalCode,
     notes: data.notes,
     tags: data.tags || [],
+    category: data.category || "personal",
     important: data.important || false,
     favorite: data.favorite || false,
     createdAt: data.createdAt?.toDate() || new Date(),
@@ -66,6 +67,9 @@ export const createContact = async (
     const sanitizedData = Object.fromEntries(
       Object.entries(contactData).filter(([, value]) => value !== undefined)
     );
+
+    console.log("Creating contact with data:", sanitizedData);
+    console.log("Contact category:", sanitizedData.category);
 
     const docRef = await addDoc(collection(db, COLLECTION_NAME), {
       ...sanitizedData,

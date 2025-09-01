@@ -85,7 +85,7 @@ export function SidebarContent({
   children,
   className,
   ...props
-}: SidebarContentProps) {
+}: Readonly<SidebarContentProps>) {
   return (
     <div className={cn("flex-1 overflow-auto py-4", className)} {...props}>
       {children}

@@ -146,6 +146,7 @@ export function ContactForm({
         ...formData,
       };
 
+      console.log("Submitting contact with category:", contactData.category);
       await onSubmit(contactData);
       onClose();
     } catch (error) {
