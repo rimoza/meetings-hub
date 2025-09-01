@@ -17,6 +17,7 @@ import AppointmentTable from './appointment-table';
 import AppointmentCard from './appointment-card';
 import { useAppointments } from '@/hooks/use-appointments';
 import { usePrintAppointment } from '@/hooks/use-print-appointment';
+import { useAutoPrint } from '@/hooks/use-auto-print';
 import { appointmentsService } from '@/lib/firebase/appointments';
 import { Appointment, ViewMode as AppointmentViewMode } from '@/types/appointment';
 import { AppointmentPrintPreview } from './appointment-print-preview';
@@ -41,12 +42,30 @@ export default function AppointmentsPageClient() {
     closePreview,
   } = usePrintAppointment();
 
+  const { triggerAutoPrint } = useAutoPrint();
+
   // Debug logging
   console.log('Appointments page - isLoading:', isLoading, 'appointments count:', appointments.length);
 
-  // Wrapper function to handle the return type mismatch
+  // Wrapper function to handle the return type mismatch and auto-print
   const handleCreateAppointment = async (appointment: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>) => {
-    await createAppointment(appointment);
+    const createdAppointment = await createAppointment(appointment);
+    
+    // Trigger auto-print if the appointment was created successfully
+    if (createdAppointment && appointment.status === 'scheduled') {
+      // We need to construct a full appointment object for auto-print
+      const fullAppointment: Appointment = {
+        ...appointment,
+        id: createdAppointment.id || 'temp-id',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      
+      // Trigger auto-print with a slight delay to ensure the appointment is fully processed
+      setTimeout(() => {
+        triggerAutoPrint(fullAppointment);
+      }, 500);
+    }
   };
 
   const [isMigrating, setIsMigrating] = useState(false);

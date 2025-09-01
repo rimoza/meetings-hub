@@ -68,18 +68,26 @@ export class PrintService {
   /**
    * Log print event for tracking
    */
-  private static logPrintEvent(appointmentId: string, type: "single" | "batch"): void {
+  private static logPrintEvent(appointmentId: string, type: "single" | "batch" | "auto"): void {
     const printLog = {
       appointmentId,
       type,
       timestamp: new Date().toISOString(),
       userAgent: navigator.userAgent,
+      status: "completed",
     };
     
     // Store in localStorage for now (could be sent to backend)
     const logs = this.getPrintLogs();
     logs.push(printLog);
     localStorage.setItem("printLogs", JSON.stringify(logs));
+  }
+
+  /**
+   * Log auto-print event specifically
+   */
+  static logAutoPrintEvent(appointmentId: string): void {
+    this.logPrintEvent(appointmentId, "auto");
   }
 
   /**
@@ -128,8 +136,12 @@ export class PrintService {
     const settings = localStorage.getItem("printSettings");
     return settings ? JSON.parse(settings) : {
       autoPrint: false,
+      autoPrintDelay: 2000,
+      showAutoPrintConfirmation: true,
       showPreview: true,
       template: "default",
+      printQuality: "high",
+      defaultPrinter: null,
     };
   }
 
@@ -138,5 +150,141 @@ export class PrintService {
    */
   static savePrintSettings(settings: any): void {
     localStorage.setItem("printSettings", JSON.stringify(settings));
+  }
+
+  /**
+   * Print Queue Management
+   */
+  static getPrintQueue(): any[] {
+    const queue = localStorage.getItem("printQueue");
+    return queue ? JSON.parse(queue) : [];
+  }
+
+  static addToPrintQueue(appointment: Appointment): void {
+    const queue = this.getPrintQueue();
+    const queueItem = {
+      id: `${appointment.id}-${Date.now()}`,
+      appointmentId: appointment.id,
+      appointment,
+      status: "pending",
+      addedAt: new Date().toISOString(),
+      retries: 0,
+    };
+    queue.push(queueItem);
+    localStorage.setItem("printQueue", JSON.stringify(queue));
+  }
+
+  static removeFromPrintQueue(queueItemId: string): void {
+    const queue = this.getPrintQueue();
+    const updatedQueue = queue.filter(item => item.id !== queueItemId);
+    localStorage.setItem("printQueue", JSON.stringify(updatedQueue));
+  }
+
+  static processPrintQueue(): void {
+    const queue = this.getPrintQueue();
+    const pendingItems = queue.filter(item => item.status === "pending");
+    
+    pendingItems.forEach(async (item) => {
+      try {
+        await this.printSingleCard(item.appointment);
+        item.status = "completed";
+        item.completedAt = new Date().toISOString();
+      } catch (error) {
+        item.status = "failed";
+        item.error = error instanceof Error ? error.message : "Unknown error";
+        item.retries = (item.retries || 0) + 1;
+        
+        // Retry up to 3 times
+        if (item.retries < 3) {
+          item.status = "pending";
+        }
+      }
+    });
+    
+    localStorage.setItem("printQueue", JSON.stringify(queue));
+  }
+
+  /**
+   * Enhanced Print History
+   */
+  static getPrintHistory(appointmentId?: string): any[] {
+    const logs = this.getPrintLogs();
+    if (appointmentId) {
+      return logs.filter(log => log.appointmentId === appointmentId);
+    }
+    return logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  }
+
+  static getPrintStatistics(): any {
+    const logs = this.getPrintLogs();
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const thisWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    return {
+      total: logs.length,
+      today: logs.filter(log => new Date(log.timestamp) >= today).length,
+      thisWeek: logs.filter(log => new Date(log.timestamp) >= thisWeek).length,
+      thisMonth: logs.filter(log => new Date(log.timestamp) >= thisMonth).length,
+      byType: {
+        single: logs.filter(log => log.type === "single").length,
+        batch: logs.filter(log => log.type === "batch").length,
+        auto: logs.filter(log => log.type === "auto").length,
+      },
+      failed: logs.filter(log => log.status === "failed").length,
+    };
+  }
+
+  /**
+   * Enhanced Error Handling
+   */
+  static async handlePrintWithRetry(appointment: Appointment, maxRetries = 3): Promise<void> {
+    let retries = 0;
+    
+    while (retries < maxRetries) {
+      try {
+        await this.printSingleCard(appointment);
+        return; // Success, exit retry loop
+      } catch (error) {
+        retries++;
+        
+        if (retries >= maxRetries) {
+          // Log the failure
+          this.logPrintFailure(appointment.id, error instanceof Error ? error.message : "Unknown error");
+          throw new Error(`Failed to print after ${maxRetries} attempts: ${error instanceof Error ? error.message : "Unknown error"}`);
+        }
+        
+        // Wait before retry (exponential backoff)
+        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retries)));
+      }
+    }
+  }
+
+  private static logPrintFailure(appointmentId: string, errorMessage: string): void {
+    const failureLog = {
+      appointmentId,
+      type: "failure",
+      timestamp: new Date().toISOString(),
+      error: errorMessage,
+      status: "failed",
+    };
+    
+    const logs = this.getPrintLogs();
+    logs.push(failureLog);
+    localStorage.setItem("printLogs", JSON.stringify(logs));
+  }
+
+  /**
+   * Bulk Operations
+   */
+  static async printAppointmentsByDate(date: string): Promise<void> {
+    // This would typically fetch appointments for the given date
+    // For now, we'll assume appointments are passed in
+    console.log(`Bulk printing appointments for date: ${date}`);
+  }
+
+  static async printAppointmentsByStatus(status: string): Promise<void> {
+    console.log(`Bulk printing appointments with status: ${status}`);
   }
 }
