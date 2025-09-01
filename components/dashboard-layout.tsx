@@ -21,7 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import type { Meeting } from "@/types/meeting";
-import Image from "next/image";
+// import Image from "next/image";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -96,7 +96,7 @@ export function DashboardLayout({ children }: Readonly<DashboardLayoutProps>) {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="relative rounded-full hover:bg-accent">
                   {user?.photoURL ? (
-                    <Image
+                    <img
                       width={32}
                       height={32}
                       src={user.photoURL}
@@ -114,9 +114,7 @@ export function DashboardLayout({ children }: Readonly<DashboardLayoutProps>) {
                 <DropdownMenuLabel className="font-normal pb-2">
                   <div className="flex items-center gap-3">
                     {user?.photoURL ? (
-                      <Image
-                        width={40}
-                        height={40}
+                      <img
                         src={user.photoURL}
                         alt={user.name || "User"}
                         className="h-10 w-10 rounded-full"

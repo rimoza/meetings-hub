@@ -98,7 +98,7 @@ export function DashboardClient() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingMeeting, setEditingMeeting] = useState<Meeting | undefined>();
 
-  console.log(reports, 'reports');
+  console.log(archives, 'archives');
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -166,13 +166,13 @@ export function DashboardClient() {
 
   const stats = [
     {
-      title: "Today's Meetings",
-      value: todayMeetings.length,
-      change: "+12%",
+      title: "Completion Rate",
+      value: `${completedTasks.length > 0 ? Math.round((completedTasks.length / tasks.length) * 100) : 0}%`,
+      change: "+5%",
       trend: "up",
-      icon: <Calendar className="h-4 w-4" />,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50 dark:bg-blue-950/20",
+      icon: <Target className="h-4 w-4" />,
+      color: "text-orange-600",
+      bgColor: "bg-orange-50 dark:bg-orange-950/20",
     },
     {
       title: "Pending Tasks",
@@ -184,22 +184,22 @@ export function DashboardClient() {
       bgColor: "bg-green-50 dark:bg-green-950/20",
     },
     {
-      title: "Total Archives",
-      value: archives.length,
+      title: "Today's Meetings",
+      value: todayMeetings.length,
+      change: "+12%",
+      trend: "up",
+      icon: <Calendar className="h-4 w-4" />,
+      color: "text-blue-600",
+      bgColor: "bg-blue-50 dark:bg-blue-950/20",
+    },
+    {
+      title: "Total Reports",
+      value: reports.length,
       change: "+18%",
       trend: "up",
       icon: <Users className="h-4 w-4" />,
       color: "text-purple-600",
       bgColor: "bg-purple-50 dark:bg-purple-950/20",
-    },
-    {
-      title: "Completion Rate",
-      value: `${completedTasks.length > 0 ? Math.round((completedTasks.length / tasks.length) * 100) : 0}%`,
-      change: "+5%",
-      trend: "up",
-      icon: <Target className="h-4 w-4" />,
-      color: "text-orange-600",
-      bgColor: "bg-orange-50 dark:bg-orange-950/20",
     },
   ];
 
