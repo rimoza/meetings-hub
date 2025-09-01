@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import type { ContactFilters } from "@/types/contact";
+import type { ContactFilters, ContactCategory } from "@/types/contact";
 import { CONTACT_CATEGORIES } from "@/types/contact";
 
 interface ContactFiltersProps {
@@ -92,7 +92,7 @@ export function ContactFilters({
           {/* Category Filter */}
           <Select 
             value={filters.category} 
-            onValueChange={(value) => updateFilters({ category: value as any })}
+            onValueChange={(value) => updateFilters({ category: value as ContactCategory | "all" })}
           >
             <SelectTrigger className="w-fit min-w-[120px]">
               <SelectValue placeholder="Category" />

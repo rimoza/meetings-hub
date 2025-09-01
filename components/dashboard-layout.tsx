@@ -59,22 +59,22 @@ export function DashboardLayout({ children }: Readonly<DashboardLayoutProps>) {
     addTask(newTask);
   };
 
-  const handleAppointmentSubmit = async (appointmentData: Omit<Appointment, "id">) => {
+  const handleAppointmentSubmit = async (appointmentData: Omit<Appointment, "id" | "createdAt" | "updatedAt">) => {
     // TODO: Implement appointment submission
     console.log("Appointment:", appointmentData);
   };
 
-  const handleContactSubmit = async (contactData: Omit<Contact, "id">) => {
+  const handleContactSubmit = async (contactData: Omit<Contact, "id" | "createdAt" | "updatedAt">) => {
     // TODO: Implement contact submission
     console.log("Contact:", contactData);
   };
 
-  const handleArchiveSubmit = async (archiveData: Omit<Archive, "id">) => {
+  const handleArchiveSubmit = async (archiveData: Omit<Archive, "id" | "createdAt" | "updatedAt">) => {
     // TODO: Implement archive submission
     console.log("Archive:", archiveData);
   };
 
-  const handleReportSubmit = async (reportData: Omit<Report, "id">) => {
+  const handleReportSubmit = async (reportData: Omit<Report, "id" | "createdAt" | "updatedAt">) => {
     // TODO: Implement report submission
     console.log("Report:", reportData);
   };
