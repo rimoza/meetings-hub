@@ -86,13 +86,20 @@ interface PrintableCardsPageProps {
 }
 
 export function PrintableCardsPage({ appointments }: PrintableCardsPageProps) {
-  // Display one card per page
+  // Display one card per page - deduplicate appointments by ID
+  const uniqueAppointments = appointments.filter((appointment, index, self) => 
+    index === self.findIndex((a) => a.id === appointment.id)
+  );
+  
   return (
     <div className="print-container">
       <div className="print-page">
         <div className="cards-grid">
-          {appointments.map((appointment) => (
-            <AppointmentPrintCard key={appointment.id} appointment={appointment} />
+          {uniqueAppointments.map((appointment, index) => (
+            <AppointmentPrintCard 
+              key={`${appointment.id}-print-${index}`} 
+              appointment={appointment} 
+            />
           ))}
         </div>
       </div>

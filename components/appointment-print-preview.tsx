@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { Appointment } from "@/types/appointment";
 import { AppointmentPrintCard } from "./appointment-print-card";
 import { X, Printer } from "lucide-react";
-import "@/styles/print-card.css";
 
 interface AppointmentPrintPreviewProps {
   appointments: Appointment[];
@@ -18,18 +17,6 @@ export function AppointmentPrintPreview({
   onClose 
 }: AppointmentPrintPreviewProps) {
   const printRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Add CSS file to document if not already present
-    const cssId = 'print-card-styles';
-    if (!document.getElementById(cssId)) {
-      const link = document.createElement('link');
-      link.id = cssId;
-      link.rel = 'stylesheet';
-      link.href = '/styles/print-card.css';
-      document.head.appendChild(link);
-    }
-  }, []);
 
   const handlePrint = () => {
     window.print();
@@ -65,8 +52,11 @@ export function AppointmentPrintPreview({
             <div className="print-container">
               <div className="print-page">
                 <div className="cards-grid">
-                  {appointments.map((appointment) => (
-                    <AppointmentPrintCard key={appointment.id} appointment={appointment} />
+                  {appointments.map((appointment, index) => (
+                    <AppointmentPrintCard 
+                      key={`${appointment.id}-${index}`} 
+                      appointment={appointment} 
+                    />
                   ))}
                 </div>
               </div>
