@@ -93,6 +93,7 @@ export class PrintService {
   /**
    * Get print logs from storage
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static getPrintLogs(): any[] {
     const logs = localStorage.getItem("printLogs");
     return logs ? JSON.parse(logs) : [];
@@ -148,6 +149,7 @@ export class PrintService {
   /**
    * Save print settings
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static savePrintSettings(settings: any): void {
     localStorage.setItem("printSettings", JSON.stringify(settings));
   }
@@ -155,6 +157,7 @@ export class PrintService {
   /**
    * Print Queue Management
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static getPrintQueue(): any[] {
     const queue = localStorage.getItem("printQueue");
     return queue ? JSON.parse(queue) : [];
@@ -207,6 +210,7 @@ export class PrintService {
   /**
    * Enhanced Print History
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static getPrintHistory(appointmentId?: string): any[] {
     const logs = this.getPrintLogs();
     if (appointmentId) {
@@ -215,6 +219,7 @@ export class PrintService {
     return logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static getPrintStatistics(): any {
     const logs = this.getPrintLogs();
     const now = new Date();

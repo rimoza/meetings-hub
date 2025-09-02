@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Clock, Calendar, Users, ChevronRight, Activity, Printer } from 'lucide-react';
+import { Clock, Calendar, Users, ChevronRight, Activity } from 'lucide-react';
 import { format } from 'date-fns';
 // import { Appointment } from '@/types/appointment';
 import { useAppointments } from '@/hooks/use-appointments';
@@ -63,21 +62,21 @@ interface QueuedAppointment {
 
 export default function AppointmentQueue() {
   const { appointments, isLoading } = useAppointments();
-  const { showPreview, selectedAppointments, printBatch, closePreview } = usePrintAppointment();
+  const { showPreview, selectedAppointments, closePreview } = usePrintAppointment();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentAppointment, setCurrentAppointment] = useState<QueuedAppointment | null>(null);
   const [upcomingAppointments, setUpcomingAppointments] = useState<QueuedAppointment[]>([]);
   const [seeingAppointmentId, setSeeingAppointmentId] = useState<string | null>(null);
   const [animateNumber, setAnimateNumber] = useState(false);
-  const [announcement, setAnnouncement] = useState('Welcome to our facility. We appreciate your patience.');
+  // const [announcement, setAnnouncement] = useState('Welcome to our facility. We appreciate your patience.');
   
-  const announcements = [
-    'Welcome to our facility. We appreciate your patience.',
-    'Please be ready when your number is called.',
-    'Our staff is here to assist you with any questions.',
-    'Thank you for visiting us today.',
-    'We strive to serve you efficiently.'
-  ];
+  // const announcements = [
+  //   'Welcome to our facility. We appreciate your patience.',
+  //   'Please be ready when your number is called.',
+  //   'Our staff is here to assist you with any questions.',
+  //   'Thank you for visiting us today.',
+  //   'We strive to serve you efficiently.'
+  // ];
 
   // Update current time every second
   useEffect(() => {
@@ -88,15 +87,15 @@ export default function AppointmentQueue() {
   }, []);
 
   // Rotate announcements
-  useEffect(() => {
-    const announcementTimer = setInterval(() => {
-      setAnnouncement(prev => {
-        const currentIndex = announcements.indexOf(prev);
-        return announcements[(currentIndex + 1) % announcements.length];
-      });
-    }, 8000);
-    return () => clearInterval(announcementTimer);
-  }, []);
+  // useEffect(() => {
+  //   const announcementTimer = setInterval(() => {
+  //     setAnnouncement(prev => {
+  //       const currentIndex = announcements.indexOf(prev);
+  //       return announcements[(currentIndex + 1) % announcements.length];
+  //     });
+  //   }, 8000);
+  //   return () => clearInterval(announcementTimer);
+  // }, []);
 
   // Monitor for status changes in the seeing appointment - real-time response
   useEffect(() => {
@@ -248,20 +247,6 @@ export default function AppointmentQueue() {
             </div>
           </div>
           <div className="flex items-center gap-6">
-            <div className="flex gap-3">
-              {appointments.length > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => printBatch(appointments.filter(apt => apt.date === new Date().toISOString().split('T')[0]))}
-                  className="bg-white/90 hover:bg-white border-teal-200 text-teal-700 hover:text-teal-800"
-                >
-                  <Printer className="w-4 h-4 mr-2" />
-                  Print Today's Cards
-                </Button>
-              )}
-            </div>
-            
             <div className="text-right">
               <div className="text-2xl font-semibold text-gray-700">
                 {formatSomaliDate(currentTime)}

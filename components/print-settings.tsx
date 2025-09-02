@@ -32,6 +32,7 @@ export function PrintSettings() {
     setPrintHistory(PrintService.getPrintHistory().slice(0, 10));
   }, []);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSettingChange = (key: string, value: any) => {
     const newSettings = { ...settings, [key]: value };
     setSettings(newSettings);
