@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Clock, Calendar, Users, ChevronRight, Activity, Sparkles, Printer } from 'lucide-react';
+import { Clock, Calendar, Users, ChevronRight, Activity, Printer } from 'lucide-react';
 import { format } from 'date-fns';
 // import { Appointment } from '@/types/appointment';
 import { useAppointments } from '@/hooks/use-appointments';
@@ -378,7 +378,7 @@ export default function AppointmentQueue() {
       </div>
 
       {/* Footer ticker with announcements */}
-      <footer className="relative z-10 bg-gradient-to-r from-teal-600 to-blue-600 text-white">
+      {/* <footer className="relative z-10 bg-gradient-to-r from-teal-600 to-blue-600 text-white">
         <div className="px-8 py-6">
           <div className="flex items-center gap-8">
             <Sparkles className="w-8 h-8 flex-shrink-0 animate-pulse" />
@@ -394,7 +394,7 @@ export default function AppointmentQueue() {
             </div>
           </div>
         </div>
-      </footer>
+      </footer> */}
 
       {/* CSS Animations */}
       <style jsx>{`
