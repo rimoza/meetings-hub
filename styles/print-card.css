@@ -57,7 +57,7 @@
 /* Responsive card sizing for different paper sizes */
 @media print {
   @page {
-    margin: 0.3in;
+    /* margin: 0.3in; */
   }
   
   /* Standard A4 paper */
@@ -73,7 +73,7 @@
 @media print and (max-width: 5.83in) and (max-height: 8.27in) {
   @page {
     /* size: A5 portrait; */
-    margin: 0.2in;
+    /* margin: 0.2in; */
   }
   
   .print-container {
@@ -81,11 +81,11 @@
   }
   
   .appointment-print-card {
-    width: 3.2in !important;
+    /* width: 3.2in !important;
     height: 4.2in !important;
     max-width: 3.2in;
     max-height: 4.2in;
-    padding: 0.15in;
+    padding: 0.15in; */
     font-size: 85%;
   }
   
