@@ -43,3 +43,6 @@ next-env.d.ts
 # files
 .env.local
 .env.production
+
+# docs folder
+/docs
