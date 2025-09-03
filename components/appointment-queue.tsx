@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Calendar, ChevronRight, Activity, CheckCircle2 } from 'lucide-react';
+import { Clock, Calendar, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { format } from 'date-fns';
 // import { Appointment } from '@/types/appointment';
 import { useAppointments } from '@/hooks/use-appointments';
@@ -242,7 +242,7 @@ export default function AppointmentQueue() {
   }
 
   return (
-    <div className="h-screen w-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 flex flex-col overflow-hidden">
+    <div className="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 flex flex-col overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -left-40 w-80 h-80 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
@@ -255,7 +255,7 @@ export default function AppointmentQueue() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-amber-500 rounded-2xl flex items-center justify-center shadow-lg">
-              <Activity className="w-8 h-8 text-white animate-pulse" />
+              <Calendar className="w-8 h-8 text-white animate-pulse" />
             </div>
             <div>
               <h1 className="text-3xl font-bold text-gray-800">
