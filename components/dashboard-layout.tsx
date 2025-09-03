@@ -9,6 +9,7 @@ import { User, LogOut, Settings, Search, Bell } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useMeetingsStore } from "@/stores/meetings-store";
 import { useTasksStore } from "@/stores/tasks-store";
+import { useAppointments } from "@/hooks/use-appointments";
 import { useAuth } from "@/contexts/auth-context";
 import {
   DropdownMenu,
@@ -35,6 +36,7 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: Readonly<DashboardLayoutProps>) {
   const { getTodayMeetings, getUpcomingMeetings, addMeeting } = useMeetingsStore();
   const { getPendingTasks, addTask } = useTasksStore();
+  const { createAppointment } = useAppointments();
   const { user, logout } = useAuth();
 
   // Computed values for sidebar counts
@@ -60,8 +62,11 @@ export function DashboardLayout({ children }: Readonly<DashboardLayoutProps>) {
   };
 
   const handleAppointmentSubmit = async (appointmentData: Omit<Appointment, "id" | "createdAt" | "updatedAt">) => {
-    // TODO: Implement appointment submission
-    console.log("Appointment:", appointmentData);
+    try {
+      await createAppointment(appointmentData);
+    } catch (error) {
+      console.error("Failed to create appointment:", error);
+    }
   };
 
   const handleContactSubmit = async (contactData: Omit<Contact, "id" | "createdAt" | "updatedAt">) => {
