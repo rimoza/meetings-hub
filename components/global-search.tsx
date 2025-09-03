@@ -16,11 +16,6 @@ import {
   Calendar,
   CheckSquare,
   CalendarCheck,
-  Users,
-  FileText,
-  Clock,
-  MapPin,
-  User,
   ArrowRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -40,6 +35,7 @@ interface SearchResult {
   icon: React.ComponentType<{ className?: string }>;
   badge?: string;
   url: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: Meeting | Task | Appointment | any;
 }
 
@@ -71,7 +67,7 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
         description: meeting.description || meeting.location,
         type: 'meeting',
         icon: Calendar,
-        badge: meeting.status,
+        badge: meeting.type,
         url: `/meetings/${meeting.id}`,
         data: meeting,
       });
@@ -82,7 +78,7 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
       results.push({
         id: task.id,
         title: task.title,
-        subtitle: task.dueDate ? `Due: ${task.dueDate}` : 'No due date',
+        subtitle: task.createdAt ? `Due: ${task.createdAt}` : 'No due date',
         description: task.description,
         type: 'task',
         icon: CheckSquare,
