@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   DropdownMenu,
@@ -19,13 +18,25 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { 
   Calendar, 
   Clock, 
   User,
   CheckCircle,
   XCircle,
-  Printer
+  Printer,
+  Edit,
+  Trash2,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import Link from 'next/link';
@@ -33,6 +44,7 @@ import { Appointment, AppointmentStatus } from '@/types/appointment';
 import { PrintService } from '@/lib/services/print-service';
 import { usePrintAppointment } from '@/hooks/use-print-appointment';
 import { AppointmentPrintPreview } from './appointment-print-preview';
+import AppointmentForm from './appointment-form';
 
 interface AppointmentTableProps {
   appointments: Appointment[];
@@ -52,15 +64,18 @@ const statusConfig = {
 export default function AppointmentTable({ 
   appointments, 
   onUpdate, 
-  // onDelete, 
+  onDelete, 
   isLoading = false 
 }: Readonly<AppointmentTableProps>) {
   const [confirmedAppointmentId, setConfirmedAppointmentId] = useState<string | null>(null);
   const [selectedAppointmentIds, setSelectedAppointmentIds] = useState<Set<string>>(new Set());
+  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
+  const [deletingAppointment, setDeletingAppointment] = useState<Appointment | null>(null);
   const { showPreview, selectedAppointments, printBatch, closePreview } = usePrintAppointment();
 
   // Initialize the confirmed appointment from existing data
   useEffect(() => {
+    console.log(confirmedAppointmentId);
     const confirmed = appointments.find(apt => apt.status === 'confirmed');
     if (confirmed) {
       setConfirmedAppointmentId(confirmed.id);
@@ -100,33 +115,55 @@ export default function AppointmentTable({
     }
   };
 
-  const handleConfirmationToggle = async (appointment: Appointment, checked: boolean) => {
+  const handleEditAppointment = async (appointmentData: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>) => {
+    if (!editingAppointment) return;
+    
     try {
-      if (checked) {
-        // First, find all currently confirmed appointments and unconfirm them
-        const currentlyConfirmed = appointments.filter(apt => 
-          apt.status === 'confirmed' && apt.id !== appointment.id
-        );
-        
-        // Unconfirm all previously confirmed appointments in parallel
-        await Promise.all(
-          currentlyConfirmed.map(apt => onUpdate(apt.id, { status: 'scheduled' }))
-        );
-        
-        // Then confirm the new appointment
-        await onUpdate(appointment.id, { status: 'confirmed' });
-        setConfirmedAppointmentId(appointment.id);
-      } else {
-        // Unconfirm the appointment
-        await onUpdate(appointment.id, { status: 'scheduled' });
-        if (confirmedAppointmentId === appointment.id) {
-          setConfirmedAppointmentId(null);
-        }
-      }
+      await onUpdate(editingAppointment.id, appointmentData);
+      setEditingAppointment(null);
     } catch (error) {
-      console.error('Error toggling appointment confirmation:', error);
+      console.error('Error updating appointment:', error);
     }
   };
+
+  const handleDeleteAppointment = async () => {
+    if (!deletingAppointment) return;
+    
+    try {
+      await onDelete(deletingAppointment.id);
+      setDeletingAppointment(null);
+    } catch (error) {
+      console.error('Error deleting appointment:', error);
+    }
+  };
+
+  // const handleConfirmationToggle = async (appointment: Appointment, checked: boolean) => {
+  //   try {
+  //     if (checked) {
+  //       // First, find all currently confirmed appointments and unconfirm them
+  //       const currentlyConfirmed = appointments.filter(apt => 
+  //         apt.status === 'confirmed' && apt.id !== appointment.id
+  //       );
+        
+  //       // Unconfirm all previously confirmed appointments in parallel
+  //       await Promise.all(
+  //         currentlyConfirmed.map(apt => onUpdate(apt.id, { status: 'scheduled' }))
+  //       );
+        
+  //       // Then confirm the new appointment
+  //       await onUpdate(appointment.id, { status: 'confirmed' });
+  //       setConfirmedAppointmentId(appointment.id);
+  //     } else {
+  //       // Unconfirm the appointment
+  //       await onUpdate(appointment.id, { status: 'scheduled' });
+  //       if (confirmedAppointmentId === appointment.id) {
+  //         setConfirmedAppointmentId(null);
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error('Error toggling appointment confirmation:', error);
+  //   }
+  // };
 
   const formatTime = (time: string) => {
     try {
@@ -203,13 +240,13 @@ export default function AppointmentTable({
                 />
               </TableHead>
               <TableHead className="w-[60px]">#</TableHead>
-              <TableHead className="w-[100px]">Confirm</TableHead>
               <TableHead>Title</TableHead>
               <TableHead>Date & Time</TableHead>
               <TableHead>Attendee</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Location</TableHead>
               <TableHead className="w-[80px]">Print</TableHead>
+              <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -235,14 +272,6 @@ export default function AppointmentTable({
                     </TableCell>
                     <TableCell className="font-semibold text-center">
                       00{appointment.dailyNumber}
-                    </TableCell>
-                    <TableCell>
-                      <Switch
-                        checked={appointment.status === 'confirmed'}
-                        onCheckedChange={(checked) => handleConfirmationToggle(appointment, checked)}
-                        disabled={appointment.status === 'completed' || appointment.status === 'cancelled'}
-                        aria-label="Confirm appointment"
-                      />
                     </TableCell>
                     <TableCell className="font-medium">
                       <div>
@@ -356,6 +385,29 @@ export default function AppointmentTable({
                       )}
                     </TableCell>
                     
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setEditingAppointment(appointment)}
+                          className="h-8 w-8 p-0"
+                          title="Edit appointment"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setDeletingAppointment(appointment)}
+                          className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          title="Delete appointment"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                    
                   </TableRow>
                 );
               })
@@ -363,6 +415,46 @@ export default function AppointmentTable({
           </TableBody>
         </Table>
       </div>
+
+      {/* Edit Appointment Dialog */}
+      {editingAppointment && (
+        <AppointmentForm
+          key={editingAppointment.id} // Add key to force re-render with new appointment data
+          appointment={editingAppointment}
+          onSubmit={async (appointmentData) => {
+            await handleEditAppointment(appointmentData);
+          }}
+        />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deletingAppointment} onOpenChange={(open) => !open && setDeletingAppointment(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Appointment</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this appointment? This action cannot be undone.
+              {deletingAppointment && (
+                <div className="mt-3 p-3 bg-muted rounded-md">
+                  <div className="font-medium">{deletingAppointment.title}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {deletingAppointment.attendee} • {formatDate(deletingAppointment.date)} at {formatTime(deletingAppointment.time)}
+                  </div>
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteAppointment}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete Appointment
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Print Preview Modal */}
       <AppointmentPrintPreview
