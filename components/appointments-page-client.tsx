@@ -287,7 +287,15 @@ export default function AppointmentsPageClient() {
               Print ({filteredAppointments.length})
             </Button>
           )}
-          <AppointmentForm onSubmit={handleCreateAppointment} />
+          <AppointmentForm 
+            onSubmit={handleCreateAppointment}
+            trigger={
+              <Button size="sm" className="gap-2">
+                <Plus className="h-4 w-4" />
+                New
+              </Button>
+            }
+          />
         </div>
       </div>
 
