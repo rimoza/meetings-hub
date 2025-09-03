@@ -171,7 +171,7 @@ export default function AppointmentsPageClient() {
     },
     {
       title: 'Upcoming',
-      value: upcomingAppointments.length,
+      value: upcomingAppointments.length - todaysAppointments.length,
       icon: Clock,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
