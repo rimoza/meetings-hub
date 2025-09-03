@@ -92,8 +92,8 @@ export function PrintableCardsPage({ appointments }: PrintableCardsPageProps) {
   );
   
   return (
-    <div className="print-container">
-      <div className="print-page">
+    <div className="">
+      <div className="">
         <div className="cards-grid">
           {uniqueAppointments.map((appointment, index) => (
             <AppointmentPrintCard 
