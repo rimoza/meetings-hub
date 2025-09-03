@@ -308,10 +308,20 @@ export default function AppointmentTable({
                         <div className="flex items-center gap-1">
                           <User className="h-3 w-3" />
                           <span className="font-medium">{appointment.attendee}</span>
+                          {appointment.attendeeCount && appointment.attendeeCount > 1 && (
+                            <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-medium">
+                              +{appointment.attendeeCount - 1}
+                            </span>
+                          )}
                         </div>
                         {appointment.attendeeEmail && (
                           <div className="text-sm text-muted-foreground">
                             {appointment.attendeeEmail}
+                          </div>
+                        )}
+                        {appointment.attendeeCount && (
+                          <div className="text-xs text-muted-foreground">
+                            {appointment.attendeeCount} attendee{appointment.attendeeCount !== 1 ? 's' : ''}
                           </div>
                         )}
                       </div>

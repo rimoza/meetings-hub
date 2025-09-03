@@ -7,6 +7,7 @@ export interface Appointment {
   status: "scheduled" | "confirmed" | "cancelled" | "completed" | "no-show";
   attendee: string;
   attendeeEmail?: string;
+  attendeeCount?: number; // Number of attendees
   duration?: number; // in minutes
   location?: string;
   description?: string;

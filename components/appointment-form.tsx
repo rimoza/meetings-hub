@@ -52,6 +52,7 @@ export default function AppointmentForm({ appointment, onSubmit, trigger, isOpen
     status: appointment?.status || 'scheduled' as AppointmentStatus,
     attendee: appointment?.attendee || '',
     attendeeEmail: appointment?.attendeeEmail || '',
+    attendeeCount: appointment?.attendeeCount || 1,
     duration: appointment?.duration || 60,
     location: appointment?.location || '',
     description: appointment?.description || '',
@@ -75,6 +76,7 @@ export default function AppointmentForm({ appointment, onSubmit, trigger, isOpen
           status: 'scheduled',
           attendee: '',
           attendeeEmail: '',
+          attendeeCount: 1,
           duration: 60,
           location: '',
           description: '',
@@ -181,19 +183,32 @@ export default function AppointmentForm({ appointment, onSubmit, trigger, isOpen
               />
             </div>
             
-            <div className="col-span-2">
-              <Label htmlFor="attendee">Attendee *</Label>
+            <div>
+              <Label htmlFor="attendee">Primary Attendee *</Label>
               <div className="relative">
                 <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="attendee"
                   value={formData.attendee}
                   onChange={(e) => handleInputChange('attendee', e.target.value)}
-                  placeholder="Enter attendee name"
+                  placeholder="Enter primary attendee name"
                   className="pl-10"
                   required
                 />
               </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="attendeeCount">Number of Attendees</Label>
+              <Input
+                id="attendeeCount"
+                type="number"
+                value={formData.attendeeCount}
+                onChange={(e) => handleInputChange('attendeeCount', parseInt(e.target.value) || 1)}
+                min="1"
+                max="50"
+                placeholder="1"
+              />
             </div>
             
             <div className="col-span-2">

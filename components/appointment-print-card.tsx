@@ -70,7 +70,7 @@ export function AppointmentPrintCard({ appointment }: Readonly<AppointmentPrintC
           
           <div className="info-row">
             <span className="info-label">Attendance:</span>
-            <span className="info-value">{appointment.dailyNumber}</span>
+            <span className="info-value">{appointment.attendeeCount}</span>
           </div>
           
           {appointment.location && (
