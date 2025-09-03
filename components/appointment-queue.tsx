@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Calendar, Users, ChevronRight, Activity, CheckCircle2 } from 'lucide-react';
+import { Clock, Calendar, ChevronRight, Activity, CheckCircle2 } from 'lucide-react';
 import { format } from 'date-fns';
 // import { Appointment } from '@/types/appointment';
 import { useAppointments } from '@/hooks/use-appointments';
@@ -374,7 +374,7 @@ export default function AppointmentQueue() {
                 {activeSection === 'today' && (
                   <>
                     <Calendar className="w-6 h-6 text-orange-500" />
-                    Today's Queue
+                    Today&apos;s Queue
                   </>
                 )}
                 {activeSection === 'upcoming' && (
