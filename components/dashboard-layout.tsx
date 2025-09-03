@@ -5,8 +5,9 @@ import { SidebarNav } from "@/components/sidebar-nav";
 import { NewItemDropdown } from "@/components/new-item-dropdown";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { User, LogOut, Settings, Search, Bell } from "lucide-react";
+import { User, LogOut, Settings, Bell } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { SearchTrigger } from "@/components/search-trigger";
 import { useMeetingsStore } from "@/stores/meetings-store";
 import { useTasksStore } from "@/stores/tasks-store";
 import { useAppointments } from "@/hooks/use-appointments";
@@ -19,7 +20,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import type { Meeting } from "@/types/meeting";
 import type { Task } from "@/types/task";
@@ -97,13 +97,7 @@ export function DashboardLayout({ children }: Readonly<DashboardLayoutProps>) {
             <SidebarTrigger className="-ml-1 hover:bg-accent rounded-md transition-colors" />
             
             {/* Search Bar */}
-            <div className="relative max-w-md flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search meetings, tasks, contacts..."
-                className="pl-10 pr-4 h-9 bg-muted/40 border-muted focus:bg-background transition-colors"
-              />
-            </div>
+            <SearchTrigger />
           </div>
           
           <div className="flex items-center gap-3">
