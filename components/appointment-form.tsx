@@ -26,6 +26,8 @@ interface AppointmentFormProps {
   appointment?: Partial<Appointment>;
   onSubmit: (appointment: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   trigger?: React.ReactNode;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 const statusOptions: { value: AppointmentStatus; label: string }[] = [
@@ -36,8 +38,12 @@ const statusOptions: { value: AppointmentStatus; label: string }[] = [
   { value: 'no-show', label: 'No Show' },
 ];
 
-export default function AppointmentForm({ appointment, onSubmit, trigger }: AppointmentFormProps) {
-  const [open, setOpen] = useState(false);
+export default function AppointmentForm({ appointment, onSubmit, trigger, isOpen, onOpenChange }: AppointmentFormProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  
+  // Use external control when provided, otherwise use internal state
+  const open = isOpen !== undefined ? isOpen : internalOpen;
+  const setOpen = onOpenChange || setInternalOpen;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: appointment?.title || '',
@@ -96,9 +102,11 @@ export default function AppointmentForm({ appointment, onSubmit, trigger }: Appo
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger || defaultTrigger}
-      </DialogTrigger>
+      {trigger && (
+        <DialogTrigger asChild>
+          {trigger || defaultTrigger}
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

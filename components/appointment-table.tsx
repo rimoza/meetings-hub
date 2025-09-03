@@ -421,6 +421,8 @@ export default function AppointmentTable({
         <AppointmentForm
           key={editingAppointment.id} // Add key to force re-render with new appointment data
           appointment={editingAppointment}
+          isOpen={!!editingAppointment}
+          onOpenChange={(open) => !open && setEditingAppointment(null)}
           onSubmit={async (appointmentData) => {
             await handleEditAppointment(appointmentData);
           }}
