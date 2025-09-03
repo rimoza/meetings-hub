@@ -38,7 +38,7 @@ const statusOptions: { value: AppointmentStatus; label: string }[] = [
   { value: 'no-show', label: 'No Show' },
 ];
 
-export default function AppointmentForm({ appointment, onSubmit, trigger, isOpen, onOpenChange }: AppointmentFormProps) {
+export default function AppointmentForm({ appointment, onSubmit, trigger, isOpen, onOpenChange }: Readonly<AppointmentFormProps>) {
   const [internalOpen, setInternalOpen] = useState(false);
   
   // Use external control when provided, otherwise use internal state
@@ -178,8 +178,8 @@ export default function AppointmentForm({ appointment, onSubmit, trigger, isOpen
                 type="number"
                 value={formData.duration}
                 onChange={(e) => handleInputChange('duration', parseInt(e.target.value) || 60)}
-                min="15"
-                step="15"
+                min="0"
+                step="1"
               />
             </div>
             

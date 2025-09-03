@@ -330,7 +330,7 @@
 /* Card Header Styles */
 .appointment-print-card .card-header {
   text-align: center;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid #000000;
   padding-bottom: 0.1in;
   margin-bottom: 0.1in;
 }
@@ -346,7 +346,7 @@
 .appointment-print-card .organization-subtitle {
   font-size: 10pt;
   margin: 2px 0 0 0;
-  color: #333;
+  color: #000000;
 }
 
 /* Card Body Styles */
@@ -370,7 +370,7 @@
 .appointment-print-card .info-label {
   font-weight: 600;
   min-width: 1.2in;
-  color: #333;
+  color: #000000;
 }
 
 .appointment-print-card .info-value {
@@ -382,7 +382,7 @@
 /* Card Footer Styles */
 .appointment-print-card .card-footer {
   text-align: center;
-  border-top: 1px solid #333;
+  border-top: 1px solid #000000;
   padding-top: 0.08in;
   margin-top: 0.12in;
 }
@@ -398,7 +398,7 @@
 .appointment-print-card .contact-info {
   font-size: 8pt;
   margin: 2px 0 0 0;
-  color: #555;
+  color: #000000;
 }
 
 /* Print page layout for single cards */
