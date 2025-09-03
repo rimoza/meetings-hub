@@ -41,7 +41,7 @@ import {
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { Appointment, AppointmentStatus } from '@/types/appointment';
-import { PrintService } from '@/lib/services/print-service';
+// import { PrintService } from '@/lib/services/print-service';
 import { usePrintAppointment } from '@/hooks/use-print-appointment';
 import { AppointmentPrintPreview } from './appointment-print-preview';
 import AppointmentForm from './appointment-form';
@@ -245,7 +245,7 @@ export default function AppointmentTable({
               <TableHead>Attendee</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Location</TableHead>
-              <TableHead className="w-[80px]">Print</TableHead>
+              {/* <TableHead className="w-[80px]">Print</TableHead> */}
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -373,16 +373,6 @@ export default function AppointmentTable({
                       <div className="text-sm text-muted-foreground">
                         {appointment.location || 'No location set'}
                       </div>
-                    </TableCell>
-                    
-                    <TableCell className="text-center">
-                      {PrintService.wasAppointmentPrinted(appointment.id) ? (
-                        <div className="flex items-center justify-center" title="Card printed">
-                          <Printer className="h-4 w-4 text-green-600" />
-                        </div>
-                      ) : (
-                        <div className="text-muted-foreground text-xs">-</div>
-                      )}
                     </TableCell>
                     
                     <TableCell>
