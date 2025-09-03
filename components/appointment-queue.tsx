@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Calendar, Users, ChevronRight, Activity } from 'lucide-react';
+import { Clock, Calendar, Users, ChevronRight, Activity, CheckCircle2 } from 'lucide-react';
 import { format } from 'date-fns';
 // import { Appointment } from '@/types/appointment';
 import { useAppointments } from '@/hooks/use-appointments';
@@ -65,9 +65,12 @@ export default function AppointmentQueue() {
   const { showPreview, selectedAppointments, closePreview } = usePrintAppointment();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentAppointment, setCurrentAppointment] = useState<QueuedAppointment | null>(null);
+  const [todaysAppointments, setTodaysAppointments] = useState<QueuedAppointment[]>([]);
   const [upcomingAppointments, setUpcomingAppointments] = useState<QueuedAppointment[]>([]);
+  const [pastAppointments, setPastAppointments] = useState<QueuedAppointment[]>([]);
   const [seeingAppointmentId, setSeeingAppointmentId] = useState<string | null>(null);
   const [animateNumber, setAnimateNumber] = useState(false);
+  const [activeSection, setActiveSection] = useState<'today' | 'upcoming' | 'past'>('today');
   // const [announcement, setAnnouncement] = useState('Welcome to our facility. We appreciate your patience.');
   
   // const announcements = [
@@ -109,92 +112,107 @@ export default function AppointmentQueue() {
     }
   }, [seeingAppointmentId, appointments]);
 
-  // Process appointments to find current and next - instant updates
+  // Process appointments to find current and categorize - instant updates
   useEffect(() => {
     if (!appointments.length) {
       setCurrentAppointment(null);
       setSeeingAppointmentId(null);
+      setTodaysAppointments([]);
+      setUpcomingAppointments([]);
+      setPastAppointments([]);
       return;
     }
 
     const now = new Date();
     const today = now.toISOString().split('T')[0];
+    const currentTimeStr = format(now, 'HH:mm');
     
-    // Get today's appointments that are not cancelled or completed
-    const todaysAppointments = appointments
-      .filter(apt => 
-        apt.date === today && 
-        apt.status !== 'cancelled' && 
-        apt.status !== 'completed'
-      )
-      .sort((a, b) => a.time.localeCompare(b.time));
-
-    if (todaysAppointments.length === 0) {
-      setCurrentAppointment(null);
-      setSeeingAppointmentId(null);
-      return;
-    }
-
-    // Create queue items
-    const queueItems: QueuedAppointment[] = todaysAppointments.map((apt, index) => ({
-      id: apt.id,
-      number: `#${formatAppointmentNumber(apt.dailyNumber || 1)}`,
-      attendee: apt.attendee,
-      title: apt.title,
-      time: apt.time,
-      status: apt.status,
-      isSeeingNow: false,
-      isNext: false,
-      estimatedWait: index * 15
-    }));
-
-    // Find all confirmed appointments
-    const confirmedAppointments = queueItems.filter(apt => apt.status === 'confirmed');
+    // Categorize appointments
+    const todaysApts: QueuedAppointment[] = [];
+    const upcomingApts: QueuedAppointment[] = [];
+    const pastApts: QueuedAppointment[] = [];
     
+    appointments.forEach((apt, index) => {
+      const queueItem: QueuedAppointment = {
+        id: apt.id,
+        number: `#${formatAppointmentNumber(apt.dailyNumber || 1)}`,
+        attendee: apt.attendee,
+        title: apt.title,
+        time: apt.time,
+        status: apt.status,
+        isSeeingNow: false,
+        isNext: false,
+        estimatedWait: index * 15
+      };
+      
+      // Categorize based on date and status
+      if (apt.status === 'completed' || apt.status === 'cancelled') {
+        // Past appointments (completed or cancelled)
+        pastApts.push(queueItem);
+      } else if (apt.date === today) {
+        // Today's appointments
+        if (apt.time < currentTimeStr && apt.status !== 'confirmed') {
+          // Past time but not completed
+          pastApts.push(queueItem);
+        } else {
+          todaysApts.push(queueItem);
+        }
+      } else if (apt.date > today) {
+        // Future appointments
+        upcomingApts.push(queueItem);
+      } else {
+        // Past date appointments
+        pastApts.push(queueItem);
+      }
+    });
+    
+    // Sort each category
+    todaysApts.sort((a, b) => a.time.localeCompare(b.time));
+    upcomingApts.sort((a, b) => a.time.localeCompare(b.time));
+    pastApts.sort((a, b) => b.time.localeCompare(a.time)); // Most recent first
+    
+    // Find current appointment from today's appointments
     let current: QueuedAppointment | null = null;
-
+    const confirmedToday = todaysApts.filter(apt => apt.status === 'confirmed');
+    
     // Priority 1: If there's a seeing appointment that's still confirmed, keep it
     if (seeingAppointmentId) {
-      const seeingApt = queueItems.find(apt => apt.id === seeingAppointmentId);
+      const seeingApt = todaysApts.find(apt => apt.id === seeingAppointmentId);
       if (seeingApt && seeingApt.status === 'confirmed') {
         current = seeingApt;
         current.isSeeingNow = true;
-      } else if (seeingApt && (seeingApt.status === 'completed' || seeingApt.status === 'cancelled' || seeingApt.status === 'scheduled')) {
+      } else {
         setSeeingAppointmentId(null);
       }
     }
-
+    
     // Priority 2: If no current seeing appointment, find the first confirmed appointment
-    if (!current && confirmedAppointments.length > 0) {
-      current = confirmedAppointments[0];
+    if (!current && confirmedToday.length > 0) {
+      current = confirmedToday[0];
       current.isSeeingNow = true;
       setSeeingAppointmentId(current.id);
     }
-
-    // Priority 3: If no confirmed appointments, clear the queue
-    if (!current && confirmedAppointments.length === 0) {
-      setSeeingAppointmentId(null);
-    }
-
+    
     // Check if current appointment changed for animation
     if (current && current.id !== currentAppointment?.id) {
       setAnimateNumber(true);
       setTimeout(() => setAnimateNumber(false), 1000);
     }
-
-    setCurrentAppointment(current);
     
-    // Set upcoming appointments (excluding current)
-    const upcoming = queueItems.filter(apt => 
+    // Mark next appointment
+    const remainingToday = todaysApts.filter(apt => 
       apt.id !== current?.id && 
       (apt.status === 'confirmed' || apt.status === 'scheduled')
-    ).slice(0, 5);
+    );
     
-    if (upcoming.length > 0) {
-      upcoming[0].isNext = true;
+    if (remainingToday.length > 0) {
+      remainingToday[0].isNext = true;
     }
     
-    setUpcomingAppointments(upcoming);
+    setCurrentAppointment(current);
+    setTodaysAppointments(todaysApts);
+    setUpcomingAppointments(upcomingApts);
+    setPastAppointments(pastApts);
   }, [appointments, seeingAppointmentId]); // Removed currentTime dependency for faster updates
 
   const formatTime = (time: string) => {
@@ -211,11 +229,11 @@ export default function AppointmentQueue() {
 
   if (isLoading) {
     return (
-      <div className="h-screen w-screen bg-gradient-to-br from-teal-50 via-blue-50 to-green-50 flex items-center justify-center">
+      <div className="h-screen w-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 flex items-center justify-center">
         <div className="text-center">
           <div className="relative">
-            <div className="animate-spin rounded-full h-32 w-32 border-4 border-transparent border-t-teal-500 border-r-blue-500 mx-auto"></div>
-            <div className="absolute inset-0 animate-ping rounded-full h-32 w-32 border-4 border-teal-400/30 mx-auto"></div>
+            <div className="animate-spin rounded-full h-32 w-32 border-4 border-transparent border-t-orange-500 border-r-amber-500 mx-auto"></div>
+            <div className="absolute inset-0 animate-ping rounded-full h-32 w-32 border-4 border-orange-400/30 mx-auto"></div>
           </div>
           <p className="mt-8 text-2xl text-gray-700 font-medium animate-pulse">Loading appointment queue...</p>
         </div>
@@ -224,19 +242,19 @@ export default function AppointmentQueue() {
   }
 
   return (
-    <div className="h-screen w-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 flex flex-col overflow-hidden">
+    <div className="h-screen w-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 flex flex-col overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-40 w-80 h-80 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-        <div className="absolute -bottom-40 -right-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-1/2 left-1/3 w-80 h-80 bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+        <div className="absolute -top-40 -left-40 w-80 h-80 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+        <div className="absolute -bottom-40 -right-40 w-80 h-80 bg-amber-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/3 w-80 h-80 bg-yellow-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
       </div>
       
       {/* Header with branding */}
-      <header className="relative z-10 bg-white/80 backdrop-blur-sm border-b border-gray-200 px-8 py-6">
+      <header className="relative z-10 bg-white/90 backdrop-blur-sm border-b border-orange-200 px-8 py-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-teal-400 to-blue-500 rounded-2xl flex items-center justify-center shadow-lg">
+            <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-amber-500 rounded-2xl flex items-center justify-center shadow-lg">
               <Activity className="w-8 h-8 text-white animate-pulse" />
             </div>
             <div>
@@ -251,7 +269,7 @@ export default function AppointmentQueue() {
               <div className="text-2xl font-semibold text-gray-700">
                 {formatSomaliDate(currentTime)}
               </div>
-              <div className="text-4xl font-bold text-teal-600 tabular-nums">
+              <div className="text-4xl font-bold text-orange-600 tabular-nums">
                 {format(currentTime, 'h:mm:ss a')}
               </div>
             </div>
@@ -280,12 +298,12 @@ export default function AppointmentQueue() {
                 </span>
               </div>
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-teal-400 to-blue-400 blur-3xl opacity-30 animate-pulse"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-amber-400 blur-3xl opacity-30 animate-pulse"></div>
                 <div className={cn(
-                  "relative bg-white rounded-3xl shadow-2xl p-16 border-4 border-teal-100",
+                  "relative bg-white rounded-3xl shadow-2xl p-16 border-4 border-orange-100",
                   animateNumber && "animate-scaleIn"
                 )}>
-                  <div className="text-9xl font-bold bg-gradient-to-r from-teal-500 to-blue-500 bg-clip-text text-transparent">
+                  <div className="text-9xl font-bold bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">
                     {currentAppointment.number}
                   </div>
                   <div className="mt-8 text-3xl font-semibold text-gray-700">
@@ -301,61 +319,241 @@ export default function AppointmentQueue() {
           )}
         </div>
 
-        {/* Right side - Upcoming queue */}
-        <div className="w-1/3 bg-white/60 backdrop-blur-sm border-l border-gray-200 p-8 overflow-y-auto">
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
-              <Users className="w-8 h-8 text-teal-500" />
-              Upcoming Queue
-            </h2>
+        {/* Right side - Categorized appointments */}
+        <div className="w-1/3 bg-white/70 backdrop-blur-sm border-l border-orange-200 overflow-hidden relative flex flex-col">
+          {/* Section Tabs */}
+          <div className="flex border-b border-orange-200 bg-white/80">
+            <button
+              onClick={() => setActiveSection('today')}
+              className={cn(
+                "flex-1 px-4 py-3 text-sm font-medium transition-all",
+                activeSection === 'today'
+                  ? "bg-orange-100 text-orange-700 border-b-2 border-orange-500"
+                  : "text-gray-600 hover:bg-orange-50"
+              )}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <Calendar className="w-4 h-4" />
+                Today ({todaysAppointments.length})
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveSection('upcoming')}
+              className={cn(
+                "flex-1 px-4 py-3 text-sm font-medium transition-all",
+                activeSection === 'upcoming'
+                  ? "bg-orange-100 text-orange-700 border-b-2 border-orange-500"
+                  : "text-gray-600 hover:bg-orange-50"
+              )}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <Clock className="w-4 h-4" />
+                Upcoming ({upcomingAppointments.length})
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveSection('past')}
+              className={cn(
+                "flex-1 px-4 py-3 text-sm font-medium transition-all",
+                activeSection === 'past'
+                  ? "bg-orange-100 text-orange-700 border-b-2 border-orange-500"
+                  : "text-gray-600 hover:bg-orange-50"
+              )}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <CheckCircle2 className="w-4 h-4" />
+                Past ({pastAppointments.length})
+              </div>
+            </button>
           </div>
 
-          <div className="space-y-4">
-            {upcomingAppointments.map((item, index) => (
-              <Card 
-                key={item.id}
-                className={cn(
-                  "transition-all duration-500 animate-fadeIn",
-                  item.isNext 
-                    ? "bg-gradient-to-r from-teal-50 to-blue-50 border-teal-300 shadow-lg scale-105" 
-                    : "bg-white hover:shadow-md"
+          {/* Section Content */}
+          <div className="flex-1 p-8 overflow-hidden relative">
+            <div className="mb-4">
+              <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                {activeSection === 'today' && (
+                  <>
+                    <Calendar className="w-6 h-6 text-orange-500" />
+                    Today's Queue
+                  </>
                 )}
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className={cn(
-                        "text-2xl font-bold",
-                        item.isNext ? "text-teal-600" : "text-gray-500"
-                      )}>
-                        {item.number}
-                      </div>
-                      {item.isNext && (
-                        <Badge className="bg-teal-100 text-teal-700 animate-pulse">
-                          Next
-                        </Badge>
-                      )}
-                    </div>
-                    <ChevronRight className={cn(
-                      "w-6 h-6",
-                      item.isNext ? "text-teal-500 animate-pulse" : "text-gray-400"
-                    )} />
-                  </div>
-                  <div className="mt-3">
-                    <div className="font-medium text-gray-700">{item.attendee}</div>
-                    <div className="text-sm text-gray-500 mt-1">
-                      {formatTime(item.time)} • Est. wait: {item.estimatedWait} min
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                {activeSection === 'upcoming' && (
+                  <>
+                    <Clock className="w-6 h-6 text-orange-500" />
+                    Upcoming Appointments
+                  </>
+                )}
+                {activeSection === 'past' && (
+                  <>
+                    <CheckCircle2 className="w-6 h-6 text-gray-500" />
+                    Past Appointments
+                  </>
+                )}
+              </h2>
+            </div>
 
-            {upcomingAppointments.length === 0 && (
-              <div className="text-center text-gray-500 py-8">
-                <Users className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                <p className="text-lg">No upcoming appointments</p>
+            {/* Scrollable container with infinite scroll for today's appointments */}
+            {activeSection === 'today' && (
+              <div className="relative h-[calc(100%-3rem)] overflow-hidden">
+                {/* Gradient overlays for fade effect */}
+                <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-white/70 to-transparent z-10 pointer-events-none"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white/70 to-transparent z-10 pointer-events-none"></div>
+                
+                {/* Scrolling content */}
+                <div className="space-y-4 animate-infiniteScroll" style={{
+                  '--scroll-height': `${todaysAppointments.length * 140}px`
+                } as React.CSSProperties}>
+                  {/* Duplicate list for infinite scroll effect */}
+                  {todaysAppointments.length > 0 ? (
+                    [...todaysAppointments, ...todaysAppointments, ...todaysAppointments].map((item, index) => {
+                      const isOriginalNext = item.isNext && index < todaysAppointments.length;
+                      const isCurrent = item.isSeeingNow && index < todaysAppointments.length;
+                      
+                      return (
+                        <Card 
+                          key={`${item.id}-${index}`}
+                          className={cn(
+                            "transition-all duration-500",
+                            isCurrent
+                              ? "bg-gradient-to-r from-green-50 to-emerald-50 border-green-300 shadow-lg scale-105"
+                              : isOriginalNext
+                              ? "bg-gradient-to-r from-orange-50 to-amber-50 border-orange-300 shadow-lg" 
+                              : "bg-white/90 hover:shadow-md"
+                          )}
+                        >
+                          <CardContent className="p-5">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className={cn(
+                                  "text-xl font-bold",
+                                  isCurrent ? "text-green-600" :
+                                  isOriginalNext ? "text-orange-600" : "text-gray-500"
+                                )}>
+                                  {item.number}
+                                </div>
+                                {isCurrent && (
+                                  <Badge className="bg-green-100 text-green-700 animate-pulse">
+                                    Serving
+                                  </Badge>
+                                )}
+                                {isOriginalNext && (
+                                  <Badge className="bg-orange-100 text-orange-700 animate-pulse">
+                                    Next
+                                  </Badge>
+                                )}
+                              </div>
+                              <ChevronRight className={cn(
+                                "w-5 h-5",
+                                isCurrent ? "text-green-500 animate-pulse" :
+                                isOriginalNext ? "text-orange-500 animate-pulse" : "text-gray-400"
+                              )} />
+                            </div>
+                            <div className="mt-2">
+                              <div className="font-medium text-gray-700">{item.attendee}</div>
+                              <div className="text-sm text-gray-500 mt-1">
+                                {formatTime(item.time)}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })
+                  ) : (
+                    <div className="text-center text-gray-500 py-8">
+                      <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                      <p className="text-lg">No appointments today</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Upcoming appointments - regular scroll */}
+            {activeSection === 'upcoming' && (
+              <div className="h-[calc(100%-3rem)] overflow-y-auto space-y-3 pr-2">
+                {upcomingAppointments.length > 0 ? (
+                  upcomingAppointments.map((item) => (
+                    <Card 
+                      key={item.id}
+                      className="bg-white/90 hover:shadow-md transition-all"
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="text-lg font-bold text-gray-600">
+                              {item.number}
+                            </div>
+                            <Badge variant="outline" className="text-xs">
+                              {item.status}
+                            </Badge>
+                          </div>
+                          <ChevronRight className="w-5 h-5 text-gray-400" />
+                        </div>
+                        <div className="mt-2">
+                          <div className="font-medium text-gray-700">{item.attendee}</div>
+                          <div className="text-sm text-gray-500 mt-1">
+                            {formatTime(item.time)} • {item.title}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                ) : (
+                  <div className="text-center text-gray-500 py-8">
+                    <Clock className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                    <p className="text-lg">No upcoming appointments</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Past appointments - regular scroll */}
+            {activeSection === 'past' && (
+              <div className="h-[calc(100%-3rem)] overflow-y-auto space-y-3 pr-2">
+                {pastAppointments.length > 0 ? (
+                  pastAppointments.map((item) => (
+                    <Card 
+                      key={item.id}
+                      className="bg-gray-50/50 opacity-75 hover:opacity-100 transition-all"
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="text-lg font-bold text-gray-400">
+                              {item.number}
+                            </div>
+                            <Badge 
+                              variant="outline" 
+                              className={cn(
+                                "text-xs",
+                                item.status === 'completed' ? "text-green-600 border-green-300" :
+                                item.status === 'cancelled' ? "text-red-600 border-red-300" :
+                                "text-gray-600"
+                              )}
+                            >
+                              {item.status}
+                            </Badge>
+                          </div>
+                          <CheckCircle2 className={cn(
+                            "w-5 h-5",
+                            item.status === 'completed' ? "text-green-500" : "text-gray-400"
+                          )} />
+                        </div>
+                        <div className="mt-2">
+                          <div className="font-medium text-gray-600">{item.attendee}</div>
+                          <div className="text-sm text-gray-400 mt-1">
+                            {formatTime(item.time)} • {item.title}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                ) : (
+                  <div className="text-center text-gray-500 py-8">
+                    <CheckCircle2 className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                    <p className="text-lg">No past appointments</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -383,6 +581,24 @@ export default function AppointmentQueue() {
 
       {/* CSS Animations */}
       <style jsx>{`
+        @keyframes infiniteScroll {
+          0% {
+            transform: translateY(25%);
+          }
+          100% {
+            transform: translateY(calc(-1 * var(--scroll-height) + 25%));
+          }
+        }
+        
+        .animate-infiniteScroll {
+          animation: infiniteScroll ${Math.max(todaysAppointments.length * 4, 10)}s linear infinite;
+          will-change: transform;
+        }
+        
+        .animate-infiniteScroll:hover {
+          animation-play-state: paused;
+        }
+        
         @keyframes blob {
           0%, 100% { transform: translate(0, 0) scale(1); }
           25% { transform: translate(20px, -30px) scale(1.1); }
