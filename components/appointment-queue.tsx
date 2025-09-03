@@ -257,7 +257,7 @@ export default function AppointmentQueue() {
                 Now Serving
               </span>
             </div>
-            <div className="relative bg-white shadow-2xl rounded-3xl px-12 py-16 inline-block min-w-[600px]">
+            <div className="relative bg-white shadow-xl rounded-3xl px-12 py-16 inline-block min-w-[600px]">
               <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-amber-400 blur-3xl opacity-40 animate-pulse"></div>
               <div className={cn(
                 "relative mx-auto",
@@ -273,9 +273,9 @@ export default function AppointmentQueue() {
                   <Clock className="w-16 h-16" />
                   <span>{formatTime(currentAppointment.time)}</span>
                 </div> */}
-                <div className="mt-4 text-4xl text-gray-500 font-medium">
+                {/* <div className="mt-4 text-4xl text-gray-500 font-medium">
                   {currentAppointment.title}
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
