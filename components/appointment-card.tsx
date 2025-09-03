@@ -30,7 +30,7 @@ import {
   Trash2,
   CheckCircle,
   XCircle,
-  // Phone,
+  Phone,
   Mail,
   Eye,
   Printer
@@ -210,6 +210,15 @@ export default function AppointmentCard({ appointment, onUpdate, onDelete }: App
                   </DropdownMenuItem>
                 )}
                 
+                {appointment.attendeePhone && (
+                  <DropdownMenuItem
+                    onClick={() => window.open(`tel:${appointment.attendeePhone}`, '_blank')}
+                  >
+                    <Phone className="mr-2 h-4 w-4" />
+                    Call
+                  </DropdownMenuItem>
+                )}
+                
                 <DropdownMenuItem onClick={() => printSingle(appointment)}>
                   <Printer className="mr-2 h-4 w-4" />
                   Print Card
@@ -263,6 +272,11 @@ export default function AppointmentCard({ appointment, onUpdate, onDelete }: App
               {appointment.attendeeEmail && (
                 <div className="text-sm text-muted-foreground">
                   {appointment.attendeeEmail}
+                </div>
+              )}
+              {appointment.attendeePhone && (
+                <div className="text-sm text-muted-foreground">
+                  {appointment.attendeePhone}
                 </div>
               )}
               {appointment.attendeeCount && (
@@ -334,6 +348,21 @@ export default function AppointmentCard({ appointment, onUpdate, onDelete }: App
               >
                 <Mail className="h-3 w-3 mr-1" />
                 Email
+              </Button>
+            )}
+            
+            {appointment.attendeePhone && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.open(`tel:${appointment.attendeePhone}`, '_blank');
+                }}
+                className="h-7 text-xs"
+              >
+                <Phone className="h-3 w-3 mr-1" />
+                Call
               </Button>
             )}
           </div>

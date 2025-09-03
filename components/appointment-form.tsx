@@ -52,6 +52,7 @@ export default function AppointmentForm({ appointment, onSubmit, trigger, isOpen
     status: appointment?.status || 'scheduled' as AppointmentStatus,
     attendee: appointment?.attendee || '',
     attendeeEmail: appointment?.attendeeEmail || '',
+    attendeePhone: appointment?.attendeePhone || '',
     attendeeCount: appointment?.attendeeCount || 1,
     duration: appointment?.duration || 60,
     location: appointment?.location || '',
@@ -76,6 +77,7 @@ export default function AppointmentForm({ appointment, onSubmit, trigger, isOpen
           status: 'scheduled',
           attendee: '',
           attendeeEmail: '',
+          attendeePhone: '',
           attendeeCount: 1,
           duration: 60,
           location: '',
@@ -219,6 +221,17 @@ export default function AppointmentForm({ appointment, onSubmit, trigger, isOpen
                 value={formData.attendeeEmail}
                 onChange={(e) => handleInputChange('attendeeEmail', e.target.value)}
                 placeholder="Enter attendee email"
+              />
+            </div>
+            
+            <div className="col-span-2">
+              <Label htmlFor="attendeePhone">Attendee Phone</Label>
+              <Input
+                id="attendeePhone"
+                type="tel"
+                value={formData.attendeePhone}
+                onChange={(e) => handleInputChange('attendeePhone', e.target.value)}
+                placeholder="Enter phone number"
               />
             </div>
             

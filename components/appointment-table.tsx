@@ -319,6 +319,11 @@ export default function AppointmentTable({
                             {appointment.attendeeEmail}
                           </div>
                         )}
+                        {appointment.attendeePhone && (
+                          <div className="text-sm text-muted-foreground">
+                            {appointment.attendeePhone}
+                          </div>
+                        )}
                         {appointment.attendeeCount && (
                           <div className="text-xs text-muted-foreground">
                             {appointment.attendeeCount} attendee{appointment.attendeeCount !== 1 ? 's' : ''}
