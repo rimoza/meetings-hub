@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { Appointment } from "@/types/appointment";
 import { format } from "date-fns";
 
@@ -8,12 +9,12 @@ interface AppointmentPrintCardProps {
   appointment: Appointment;
 }
 
-export function AppointmentPrintCard({ appointment }: AppointmentPrintCardProps) {
-  // Extract year from date for appointment ID
-  const appointmentYear = new Date(appointment.date).getFullYear();
+export function AppointmentPrintCard({ appointment }: Readonly<AppointmentPrintCardProps>) {
+  // Extract year from date for meeting ID
+  const meetingYear = new Date(appointment.date).getFullYear();
   
-  // Format appointment ID as XXX/YYYY (remove leading zeros from dailyNumber)
-  const appointmentId = `${appointment.dailyNumber}/${appointmentYear}`;
+  // Format meeting ID as XXX/YYYY (remove leading zeros from dailyNumber)
+  const meetingId = `${appointment.dailyNumber}/${meetingYear}`;
   
   // Format date as "02 Sep, 2025"
   const formattedDate = format(new Date(appointment.date), "dd MMM, yyyy");
@@ -30,30 +31,41 @@ export function AppointmentPrintCard({ appointment }: AppointmentPrintCardProps)
   return (
     <div className="appointment-print-card">
       <div className="card-header">
-        <h1 className="organization-name">XISBIGA WADDANI</h1>
-        <p className="organization-subtitle">Xafiiska Guddoomiyaha</p>
+        <div className="organization-logo" style={{display: 'flex', alignItems: 'center', justifyContent: 'center' ,marginBottom:"1rem"}}>
+          <Image
+            src="/logo.jpg"
+            alt="Organization Logo"
+            width={150}
+            height={80}
+            className="logo-image"
+          />
+        </div>
+        <div className="organization-text">
+          <h1 className="organization-name">XISBIGA WADDANI</h1>
+          <p className="organization-subtitle">Xafiiska Guddoomiyaha</p>
+        </div>
       </div>
       
       <div className="card-body">
-        <div className="appointment-info">
+        <div className="meeting-info">
           <div className="info-row">
-            <span className="info-label">Appointment ID:</span>
-            <span className="info-value">#00{appointmentId}</span>
+            <span className="info-label">Meeting ID:</span>
+            <span className="info-value">#00{meetingId}</span>
           </div>
           
           <div className="info-row">
-            <span className="info-label">Appointment Date:</span>
+            <span className="info-label">Meeting Date:</span>
             <span className="info-value">{formattedDate}</span>
           </div>
           
           <div className="info-row">
-            <span className="info-label">Appointment Time:</span>
+            <span className="info-label">Meeting Time:</span>
             <span className="info-value">{formatTime(appointment.time)}</span>
           </div>
           
           <div className="info-row">
             <span className="info-label">Name:</span>
-            <span className="info-value">{appointment.attendee}</span>
+            <span className="info-value">{appointment.title}</span>
           </div>
           
           <div className="info-row">
@@ -71,10 +83,13 @@ export function AppointmentPrintCard({ appointment }: AppointmentPrintCardProps)
       </div>
       
       <div className="card-footer">
-        <p className="thanks-message">Thank you for your appointment.<br/>We look forward to meeting you.</p>
-        {appointment.attendeeEmail && (
-          <p className="contact-info">Contact: {appointment.attendeeEmail}</p>
-        )}
+        <p className="thanks-message">Ku mahadsanid sugitaankaaga.<br/>Gacmo furan ku soo dhawoow.</p>
+        <div className="contact-section">
+          <p className="contact-info">+252634118949 (Call & WhatsApp)</p>
+          {appointment.attendeeEmail && (
+            <p className="contact-info">Email: {appointment.attendeeEmail}</p>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -85,7 +100,7 @@ interface PrintableCardsPageProps {
   appointments: Appointment[];
 }
 
-export function PrintableCardsPage({ appointments }: PrintableCardsPageProps) {
+export function PrintableCardsPage({ appointments }: Readonly<PrintableCardsPageProps>) {
   // Display one card per page - deduplicate appointments by ID
   const uniqueAppointments = appointments.filter((appointment, index, self) => 
     index === self.findIndex((a) => a.id === appointment.id)
