@@ -12,7 +12,7 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
+export function ProtectedRoute({ children }: Readonly<ProtectedRouteProps>) {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
   const router = useRouter();
 
@@ -44,7 +44,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   // Show suspended screen
   if (user?.status === 'suspended') {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="min-h-screen w-full flex items-center justify-center p-4">
         <Card className="max-w-md w-full">
           <CardHeader className="text-center">
             <div className="mx-auto w-12 h-12 bg-orange-100 dark:bg-orange-900/20 rounded-full flex items-center justify-center mb-4">

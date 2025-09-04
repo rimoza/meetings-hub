@@ -44,7 +44,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Check, X, UserCog } from "lucide-react";
+import { Check, X, UserCog, Clock, ShieldCheck, ShieldX, UserX } from "lucide-react";
 import { toast } from "sonner";
 
 interface UserData {
@@ -208,8 +208,18 @@ export function UserManagementClient() {
       case 'approved': return 'default';
       case 'pending': return 'secondary';
       case 'denied': return 'destructive';
-      case 'suspended': return 'secondary';
+      case 'suspended': return 'destructive';
       default: return 'outline';
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'approved': return <ShieldCheck className="h-3 w-3" />;
+      case 'pending': return <Clock className="h-3 w-3" />;
+      case 'denied': return <ShieldX className="h-3 w-3" />;
+      case 'suspended': return <UserX className="h-3 w-3" />;
+      default: return null;
     }
   };
 
@@ -221,9 +231,49 @@ export function UserManagementClient() {
     );
   }
 
+  const statusCounts = {
+    pending: users.filter(u => u.status === 'pending').length,
+    approved: users.filter(u => u.status === 'approved').length,
+    denied: users.filter(u => u.status === 'denied').length,
+    suspended: users.filter(u => u.status === 'suspended').length,
+  };
+
   return (
-    <>
-      <Card>
+    <div className="flex flex-col items-center w-full">
+      {/* Status Summary Cards - Centered */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 w-full max-w-3xl mx-auto">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 border border-yellow-200 dark:border-yellow-800 flex flex-col items-center justify-center">
+          <div className="flex items-center gap-2 mb-2">
+            <Clock className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+            <span className="text-sm font-medium text-yellow-900 dark:text-yellow-100">Pending</span>
+          </div>
+          <p className="text-3xl font-bold text-yellow-900 dark:text-yellow-100">{statusCounts.pending}</p>
+        </div>
+        <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-800 flex flex-col items-center justify-center">
+          <div className="flex items-center gap-2 mb-2">
+            <ShieldCheck className="h-5 w-5 text-green-600 dark:text-green-400" />
+            <span className="text-sm font-medium text-green-900 dark:text-green-100">Approved</span>
+          </div>
+          <p className="text-3xl font-bold text-green-900 dark:text-green-100">{statusCounts.approved}</p>
+        </div>
+        <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 border border-red-200 dark:border-red-800 flex flex-col items-center justify-center">
+          <div className="flex items-center gap-2 mb-2">
+            <ShieldX className="h-5 w-5 text-red-600 dark:text-red-400" />
+            <span className="text-sm font-medium text-red-900 dark:text-red-100">Denied</span>
+          </div>
+          <p className="text-3xl font-bold text-red-900 dark:text-red-100">{statusCounts.denied}</p>
+        </div>
+        <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-4 border border-orange-200 dark:border-orange-800 flex flex-col items-center justify-center">
+          <div className="flex items-center gap-2 mb-2">
+            <UserX className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+            <span className="text-sm font-medium text-orange-900 dark:text-orange-100">Suspended</span>
+          </div>
+          <p className="text-3xl font-bold text-orange-900 dark:text-orange-100">{statusCounts.suspended}</p>
+        </div>
+      </div>
+
+      {/* User Management Table */}
+      <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <UserCog className="h-5 w-5" />
@@ -255,8 +305,13 @@ export function UserManagementClient() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={getStatusBadgeVariant(user.status) as any}>
-                      {user.status}
+                    <Badge 
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      variant={getStatusBadgeVariant(user.status) as any}
+                      className="flex items-center gap-1 w-fit"
+                    >
+                      {getStatusIcon(user.status)}
+                      <span className="capitalize">{user.status}</span>
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -275,6 +330,7 @@ export function UserManagementClient() {
                         </SelectContent>
                       </Select>
                     ) : (
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       <Badge variant={getRoleBadgeVariant(user.role) as any}>
                         {user.role}
                       </Badge>
@@ -309,7 +365,7 @@ export function UserManagementClient() {
                           </Button>
                         </>
                       )}
-                      {user.status === 'approved' && currentUser?.role === 'admin' && user.uid !== currentUser.uid && (
+                      {currentUser?.role === 'admin' && user.uid !== currentUser.uid && user.status !== 'pending' && (
                         <Select
                           value={user.status}
                           onValueChange={(value) => handleStatusChange(user.uid, value)}
@@ -319,7 +375,8 @@ export function UserManagementClient() {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="approved">Approved</SelectItem>
-                            <SelectItem value="suspended">Suspend</SelectItem>
+                            <SelectItem value="suspended">Suspended</SelectItem>
+                            <SelectItem value="denied">Denied</SelectItem>
                           </SelectContent>
                         </Select>
                       )}
@@ -357,6 +414,6 @@ export function UserManagementClient() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }
