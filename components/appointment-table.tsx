@@ -307,7 +307,6 @@ export default function AppointmentTable({
                       <div className="space-y-1">
                         <div className="flex items-center gap-1">
                           <User className="h-3 w-3" />
-                          <span className="font-medium">{appointment.attendee}</span>
                           {appointment.attendeeCount && appointment.attendeeCount > 1 && (
                             <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-medium">
                               +{appointment.attendeeCount - 1}
@@ -440,7 +439,7 @@ export default function AppointmentTable({
                 <div className="mt-3 p-3 bg-muted rounded-md">
                   <div className="font-medium">{deletingAppointment.title}</div>
                   <div className="text-sm text-muted-foreground">
-                    {deletingAppointment.attendee} • {formatDate(deletingAppointment.date)} at {formatTime(deletingAppointment.time)}
+                    {deletingAppointment.title} • {formatDate(deletingAppointment.date)} at {formatTime(deletingAppointment.time)}
                   </div>
                 </div>
               )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useCallback } from "react";
 import { Appointment } from "@/types/appointment";
 import { PrintService } from "@/lib/services/print-service";
 import { toast } from "sonner";
@@ -30,7 +30,7 @@ export function useAutoPrint() {
         // Show confirmation if enabled
         if (settings.showAutoPrintConfirmation) {
           const confirmed = window.confirm(
-            `Auto-print appointment card for ${appointment.attendee}?`
+            `Auto-print appointment card for ${appointment.title}?`
           );
           if (!confirmed) {
             return;
@@ -41,7 +41,7 @@ export function useAutoPrint() {
         await PrintService.printSingleCard(appointment);
         
         // Show success toast
-        toast.success(`Auto-printed appointment card for ${appointment.attendee}`);
+        toast.success(`Auto-printed appointment card for ${appointment.title}`);
         
         // Log the auto-print event
         PrintService.logAutoPrintEvent(appointment.id);
