@@ -1,5 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp, type FirebaseApp } from "firebase/app";
+import { getFirestore, type Firestore } from "firebase/firestore";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -28,13 +29,16 @@ export const isFirebaseConfigured = (): boolean => {
 
 // Initialize Firebase only if properly configured
 let app: FirebaseApp | null = null;
+let db: Firestore | null = null;
 
 if (isFirebaseConfigured()) {
   try {
     app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
   } catch (error) {
     console.error("Firebase initialization error:", error);
     app = null;
+    db = null;
   }
 } else {
   console.warn(
@@ -42,4 +46,4 @@ if (isFirebaseConfigured()) {
   );
 }
 
-export { app };
+export { app, db };
