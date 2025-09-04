@@ -137,7 +137,6 @@ export default function AppointmentsPageClient() {
     return baseAppointments.filter(appointment => {
       const matchesSearch = 
         appointment.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        appointment.attendee.toLowerCase().includes(searchTerm.toLowerCase()) ||
         appointment.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         '';
 

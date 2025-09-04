@@ -49,7 +49,7 @@ const formatSomaliDate = (date: Date): string => {
 interface QueuedAppointment {
   id: string;
   number: string;
-  attendee: string;
+  attendeeCount: number;
   title: string;
   time: string;
   status: string;
@@ -129,7 +129,7 @@ export default function AppointmentQueue() {
         const queueItem: QueuedAppointment = {
           id: apt.id,
           number: `#${formatAppointmentNumber(apt.dailyNumber || 1)}`,
-          attendee: apt.attendee,
+          attendeeCount: apt.attendeeCount || 1,
           title: apt.title,
           time: apt.time,
           status: apt.status,

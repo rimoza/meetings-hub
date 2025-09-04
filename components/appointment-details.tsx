@@ -34,7 +34,7 @@ import {
   Trash2,
   CheckCircle,
   XCircle,
-  Mail,
+  // Mail,
   // Phone,
   ArrowLeft,
   FileText,
@@ -61,7 +61,7 @@ const statusConfig = {
   'no-show': { label: 'No Show', variant: 'outline' as const, icon: XCircle, color: 'text-orange-600', bgColor: 'bg-orange-50' },
 };
 
-export default function AppointmentDetails({ appointmentId }: AppointmentDetailsProps) {
+export default function AppointmentDetails({ appointmentId }: Readonly<AppointmentDetailsProps>) {
   const router = useRouter();
   const { appointments, updateAppointment, deleteAppointment, isLoading } = useAppointments();
   const [appointment, setAppointment] = useState<Appointment | null>(null);
@@ -269,14 +269,6 @@ export default function AppointmentDetails({ appointmentId }: AppointmentDetails
               
               <DropdownMenuSeparator />
               
-              {appointment.attendeeEmail && (
-                <DropdownMenuItem
-                  onClick={() => window.open(`mailto:${appointment.attendeeEmail}`, '_blank')}
-                >
-                  <Mail className="mr-2 h-4 w-4" />
-                  Send Email
-                </DropdownMenuItem>
-              )}
               
               <DropdownMenuItem onClick={() => setShowPrintPreview(true)}>
                 <Printer className="mr-2 h-4 w-4" />
@@ -356,18 +348,6 @@ export default function AppointmentDetails({ appointmentId }: AppointmentDetails
                 <div className="flex items-start gap-3">
                   <User className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div className="space-y-1">
-                    <div className="font-medium text-lg">{appointment.attendee}</div>
-                    {appointment.attendeeEmail && (
-                      <div className="flex items-center gap-2">
-                        <Mail className="h-4 w-4 text-muted-foreground" />
-                        <a 
-                          href={`mailto:${appointment.attendeeEmail}`}
-                          className="text-primary hover:underline"
-                        >
-                          {appointment.attendeeEmail}
-                        </a>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
@@ -468,17 +448,6 @@ export default function AppointmentDetails({ appointmentId }: AppointmentDetails
                 </Button>
               )}
               
-              {appointment.attendeeEmail && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => window.open(`mailto:${appointment.attendeeEmail}`, '_blank')}
-                >
-                  <Mail className="h-4 w-4 mr-2" />
-                  Send Email
-                </Button>
-              )}
               
               <AppointmentForm
                 appointment={appointment}
