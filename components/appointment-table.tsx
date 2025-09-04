@@ -227,10 +227,10 @@ export default function AppointmentTable({
       )}
 
       {/* Table */}
-      <div className="rounded-md border">
+      <div className="rounded-lg border bg-card overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow className="bg-muted/50 hover:bg-muted/50">
               <TableHead className="w-[50px]">
                 <Checkbox
                   checked={isAllSelected}
@@ -239,14 +239,28 @@ export default function AppointmentTable({
                   className={isIndeterminate ? "data-[state=checked]:bg-primary/50" : ""}
                 />
               </TableHead>
-              <TableHead className="w-[60px]">#</TableHead>
-              <TableHead>Title</TableHead>
-              <TableHead>Date & Time</TableHead>
-              <TableHead>Attendee</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Location</TableHead>
-              {/* <TableHead className="w-[80px]">Print</TableHead> */}
-              <TableHead className="w-[100px]">Actions</TableHead>
+              <TableHead className="w-[60px] font-semibold">#</TableHead>
+              <TableHead className="font-semibold">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  Appointment
+                </div>
+              </TableHead>
+              <TableHead className="font-semibold">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  Date & Time
+                </div>
+              </TableHead>
+              <TableHead className="font-semibold">
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-muted-foreground" />
+                  Attendee
+                </div>
+              </TableHead>
+              <TableHead className="font-semibold text-center">Status</TableHead>
+              <TableHead className="font-semibold">Location</TableHead>
+              <TableHead className="font-semibold text-center w-[120px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -257,12 +271,16 @@ export default function AppointmentTable({
                 </TableCell>
               </TableRow>
             ) : (
-              appointments.map((appointment) => {
+              appointments.map((appointment, index) => {
                 const statusInfo = statusConfig[appointment.status];
                 const StatusIcon = statusInfo.icon;
+                const isLast = index === appointments.length - 1;
                 
                 return (
-                  <TableRow key={appointment.id}>
+                  <TableRow 
+                    key={appointment.id}
+                    className={`group hover:bg-muted/30 transition-colors ${!isLast ? "border-b" : ""}`}
+                  >
                     <TableCell>
                       <Checkbox
                         checked={selectedAppointmentIds.has(appointment.id)}

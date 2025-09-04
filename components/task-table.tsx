@@ -9,13 +9,11 @@ import {
   XCircle,
   PlayCircle,
   Flag,
-  ArrowUpDown,
   Eye,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -31,7 +29,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useState } from "react";
 import type { Task } from "@/types/task";
 
 interface TaskTableProps {
@@ -42,8 +39,6 @@ interface TaskTableProps {
   onChangeStatus?: (taskId: string, status: Task["status"]) => void;
 }
 
-type SortKey = keyof Task | "none";
-type SortOrder = "asc" | "desc";
 
 export function TaskTable({
   tasks,
@@ -51,8 +46,6 @@ export function TaskTable({
   onDelete,
   onChangeStatus,
 }: TaskTableProps) {
-  const [sortKey, setSortKey] = useState<SortKey>("none");
-  const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
 
   const getStatusIcon = (status: Task["status"]) => {
     switch (status) {
@@ -84,87 +77,61 @@ export function TaskTable({
     return new Date(dateString).toLocaleDateString();
   };
 
-  const handleSort = (key: SortKey) => {
-    if (sortKey === key) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortKey(key);
-      setSortOrder("asc");
-    }
-  };
-
-  const sortedTasks = [...tasks].sort((a, b) => {
-    if (sortKey === "none") return 0;
-
-    let aValue = a[sortKey as keyof Task];
-    let bValue = b[sortKey as keyof Task];
-
-    if (typeof aValue === "string") {
-      aValue = aValue.toLowerCase();
-    }
-    if (typeof bValue === "string") {
-      bValue = bValue.toLowerCase();
-    }
-
-    if (aValue! < bValue!) return sortOrder === "asc" ? -1 : 1;
-    if (aValue! > bValue!) return sortOrder === "asc" ? 1 : -1;
-    return 0;
-  });
-
   const handleStatusChange = (taskId: string, newStatus: Task["status"]) => {
     if (onChangeStatus) {
       onChangeStatus(taskId, newStatus);
     }
   };
 
-  const SortButton = ({
-    sortKey: key,
-    children,
-  }: {
-    sortKey: SortKey;
-    children: React.ReactNode;
-  }) => (
-    <Button
-      variant="ghost"
-      size="sm"
-      className="h-auto p-0 font-semibold"
-      onClick={() => handleSort(key)}
-    >
-      {children}
-      <ArrowUpDown className="ml-1 h-3 w-3" />
-    </Button>
-  );
-
   return (
-    <Card>
-      <CardContent className="p-0">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[120px]">Status</TableHead>
-                <TableHead>
-                  <SortButton sortKey="title">Title</SortButton>
-                </TableHead>
-                <TableHead>
-                  <SortButton sortKey="type">Type</SortButton>
-                </TableHead>
-                <TableHead>
-                  <SortButton sortKey="priority">Priority</SortButton>
-                </TableHead>
-                <TableHead>
-                  <SortButton sortKey="date">Date</SortButton>
-                </TableHead>
-                <TableHead>Assignee</TableHead>
-                <TableHead>Labels</TableHead>
-                <TableHead className="w-[50px]">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
+    <div className="rounded-lg border bg-card overflow-hidden">
+      <Table>
+        <TableHeader>
+          <TableRow className="bg-muted/50 hover:bg-muted/50">
+            <TableHead className="font-semibold w-[120px]">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                Status
+              </div>
+            </TableHead>
+            <TableHead className="font-semibold">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                Task
+              </div>
+            </TableHead>
+            <TableHead className="font-semibold">
+              <div className="flex items-center gap-2">
+                <Flag className="h-4 w-4 text-muted-foreground" />
+                Type
+              </div>
+            </TableHead>
+            <TableHead className="font-semibold text-center">Priority</TableHead>
+            <TableHead className="font-semibold">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                Date
+              </div>
+            </TableHead>
+            <TableHead className="font-semibold">
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4 text-muted-foreground" />
+                Assignee
+              </div>
+            </TableHead>
+            <TableHead className="font-semibold">Labels</TableHead>
+            <TableHead className="font-semibold text-center w-[120px]">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
             <TableBody>
-              {sortedTasks.map((task) => (
+              {tasks.map((task, index) => {
+                const isLast = index === tasks.length - 1;
+                return (
                 <TableRow
                   key={task.id}
-                  className={task.status === "completed" ? "opacity-60" : ""}
+                  className={`group hover:bg-muted/30 transition-colors ${
+                    task.status === "completed" ? "opacity-60" : ""
+                  } ${!isLast ? "border-b" : ""}`}
                 >
                   <TableCell>
                     <div className="flex items-center gap-2">
@@ -315,8 +282,9 @@ export function TaskTable({
                     </DropdownMenu>
                   </TableCell>
                 </TableRow>
-              ))}
-              {sortedTasks.length === 0 && (
+                );
+              })}
+              {/* {sortedTasks.length === 0 && (
                 <TableRow>
                   <TableCell
                     colSpan={8}
@@ -325,11 +293,9 @@ export function TaskTable({
                     No tasks found
                   </TableCell>
                 </TableRow>
-              )}
+              )} */}
             </TableBody>
           </Table>
-        </div>
-      </CardContent>
-    </Card>
+    </div>
   );
 }
