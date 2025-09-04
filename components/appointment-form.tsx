@@ -107,7 +107,7 @@ export default function AppointmentForm({ appointment, onSubmit, trigger, isOpen
           {trigger || defaultTrigger}
         </DialogTrigger>
       )}
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
@@ -131,12 +131,12 @@ export default function AppointmentForm({ appointment, onSubmit, trigger, isOpen
                   value={formData.title}
                   onChange={(e) => handleInputChange('title', e.target.value)}
                   placeholder="Enter appointment title"
-                  className="mt-1"
+                  className="h-10 mt-1"
                   required
                 />
               </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <Label htmlFor="date" className="text-sm font-medium">Date *</Label>
                   <Input
@@ -144,7 +144,7 @@ export default function AppointmentForm({ appointment, onSubmit, trigger, isOpen
                     type="date"
                     value={formData.date}
                     onChange={(e) => handleInputChange('date', e.target.value)}
-                    className="mt-1"
+                    className="h-10 mt-1 text-sm"
                     required
                   />
                 </div>
@@ -156,7 +156,7 @@ export default function AppointmentForm({ appointment, onSubmit, trigger, isOpen
                     type="time"
                     value={formData.time}
                     onChange={(e) => handleInputChange('time', e.target.value)}
-                    className="mt-1"
+                    className="h-10 mt-1 text-sm"
                     required
                   />
                 </div>
@@ -167,10 +167,10 @@ export default function AppointmentForm({ appointment, onSubmit, trigger, isOpen
                     value={formData.status} 
                     onValueChange={(value) => handleInputChange('status', value)}
                   >
-                    <SelectTrigger className="mt-1">
+                    <SelectTrigger className="h-10 w-full mt-1 text-sm">
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="w-full">
                       {statusOptions.map((option) => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
@@ -190,7 +190,7 @@ export default function AppointmentForm({ appointment, onSubmit, trigger, isOpen
               Duration & Attendees
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <Label htmlFor="duration" className="text-sm font-medium flex items-center gap-2">
                   <Clock className="h-3 w-3" />
@@ -214,7 +214,7 @@ export default function AppointmentForm({ appointment, onSubmit, trigger, isOpen
                   min="1"
                   step="1"
                   placeholder="Enter duration in minutes"
-                  className="mt-1"
+                  className="h-10 mt-1"
                   required
                 />
               </div>
@@ -232,7 +232,7 @@ export default function AppointmentForm({ appointment, onSubmit, trigger, isOpen
                   min="1"
                   max="50"
                   placeholder="1"
-                  className="mt-1"
+                  className="h-10 mt-1"
                 />
               </div>
             </div>
@@ -257,7 +257,7 @@ export default function AppointmentForm({ appointment, onSubmit, trigger, isOpen
                   value={formData.attendeePhone}
                   onChange={(e) => handleInputChange('attendeePhone', e.target.value)}
                   placeholder="e.g., +1 (555) 123-4567"
-                  className="mt-1"
+                  className="h-10 mt-1"
                 />
               </div>
               
@@ -271,7 +271,7 @@ export default function AppointmentForm({ appointment, onSubmit, trigger, isOpen
                   value={formData.location}
                   onChange={(e) => handleInputChange('location', e.target.value)}
                   placeholder="Meeting room, address, or video link"
-                  className="mt-1"
+                  className="h-10 mt-1"
                 />
               </div>
             </div>
@@ -314,7 +314,7 @@ export default function AppointmentForm({ appointment, onSubmit, trigger, isOpen
               ) : (
                 <>
                   <Calendar className="w-4 h-4 mr-2" />
-                  {appointment?.id ? 'Update Appointment' : 'Create Appointment'}
+                  {appointment?.id ? 'Update' : 'Create'}
                 </>
               )}
             </Button>

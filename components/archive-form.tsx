@@ -115,18 +115,18 @@ export function ArchiveForm({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[95vw] max-w-[500px] sm:max-w-[600px] max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-[500px] sm:max-w-[600px] max-h-[95vh] sm:max-h-[90vh] overflow-y-auto scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <DialogHeader>
           <DialogTitle className="text-lg sm:text-xl">
             {archive ? "Edit Archive" : "Create Archive"}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-          <div className="grid grid-cols-1 gap-3 sm:gap-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 gap-3">
             {/* Title */}
             <div>
-              <Label htmlFor="title">Title *</Label>
+              <Label htmlFor="title" className="text-sm">Title *</Label>
               <Input
                 id="title"
                 value={formData.title}
@@ -134,12 +134,13 @@ export function ArchiveForm({
                   setFormData((prev) => ({ ...prev, title: e.target.value }))
                 }
                 placeholder="Archive title"
+                className="h-10 mt-1"
                 required
               />
             </div>
 
             {/* Date and Status */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <Label htmlFor="date" className="text-sm">
                   Date *
@@ -154,7 +155,7 @@ export function ArchiveForm({
                       date: new Date(e.target.value),
                     }))
                   }
-                  className="h-9 sm:h-10 text-sm"
+                  className="h-10 mt-1 text-sm"
                   required
                 />
               </div>
@@ -167,10 +168,10 @@ export function ArchiveForm({
                     setFormData((prev) => ({ ...prev, status: value }))
                   }
                 >
-                  <SelectTrigger className="h-9 sm:h-10 text-sm">
+                  <SelectTrigger className="h-10 w-full mt-1 text-sm">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="w-full">
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="archived">Archived</SelectItem>
                     <SelectItem value="draft">Draft</SelectItem>
@@ -182,12 +183,12 @@ export function ArchiveForm({
             {/* Labels */}
             <div>
               <Label className="text-sm">Labels</Label>
-              <div className="flex gap-2 mb-2">
+              <div className="flex gap-2 mt-1">
                 <Input
                   value={labelInput}
                   onChange={(e) => setLabelInput(e.target.value)}
                   placeholder="Add label"
-                  className="h-9 sm:h-10 text-sm"
+                  className="h-10"
                   onKeyPress={(e) =>
                     e.key === "Enter" && (e.preventDefault(), addLabel())
                   }
@@ -196,8 +197,7 @@ export function ArchiveForm({
                   type="button"
                   onClick={addLabel}
                   variant="outline"
-                  size="sm"
-                  className="h-9 px-3 sm:h-10 sm:px-4"
+                  className="h-10 px-4"
                 >
                   Add
                 </Button>
@@ -225,7 +225,7 @@ export function ArchiveForm({
             </div>
           </div>
 
-          <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+          <DialogFooter className="flex-col sm:flex-row gap-3 sm:gap-3">
             <Button
               type="button"
               variant="outline"
@@ -246,7 +246,7 @@ export function ArchiveForm({
                   {archive ? "Updating..." : "Creating..."}
                 </>
               ) : (
-                `${archive ? "Update" : "Create"} Archive`
+`${archive ? "Update" : "Create"}`
               )}
             </Button>
           </DialogFooter>

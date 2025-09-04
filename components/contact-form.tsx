@@ -186,9 +186,9 @@ export function ContactForm({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[95vw] max-w-[700px] max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-[700px] max-h-[95vh] sm:max-h-[90vh] overflow-y-auto scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <DialogHeader>
-          <DialogTitle className="text-lg sm:text-xl">
+          <DialogTitle className="text-lg sm:text-xl border-b border-gray-200 pb-2">
             {contact ? "Edit Contact" : "Create Contact"}
           </DialogTitle>
         </DialogHeader>
@@ -202,17 +202,17 @@ export function ContactForm({
             </div>
             
             {/* Name Section */}
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <Label className="text-sm">Title</Label>
                 <Select
                   value={formData.title || "none"}
                   onValueChange={(value: string) => updateField("title", value === "none" ? undefined : value as ContactTitle)}
                 >
-                  <SelectTrigger className="h-9">
+                  <SelectTrigger className="h-10 w-full text-sm">
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="w-full">
                     <SelectItem value="none">None</SelectItem>
                     {CONTACT_TITLES.map((title) => (
                       <SelectItem key={title} value={title!}>
@@ -222,31 +222,31 @@ export function ContactForm({
                   </SelectContent>
                 </Select>
               </div>
-              <div className="sm:col-span-1.5">
-                <Label htmlFor="firstName">First Name *</Label>
+              <div>
+                <Label htmlFor="firstName" className="text-sm">First Name *</Label>
                 <Input
                   id="firstName"
                   value={formData.firstName}
                   onChange={(e) => updateField("firstName", e.target.value)}
                   placeholder="John"
                   required
-                  className="h-9"
+                  className="h-10"
                 />
               </div>
-              <div className="sm:col-span-1.5">
-                <Label htmlFor="lastName">Last Name *</Label>
+              <div>
+                <Label htmlFor="lastName" className="text-sm">Last Name *</Label>
                 <Input
                   id="lastName"
                   value={formData.lastName}
                   onChange={(e) => updateField("lastName", e.target.value)}
                   placeholder="Doe"
                   required
-                  className="h-9"
+                  className="h-10"
                 />
               </div>
             </div>
 
-            {/* Contact Information */}
+            {/* Contact Information - Email and Phone */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <Label htmlFor="email">Email</Label>
@@ -256,7 +256,7 @@ export function ContactForm({
                   value={formData.email}
                   onChange={(e) => updateField("email", e.target.value)}
                   placeholder="john@example.com"
-                  className="h-9"
+                  className="h-10"
                 />
               </div>
               <div>
@@ -268,41 +268,42 @@ export function ContactForm({
                   onChange={(e) => updateField("phone", e.target.value)}
                   placeholder="+1 234 567 8900"
                   required
-                  className="h-9"
+                  className="h-10"
                 />
               </div>
             </div>
 
-            <div>
-              <Label htmlFor="alternativePhone">Alternative Phone</Label>
-              <Input
-                id="alternativePhone"
-                type="tel"
-                value={formData.alternativePhone}
-                onChange={(e) => updateField("alternativePhone", e.target.value)}
-                placeholder="+1 234 567 8901"
-                className="h-9"
-              />
-            </div>
-
-            {/* Category */}
-            <div>
-              <Label htmlFor="category">Category *</Label>
-              <Select
-                value={formData.category}
-                onValueChange={(value) => updateField("category", value as ContactCategory)}
-              >
-                <SelectTrigger className="h-9">
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {CONTACT_CATEGORIES.map((category) => (
-                    <SelectItem key={category.value} value={category.value}>
-                      {category.icon} {category.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* Alternative Phone and Category - matching layout */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="alternativePhone">Alternative Phone</Label>
+                <Input
+                  id="alternativePhone"
+                  type="tel"
+                  value={formData.alternativePhone}
+                  onChange={(e) => updateField("alternativePhone", e.target.value)}
+                  placeholder="+1 234 567 8901"
+                  className="h-10"
+                />
+              </div>
+              <div>
+                <Label htmlFor="category">Category *</Label>
+                <Select
+                  value={formData.category}
+                  onValueChange={(value) => updateField("category", value as ContactCategory)}
+                >
+                  <SelectTrigger className="h-10 w-full">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent className="w-full">
+                    {CONTACT_CATEGORIES.map((category) => (
+                      <SelectItem key={category.value} value={category.value}>
+                        {category.icon} {category.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 
@@ -501,7 +502,7 @@ export function ContactForm({
             </div>
           </div>
 
-          <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+          <DialogFooter className="flex-col sm:flex-row gap-3 sm:gap-3">
             <Button
               type="button"
               variant="outline"
@@ -522,7 +523,7 @@ export function ContactForm({
                   {contact ? "Updating..." : "Creating..."}
                 </>
               ) : (
-                `${contact ? "Update" : "Create"} Contact`
+                `${contact ? "Update" : "Create"}`
               )}
             </Button>
           </DialogFooter>

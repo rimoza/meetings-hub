@@ -12,7 +12,7 @@ import { MeetingsLoading } from "@/components/loading/meetings-loading";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useMeetingsStore } from "@/stores/meetings-store";
 import { useAuth } from "@/contexts/auth-context";
-import { subscribeMeetings, updateMeeting as updateMeetingFirebase, deleteMeeting } from "@/lib/firebase/meetings";
+import { subscribeMeetings, createMeeting, updateMeeting as updateMeetingFirebase, deleteMeeting } from "@/lib/firebase/meetings";
 import type { Meeting, ViewMode } from "@/types/meeting";
 import { toast } from "sonner";
 
@@ -86,6 +86,14 @@ export function MeetingsPageClient() {
         await updateMeetingFirebase(editingMeeting.id, meetingData);
         updateMeeting(editingMeeting.id, meetingData);
         toast.success("Meeting updated successfully");
+      } else {
+        // Create new meeting
+        if (!user?.uid) {
+          toast.error("You must be logged in to create a meeting");
+          return;
+        }
+        await createMeeting(user.uid, meetingData);
+        toast.success("Meeting created successfully");
       }
       setIsFormOpen(false);
       setEditingMeeting(undefined);

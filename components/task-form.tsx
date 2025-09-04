@@ -160,14 +160,14 @@ export function TaskForm({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <DialogHeader>
           <DialogTitle>{task ? "Edit Task" : "Create New Task"}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Title *</Label>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="title" className="text-sm">Title *</Label>
               <Input
                 id="title"
                 value={formData.title}
@@ -176,21 +176,22 @@ export function TaskForm({
                 }
                 required
                 placeholder="Enter task title"
+                className="h-10 mt-1"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="type">Type</Label>
+            <div>
+              <Label htmlFor="type" className="text-sm">Type</Label>
               <Select
                 value={formData.type}
                 onValueChange={(value: Task["type"]) =>
                   setFormData({ ...formData, type: value })
                 }
               >
-                <SelectTrigger id="type">
+                <SelectTrigger id="type" className="h-10 w-full mt-1">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="w-full">
                   <SelectItem value="task">Task</SelectItem>
                   <SelectItem value="follow_up">Follow Up</SelectItem>
                 </SelectContent>
@@ -198,8 +199,8 @@ export function TaskForm({
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+          <div>
+            <Label htmlFor="description" className="text-sm">Description</Label>
             <Textarea
               id="description"
               value={formData.description}
@@ -208,12 +209,13 @@ export function TaskForm({
               }
               rows={3}
               placeholder="Enter task description"
+              className="mt-1"
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="date">Date</Label>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+              <Label htmlFor="date" className="text-sm">Date *</Label>
               <Input
                 id="date"
                 type="date"
@@ -222,21 +224,22 @@ export function TaskForm({
                   setFormData({ ...formData, date: e.target.value })
                 }
                 required
+                className="h-10 mt-1 text-sm"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
+            <div>
+              <Label htmlFor="status" className="text-sm">Status</Label>
               <Select
                 value={formData.status}
                 onValueChange={(value: Task["status"]) =>
                   setFormData({ ...formData, status: value })
                 }
               >
-                <SelectTrigger id="status">
+                <SelectTrigger id="status" className="h-10 w-full mt-1 text-sm">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="w-full">
                   <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="in_progress">In Progress</SelectItem>
                   <SelectItem value="completed">Completed</SelectItem>
@@ -245,18 +248,18 @@ export function TaskForm({
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="priority">Priority</Label>
+            <div>
+              <Label htmlFor="priority" className="text-sm">Priority</Label>
               <Select
                 value={formData.priority}
                 onValueChange={(value: Task["priority"]) =>
                   setFormData({ ...formData, priority: value })
                 }
               >
-                <SelectTrigger id="priority">
+                <SelectTrigger id="priority" className="h-10 w-full mt-1 text-sm">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="w-full">
                   <SelectItem value="low">Low</SelectItem>
                   <SelectItem value="medium">Medium</SelectItem>
                   <SelectItem value="high">High</SelectItem>
@@ -265,9 +268,9 @@ export function TaskForm({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="assignee">Assignee</Label>
+          <div className={`grid gap-3 ${formData.type === "follow_up" ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1"}`}>
+            <div>
+              <Label htmlFor="assignee" className="text-sm">Assignee</Label>
               <Input
                 id="assignee"
                 value={formData.assignee}
@@ -275,22 +278,23 @@ export function TaskForm({
                   setFormData({ ...formData, assignee: e.target.value })
                 }
                 placeholder="Enter assignee name"
+                className="h-10 mt-1"
               />
             </div>
 
             {formData.type === "follow_up" && (
-              <div className="space-y-2">
-                <Label htmlFor="meetingId">Related Meeting</Label>
+              <div>
+                <Label htmlFor="meetingId" className="text-sm">Related Meeting</Label>
                 <Select
                   value={formData.meetingId}
                   onValueChange={(value) =>
                     setFormData({ ...formData, meetingId: value })
                   }
                 >
-                  <SelectTrigger id="meetingId">
+                  <SelectTrigger id="meetingId" className="h-10 w-full mt-1">
                     <SelectValue placeholder="Select meeting" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="w-full">
                     <SelectItem value="none">None</SelectItem>
                     {meetings.map((meeting) => (
                       <SelectItem key={meeting.id} value={meeting.id}>
@@ -303,18 +307,19 @@ export function TaskForm({
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label>To-Do List</Label>
-            <div className="flex gap-2">
+          <div>
+            <Label className="text-sm">To-Do List</Label>
+            <div className="flex gap-2 mt-1">
               <Input
                 value={newTodo}
                 onChange={(e) => setNewTodo(e.target.value)}
                 placeholder="Add a to-do item"
+                className="h-10"
                 onKeyPress={(e) =>
                   e.key === "Enter" && (e.preventDefault(), handleAddTodo())
                 }
               />
-              <Button type="button" onClick={handleAddTodo} size="icon">
+              <Button type="button" onClick={handleAddTodo} className="h-10 px-4">
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
@@ -354,19 +359,20 @@ export function TaskForm({
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Labels</Label>
-              <div className="flex gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <Label className="text-sm">Labels</Label>
+              <div className="flex gap-2 mt-1">
                 <Input
                   value={newLabel}
                   onChange={(e) => setNewLabel(e.target.value)}
                   placeholder="Add a label"
+                  className="h-10"
                   onKeyPress={(e) =>
                     e.key === "Enter" && (e.preventDefault(), handleAddLabel())
                   }
                 />
-                <Button type="button" onClick={handleAddLabel} size="icon">
+                <Button type="button" onClick={handleAddLabel} className="h-10 px-4">
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
@@ -386,18 +392,19 @@ export function TaskForm({
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label>Tags</Label>
-              <div className="flex gap-2">
+            <div>
+              <Label className="text-sm">Tags</Label>
+              <div className="flex gap-2 mt-1">
                 <Input
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
                   placeholder="Add a tag"
+                  className="h-10"
                   onKeyPress={(e) =>
                     e.key === "Enter" && (e.preventDefault(), handleAddTag())
                   }
                 />
-                <Button type="button" onClick={handleAddTag} size="icon">
+                <Button type="button" onClick={handleAddTag} className="h-10 px-4">
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
@@ -418,12 +425,12 @@ export function TaskForm({
             </div>
           </div>
 
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-3">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
             <Button type="submit">
-              {task ? "Update Task" : "Create Task"}
+              {task ? "Update" : "Create"}
             </Button>
           </div>
         </form>

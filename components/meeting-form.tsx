@@ -158,6 +158,7 @@ export function MeetingForm({
                 }
                 placeholder="Meeting title"
                 required
+                className="h-10"
               />
             </div>
 
@@ -194,7 +195,7 @@ export function MeetingForm({
                       date: new Date(e.target.value),
                     }))
                   }
-                  className="h-9 sm:h-10 text-sm"
+                  className="h-10 text-sm"
                   required
                 />
               </div>
@@ -210,7 +211,7 @@ export function MeetingForm({
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, time: e.target.value }))
                   }
-                  className="h-9 sm:h-10 text-sm"
+                  className="h-10 text-sm"
                   required
                 />
               </div>
@@ -224,17 +225,18 @@ export function MeetingForm({
               <Input
                 id="duration"
                 type="number"
-                min="15"
-                step="15"
-                value={formData.duration}
-                onChange={(e) =>
+                min="1"
+                value={formData.duration || ''}
+                onChange={(e) => {
+                  const value = e.target.value;
                   setFormData((prev) => ({
                     ...prev,
-                    duration: Number.parseInt(e.target.value),
+                    duration: value === '' ? 0 : Number.parseInt(value) || 0,
                   }))
-                }
-                className="h-9 sm:h-10 text-sm"
+                }}
+                className="h-10 text-sm"
                 placeholder="60"
+                required
               />
             </div>
 
@@ -248,10 +250,10 @@ export function MeetingForm({
                     setFormData((prev) => ({ ...prev, type: value }))
                   }
                 >
-                  <SelectTrigger className="h-9 sm:h-10 text-sm">
+                  <SelectTrigger className="h-10 w-full text-sm">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="w-full">
                     <SelectItem value="meeting">Meeting</SelectItem>
                     <SelectItem value="call">Call</SelectItem>
                     <SelectItem value="interview">Interview</SelectItem>
@@ -268,10 +270,10 @@ export function MeetingForm({
                     setFormData((prev) => ({ ...prev, priority: value }))
                   }
                 >
-                  <SelectTrigger className="h-9 sm:h-10 text-sm">
+                  <SelectTrigger className="h-10 w-full text-sm">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="w-full">
                     <SelectItem value="low">Low</SelectItem>
                     <SelectItem value="medium">Medium</SelectItem>
                     <SelectItem value="high">High</SelectItem>
@@ -290,6 +292,7 @@ export function MeetingForm({
                   setFormData((prev) => ({ ...prev, location: e.target.value }))
                 }
                 placeholder="Meeting location or video link"
+                className="h-10"
               />
             </div>
 
@@ -301,7 +304,7 @@ export function MeetingForm({
                   value={attendeeInput}
                   onChange={(e) => setAttendeeInput(e.target.value)}
                   placeholder="Add attendee"
-                  className="h-9 sm:h-10 text-sm"
+                  className="h-10 text-sm"
                   onKeyPress={(e) =>
                     e.key === "Enter" && (e.preventDefault(), addAttendee())
                   }
@@ -311,7 +314,7 @@ export function MeetingForm({
                   onClick={addAttendee}
                   variant="outline"
                   size="sm"
-                  className="h-9 px-3 sm:h-10 sm:px-4"
+                  className="h-10 px-4"
                 >
                   Add
                 </Button>
@@ -338,7 +341,7 @@ export function MeetingForm({
             </div>
           </div>
 
-          <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+          <DialogFooter className="flex-col sm:flex-row gap-3 sm:gap-3">
             <Button
               type="button"
               variant="outline"
@@ -359,7 +362,7 @@ export function MeetingForm({
                   {meeting ? "Updating..." : "Creating..."}
                 </>
               ) : (
-                `${meeting ? "Update" : "Create"} Meeting`
+                `${meeting ? "Update" : "Create"}`
               )}
             </Button>
           </DialogFooter>
