@@ -58,8 +58,18 @@ interface User {
   name: string | null;
   photoURL?: string | null;
   emailVerified: boolean;
+  
+  status: 'pending' | 'approved' | 'denied' | 'suspended';
+  role: 'admin' | 'user';
+  approvedBy?: string;
+  approvedAt?: Date;
+  deniedBy?: string;
+  deniedAt?: Date;
+  denialReason?: string;
+  
   createdAt?: Date;
   lastLoginAt?: Date;
+  updatedAt?: Date;
 }
 
 interface AuthContextType {
@@ -106,8 +116,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             name: firebaseUser.displayName,
             photoURL: firebaseUser.photoURL,
             emailVerified: firebaseUser.emailVerified,
+            status: 'pending' as const,
+            role: 'user' as const,
             createdAt: new Date(),
             lastLoginAt: new Date(),
+            updatedAt: new Date(),
           });
           setIsLoading(false);
           return;
@@ -125,8 +138,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               name: firebaseUser.displayName || userData.name,
               photoURL: firebaseUser.photoURL,
               emailVerified: firebaseUser.emailVerified,
+              status: userData.status || 'pending',
+              role: userData.role || 'user',
+              approvedBy: userData.approvedBy,
+              approvedAt: userData.approvedAt?.toDate(),
+              deniedBy: userData.deniedBy,
+              deniedAt: userData.deniedAt?.toDate(),
+              denialReason: userData.denialReason,
               createdAt: userData.createdAt?.toDate(),
               lastLoginAt: new Date(),
+              updatedAt: userData.updatedAt?.toDate(),
             });
 
             // Update last login
@@ -135,6 +156,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 userDocRef,
                 {
                   lastLoginAt: serverTimestamp(),
+                  updatedAt: serverTimestamp(),
                 },
                 { merge: true },
               );
@@ -142,15 +164,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               console.warn("Failed to update last login (offline mode):", updateError);
             }
           } else {
-            // Create new user document
+            // Create new user document with pending status
             const newUser = {
               uid: firebaseUser.uid,
               email: firebaseUser.email,
-              name: firebaseUser.displayName,
+              name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
               photoURL: firebaseUser.photoURL,
               emailVerified: firebaseUser.emailVerified,
+              status: 'pending',
+              role: 'user',
               createdAt: serverTimestamp(),
               lastLoginAt: serverTimestamp(),
+              updatedAt: serverTimestamp(),
             };
 
             try {
@@ -161,8 +186,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             
             setUser({
               ...newUser,
+              status: 'pending' as const,
+              role: 'user' as const,
               createdAt: new Date(),
               lastLoginAt: new Date(),
+              updatedAt: new Date(),
             });
           }
         } catch (firestoreError) {
@@ -173,8 +201,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             name: firebaseUser.displayName,
             photoURL: firebaseUser.photoURL,
             emailVerified: firebaseUser.emailVerified,
+            status: 'pending' as const,
+            role: 'user' as const,
             createdAt: new Date(),
             lastLoginAt: new Date(),
+            updatedAt: new Date(),
           });
         }
       } else {

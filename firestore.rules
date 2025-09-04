@@ -1,0 +1,67 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    function isApproved() {
+      return isAuthenticated() && getUserData().status == 'approved';
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && getUserData().role == 'admin';
+    }
+    
+    // User collection rules
+    match /users/{userId} {
+      // Users can read their own data
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Only admins can read all users' data (for user management)
+      allow read: if isAdmin();
+      
+      // Users can update their own profile (limited fields)
+      allow update: if isAuthenticated() 
+        && request.auth.uid == userId
+        && !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['status', 'role', 'approvedBy', 'approvedAt']);
+      
+      // Only admins can update approval status and roles
+      allow update: if isAdmin();
+      
+      // Allow creation during signup
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // All approved users have full access to data collections
+    match /meetings/{document=**} {
+      allow read, write: if isApproved();
+    }
+    
+    match /appointments/{document=**} {
+      allow read, write: if isApproved();
+    }
+    
+    match /tasks/{document=**} {
+      allow read, write: if isApproved();
+    }
+    
+    match /contacts/{document=**} {
+      allow read, write: if isApproved();
+    }
+    
+    match /archives/{document=**} {
+      allow read, write: if isApproved();
+    }
+    
+    match /reports/{document=**} {
+      allow read, write: if isApproved();
+    }
+  }
+}

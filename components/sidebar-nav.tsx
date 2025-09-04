@@ -13,6 +13,7 @@ import {
   UserCheck,
   Monitor,
   Printer,
+  UserCog,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -34,6 +35,7 @@ import {
 } from "@/components/ui/collapsible";
 import { useRouter, usePathname } from "next/navigation";
 import { useState } from "react";
+import { useAuth } from "@/contexts/auth-context";
 
 interface SidebarNavProps {
   todayCount?: number;
@@ -52,6 +54,7 @@ export function SidebarNav({
   const router = useRouter();
   const pathname = usePathname();
   const [isMeetingsOpen, setIsMeetingsOpen] = useState(false);
+  const { user } = useAuth();
 
   const meetingSubItems = [
     {
@@ -275,6 +278,23 @@ export function SidebarNav({
                 </SidebarMenuItem>
               );
             })}
+
+            {/* Admin Section - Only show for admins */}
+            {user?.role === 'admin' && (
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  isActive={pathname === "/admin/users"}
+                  onClick={() => handleNavClick("/admin/users")}
+                  className="h-11 rounded-lg hover:bg-accent transition-all duration-200 data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-medium"
+                  tooltip="User Management"
+                >
+                  <div className="p-1.5 rounded-md bg-orange-500/10">
+                    <UserCog className="h-4 w-4 text-orange-500 shrink-0" />
+                  </div>
+                  <span className="ml-3">User Management</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )}
           </SidebarMenu>
         </div>
       </SidebarContent>
