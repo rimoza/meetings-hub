@@ -13,8 +13,8 @@ const sampleAppointments: Appointment[] = [
     date: "2025-09-02",
     time: "10:30",
     status: "scheduled",
-    attendee: "Maxamed Ibraahim",
-    attendeeEmail: "+252637589678",
+    attendeeCount: 1,
+    attendeePhone: "+252637589678",
     duration: 30,
     location: "Conference Room A",
     description: "Quarterly review meeting",
@@ -29,8 +29,8 @@ const sampleAppointments: Appointment[] = [
     date: "2025-09-02",
     time: "14:00",
     status: "scheduled",
-    attendee: "Faadumo Xasan",
-    attendeeEmail: "+252612345678",
+    attendeeCount: 2,
+    attendeePhone: "+252612345678",
     duration: 45,
     location: "Office 201",
     description: "Annual budget planning",
@@ -45,8 +45,8 @@ const sampleAppointments: Appointment[] = [
     date: "2025-09-02",
     time: "16:30",
     status: "confirmed",
-    attendee: "Cabdi Kariim",
-    attendeeEmail: "cabdi@example.com",
+    attendeeCount: 1,
+    attendeePhone: "+252612348901",
     duration: 60,
     location: "Meeting Room B",
     description: "Project status update",
@@ -89,7 +89,6 @@ export default function TestPrintPage() {
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="font-semibold text-lg">{appointment.title}</h3>
-                <p className="text-gray-600">Attendee: {appointment.attendee}</p>
                 <p className="text-gray-600">Date: {appointment.date}</p>
                 <p className="text-gray-600">Time: {appointment.time}</p>
                 <p className="text-gray-600">Location: {appointment.location}</p>

@@ -31,7 +31,7 @@ import {
   CheckCircle,
   XCircle,
   Phone,
-  Mail,
+  // Mail,
   Eye,
   Printer
 } from 'lucide-react';
@@ -58,7 +58,7 @@ const statusConfig = {
   'no-show': { label: 'No Show', variant: 'outline' as const, icon: XCircle, color: 'text-orange-600' },
 };
 
-export default function AppointmentCard({ appointment, onUpdate, onDelete }: AppointmentCardProps) {
+export default function AppointmentCard({ appointment, onUpdate, onDelete }: Readonly<AppointmentCardProps>) {
   const router = useRouter();
   const statusInfo = statusConfig[appointment.status];
   const StatusIcon = statusInfo.icon;
@@ -201,14 +201,6 @@ export default function AppointmentCard({ appointment, onUpdate, onDelete }: App
                   </DropdownMenuItem>
                 )}
                 
-                {appointment.attendeeEmail && (
-                  <DropdownMenuItem
-                    onClick={() => window.open(`mailto:${appointment.attendeeEmail}`, '_blank')}
-                  >
-                    <Mail className="mr-2 h-4 w-4" />
-                    Send Email
-                  </DropdownMenuItem>
-                )}
                 
                 {appointment.attendeePhone && (
                   <DropdownMenuItem
@@ -262,18 +254,12 @@ export default function AppointmentCard({ appointment, onUpdate, onDelete }: App
             <User className="h-4 w-4 text-muted-foreground mt-0.5" />
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="font-medium">{appointment.attendee}</span>
                 {appointment.attendeeCount && appointment.attendeeCount > 1 && (
                   <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-medium">
                     +{appointment.attendeeCount - 1}
                   </span>
                 )}
               </div>
-              {appointment.attendeeEmail && (
-                <div className="text-sm text-muted-foreground">
-                  {appointment.attendeeEmail}
-                </div>
-              )}
               {appointment.attendeePhone && (
                 <div className="text-sm text-muted-foreground">
                   {appointment.attendeePhone}
@@ -336,20 +322,6 @@ export default function AppointmentCard({ appointment, onUpdate, onDelete }: App
               </Button>
             )}
             
-            {appointment.attendeeEmail && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  window.open(`mailto:${appointment.attendeeEmail}`, '_blank');
-                }}
-                className="h-7 text-xs"
-              >
-                <Mail className="h-3 w-3 mr-1" />
-                Email
-              </Button>
-            )}
             
             {appointment.attendeePhone && (
               <Button

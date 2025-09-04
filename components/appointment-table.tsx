@@ -314,11 +314,6 @@ export default function AppointmentTable({
                             </span>
                           )}
                         </div>
-                        {appointment.attendeeEmail && (
-                          <div className="text-sm text-muted-foreground">
-                            {appointment.attendeeEmail}
-                          </div>
-                        )}
                         {appointment.attendeePhone && (
                           <div className="text-sm text-muted-foreground">
                             {appointment.attendeePhone}

@@ -94,7 +94,7 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
         id: appointment.id,
         title: appointment.title,
         subtitle: `${appointment.date} at ${appointment.time}`,
-        description: `${appointment.attendee}${appointment.attendeeEmail ? ` • ${appointment.attendeeEmail}` : ''}${appointment.attendeePhone ? ` • ${appointment.attendeePhone}` : ''}${appointment.location ? ` • ${appointment.location}` : ''}`,
+        description: `${appointment.attendeeCount} attendee${appointment.attendeeCount! > 1 ? 's' : ''}${appointment.attendeePhone ? ` • ${appointment.attendeePhone}` : ''}${appointment.location ? ` • ${appointment.location}` : ''}`,
         type: 'appointment',
         icon: CalendarCheck,
         badge: appointment.status,

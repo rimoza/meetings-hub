@@ -86,9 +86,6 @@ export function AppointmentPrintCard({ appointment }: Readonly<AppointmentPrintC
         <p className="thanks-message">Ku mahadsanid sugitaankaaga.<br/>Gacmo furan ku soo dhawoow.</p>
         <div className="contact-section">
           <p className="contact-info">+252634118949 (Call & WhatsApp)</p>
-          {appointment.attendeeEmail && (
-            <p className="contact-info">Email: {appointment.attendeeEmail}</p>
-          )}
         </div>
       </div>
     </div>
