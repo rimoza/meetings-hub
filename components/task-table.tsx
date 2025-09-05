@@ -45,7 +45,7 @@ export function TaskTable({
   onEdit,
   onDelete,
   onChangeStatus,
-}: TaskTableProps) {
+}: Readonly<TaskTableProps>) {
 
   const getStatusIcon = (status: Task["status"]) => {
     switch (status) {
@@ -284,16 +284,6 @@ export function TaskTable({
                 </TableRow>
                 );
               })}
-              {/* {sortedTasks.length === 0 && (
-                <TableRow>
-                  <TableCell
-                    colSpan={8}
-                    className="text-center py-8 text-muted-foreground"
-                  >
-                    No tasks found
-                  </TableCell>
-                </TableRow>
-              )} */}
             </TableBody>
           </Table>
     </div>
