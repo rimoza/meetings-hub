@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/form";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
-import type { Archive, ArchiveStatus } from "@/types/archive";
+import type { Archive } from "@/types/archive";
 
 // Zod schema for archive form validation
 const archiveFormSchema = z.object({

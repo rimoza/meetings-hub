@@ -335,7 +335,7 @@ export function ReportForm({
               <FormField
                 control={form.control}
                 name="file"
-                render={({ field }) => (
+                render={() => (
                   <FormItem>
                     <FormLabel>Document Upload (Optional)</FormLabel>
                     <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6">
