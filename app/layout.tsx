@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AuthProvider } from "@/contexts/auth-context";
 import InstallPrompt from "@/components/install-prompt";
+import { InactivityTracker } from "@/components/inactivity-tracker";
 
 export const metadata: Metadata = {
   title: "Chairman Office - Work Management System",
@@ -91,6 +92,7 @@ html {
           disableTransitionOnChange
         >
           <AuthProvider>
+            <InactivityTracker />
             <SidebarProvider defaultOpen={true}>{children}</SidebarProvider>
             <Toaster />
             <InstallPrompt />
