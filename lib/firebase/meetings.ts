@@ -19,6 +19,8 @@ import {
 import { app, isFirebaseConfigured } from "@/lib/firebase/config";
 import type { Meeting, MeetingNote } from "@/types/meeting";
 import { createTaskFromMeetingNote } from "./tasks";
+import { logActivity } from "./activities";
+import { getAuth } from "firebase/auth";
 
 const COLLECTION_NAME = "meetings";
 const db: Firestore | null =
@@ -76,6 +78,26 @@ export const createMeeting = async (
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
+    
+    // Log activity
+    const auth = getAuth();
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      await logActivity(
+        userId,
+        currentUser.displayName || currentUser.email || "User",
+        "created",
+        "meeting",
+        docRef.id,
+        meetingData.title,
+        { 
+          date: meetingData.date,
+          time: meetingData.time,
+          priority: meetingData.priority 
+        }
+      );
+    }
+    
     return docRef.id;
   } catch (error) {
     console.error("Error creating meeting:", error);

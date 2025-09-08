@@ -55,6 +55,7 @@ import {
 import { subscribeTasks } from "@/lib/firebase/tasks";
 import { subscribeArchives } from "@/lib/firebase/archives";
 import { subscribeReports } from "@/lib/firebase/reports";
+import { subscribeToRecentActivities, Activity } from "@/lib/firebase/activities";
 
 const meetingData = [
   { day: "Mon", meetings: 4, completed: 3 },
@@ -91,6 +92,7 @@ export function DashboardClient() {
   const { archives, setArchives } = useArchivesStore();
   const { reports, setReports } = useReportsStore();
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [recentActivities, setRecentActivities] = useState<Activity[]>([]);
 
   console.log(archives, 'archives from dashboard');
   useEffect(() => {
@@ -119,11 +121,16 @@ export function DashboardClient() {
       setReports(reports);
     });
 
+    const unsubscribeActivities = subscribeToRecentActivities((activities) => {
+      setRecentActivities(activities);
+    }, 10);
+
     return () => {
       unsubscribeMeetings();
       unsubscribeTasks();
       unsubscribeArchives();
       unsubscribeReports();
+      unsubscribeActivities();
     };
   }, [user?.uid, setMeetings, setTasks, setArchives, setReports]);
 
@@ -176,44 +183,43 @@ export function DashboardClient() {
     },
   ];
 
-  const recentActivity = [
-    {
-      id: 1,
-      user: "Sarah Chen",
-      action: "completed meeting",
-      target: "Product Review",
-      time: "2 mins ago",
-      avatar: "SC",
-      color: "bg-blue-500",
-    },
-    {
-      id: 2,
-      user: "Mike Johnson",
-      action: "scheduled appointment",
-      target: "Client Demo",
-      time: "15 mins ago",
-      avatar: "MJ",
-      color: "bg-green-500",
-    },
-    {
-      id: 3,
-      user: "Emma Wilson",
-      action: "updated task",
-      target: "Q4 Planning",
-      time: "1 hour ago",
-      avatar: "EW",
-      color: "bg-purple-500",
-    },
-    {
-      id: 4,
-      user: "David Lee",
-      action: "added report",
-      target: "Monthly Review",
-      time: "3 hours ago",
-      avatar: "DL",
-      color: "bg-orange-500",
-    },
-  ];
+  const getActionText = (action: string, entityType: string) => {
+    switch (action) {
+      case "created":
+        return `created ${entityType}`;
+      case "updated":
+        return `updated ${entityType}`;
+      case "completed":
+        return `completed ${entityType}`;
+      case "deleted":
+        return `deleted ${entityType}`;
+      case "scheduled":
+        return `scheduled ${entityType}`;
+      case "added":
+        return `added ${entityType}`;
+      default:
+        return action;
+    }
+  };
+
+  const getAvatarColor = (entityType: string) => {
+    switch (entityType) {
+      case "meeting":
+        return "bg-blue-500";
+      case "task":
+        return "bg-green-500";
+      case "appointment":
+        return "bg-purple-500";
+      case "report":
+        return "bg-orange-500";
+      case "contact":
+        return "bg-pink-500";
+      case "archive":
+        return "bg-yellow-500";
+      default:
+        return "bg-gray-500";
+    }
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -411,28 +417,38 @@ export function DashboardClient() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {recentActivity.map((activity) => (
-                <div 
-                  key={activity.id} 
-                  className="flex items-center gap-4 p-3 rounded-lg hover:bg-accent/50 transition-all cursor-pointer group"
-                >
-                  <Avatar className="group-hover:scale-110 transition-transform">
-                    <AvatarFallback className={`${activity.color} text-white text-xs`}>
-                      {activity.avatar}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm">
-                      <span className="font-medium">{activity.user}</span>
-                      <span className="text-muted-foreground"> {activity.action} </span>
-                      <span className="font-medium">{activity.target}</span>
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">{activity.time}</p>
+            {recentActivities.length > 0 ? (
+              <div className="space-y-4">
+                {recentActivities.slice(0, 4).map((activity) => (
+                  <div 
+                    key={activity.id} 
+                    className="flex items-center gap-4 p-3 rounded-lg hover:bg-accent/50 transition-all cursor-pointer group"
+                  >
+                    <Avatar className="group-hover:scale-110 transition-transform">
+                      <AvatarFallback className={`${getAvatarColor(activity.entityType)} text-white text-xs`}>
+                        {activity.userAvatar || activity.userName.split(' ').map(n => n[0]).join('').toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm">
+                        <span className="font-medium">{activity.userName}</span>
+                        <span className="text-muted-foreground"> {getActionText(activity.action, activity.entityType)} </span>
+                        <span className="font-medium">{activity.entityTitle}</span>
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {format(activity.timestamp, "PPp")}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground">No recent activity</p>
+                <p className="text-xs text-muted-foreground mt-1">Activities will appear here as they happen</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
