@@ -7,7 +7,6 @@ import {
   onSnapshot,
   serverTimestamp,
   where,
-  Timestamp,
   getDocs,
 } from "firebase/firestore";
 import { db } from "./config";
@@ -22,6 +21,7 @@ export interface Activity {
   entityId: string;
   entityTitle: string;
   timestamp: Date;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: Record<string, any>;
 }
 
@@ -32,6 +32,7 @@ export async function logActivity(
   entityType: Activity["entityType"],
   entityId: string,
   entityTitle: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: Record<string, any>
 ) {
   if (!db) {
