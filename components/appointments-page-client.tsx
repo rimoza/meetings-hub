@@ -79,7 +79,6 @@ export default function AppointmentsPageClient() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [printFilter, setPrintFilter] = useState<string>('all');
   const [activeTab, setActiveTab] = useState<'today' | 'upcoming' | 'past'>('today');
-  const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
 
   // Categorize appointments
   const today = new Date();
@@ -276,15 +275,6 @@ export default function AppointmentsPageClient() {
         
         <div className="flex items-center gap-3">
           <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setShowBarcodeScanner(true)}
-            className="gap-2"
-          >
-            <Scan className="h-4 w-4" />
-            Scanner
-          </Button>
           {filteredAppointments.length > 0 && (
             <Button 
               variant="outline" 
@@ -470,26 +460,15 @@ export default function AppointmentsPageClient() {
         onClose={closePreview}
       />
       
-      {/* Barcode Scanner Modal */}
-      <Dialog open={showBarcodeScanner} onOpenChange={setShowBarcodeScanner}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Barcode Scanner</DialogTitle>
-          </DialogHeader>
-          <div className="flex justify-center py-4">
-            <BarcodeScanner
-              onScanSuccess={(appointmentId, meetingId) => {
-                console.log(`Successfully scanned appointment: ${meetingId} (ID: ${appointmentId})`);
-                // Optionally close the scanner after successful scan
-                // setShowBarcodeScanner(false);
-              }}
-              onScanError={(error) => {
-                console.error('Scan error:', error);
-              }}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Barcode Scanner - Always Active */}
+      <BarcodeScanner
+        onScanSuccess={(appointmentId, meetingId) => {
+          console.log(`Successfully scanned appointment: ${meetingId} (ID: ${appointmentId})`);
+        }}
+        onScanError={(error) => {
+          console.error('Scan error:', error);
+        }}
+      />
     </div>
   );
 }
