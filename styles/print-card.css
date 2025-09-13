@@ -38,10 +38,10 @@
 /* Extended appointment card dimensions: 4" x 2.5" */
 .appointment-print-card {
   /* width: 3.5in;
-  height: 4.5in; */
-  border: 1px dotted #000;
-  border-radius: 12px;
-  padding: 0.2in;
+  height: 6in; */
+  /* border: 1px dotted #000;
+  border-radius: 12px; */
+  padding: 0.25in;
   box-sizing: border-box;
   font-family: Arial, sans-serif;
   display: flex;
@@ -58,6 +58,10 @@
 @media print {
   @page {
     /* margin: 0.3in; */
+    size: auto;
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+    print-color-adjust: exact;
   }
   
   /* Standard A4 paper */
@@ -114,8 +118,8 @@
 .appointment-print-card .card-header {
   text-align: center;
   border-bottom: 1px solid #333;
-  padding-bottom: 0.1in;
-  margin-bottom: 0.1in;
+  padding-bottom: 0.15in;
+  margin-bottom: 0.2in;
 }
 
 .appointment-print-card .organization-name {
@@ -146,8 +150,8 @@
 
 .appointment-print-card .info-row {
   display: flex;
-  margin-bottom: 3px;
-  line-height: 1.2;
+  margin-bottom: 8px;
+  line-height: 1.4;
 }
 
 .appointment-print-card .info-label {
@@ -166,8 +170,8 @@
 .appointment-print-card .card-footer {
   text-align: center;
   border-top: 1px solid #333;
-  padding-top: 0.08in;
-  margin-top: 0.12in;
+  padding-top: 0.12in;
+  margin-top: 0.2in;
 }
 
 .appointment-print-card .thanks-message {
@@ -334,5 +338,42 @@
     box-shadow: none !important;
     -webkit-print-color-adjust: exact;
     color-adjust: exact;
+  }
+  
+  /* Ensure barcode prints with high contrast */
+  .barcode-section,
+  .print-barcode-container {
+    background: white !important;
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+    print-color-adjust: exact;
+    page-break-inside: avoid;
+  }
+  
+  .barcode-section svg,
+  .print-barcode-container svg {
+    background: white !important;
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+  .barcode-section rect[fill="white"],
+  .print-barcode-container rect[fill="white"],
+  .print-barcode-container rect[fill="#FFFFFF"] {
+    fill: white !important;
+  }
+  
+  .barcode-section rect[fill="black"],
+  .print-barcode-container rect[fill="black"],
+  .print-barcode-container rect[fill="#000000"] {
+    fill: black !important;
+  }
+  
+  /* Ensure barcode prints at high resolution */
+  .print-barcode-container {
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
   }
 }

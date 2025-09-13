@@ -4,6 +4,7 @@ import React from "react";
 import Image from "next/image";
 import { Appointment } from "@/types/appointment";
 import { format } from "date-fns";
+import { PrintOptimizedBarcode } from "./print-optimized-barcode";
 
 interface AppointmentPrintCardProps {
   appointment: Appointment;
@@ -15,6 +16,9 @@ export function AppointmentPrintCard({ appointment }: Readonly<AppointmentPrintC
   
   // Format meeting ID as XXX/YYYY (remove leading zeros from dailyNumber)
   const meetingId = `${appointment.dailyNumber}/${meetingYear}`;
+  
+  // Create a short barcode value with #00 prefix
+  const barcodeValue = `#00${appointment.dailyNumber}`;
   
   // Format date as "02 Sep, 2025"
   const formattedDate = format(new Date(appointment.date), "dd MMM, yyyy");
@@ -81,6 +85,12 @@ export function AppointmentPrintCard({ appointment }: Readonly<AppointmentPrintC
           )}
         </div>
       </div>
+      
+      <PrintOptimizedBarcode 
+        value={barcodeValue}
+        meetingId={meetingId}
+        appointmentId={appointment.id}
+      />
       
       <div className="card-footer">
         <p className="thanks-message">Ku mahadsanid sugitaankaaga.<br/>Gacmo furan ku soo dhawoow.</p>

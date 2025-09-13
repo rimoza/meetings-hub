@@ -264,10 +264,10 @@
 
 /* Extended appointment card dimensions: 4" x 2.5" */
 .appointment-print-card {
-  width: 3.5in;
-  height: 4.5in;
+   width: 3.5in;
+  /*height: 4.5in;
   border: 1px dotted #000;
-  border-radius: 12px;
+  border-radius: 12px; */
   padding: 0.2in;
   box-sizing: border-box;
   font-family: Arial, sans-serif;
@@ -309,7 +309,7 @@
   
   .appointment-print-card {
     width: 3.2in !important;
-    height: 4.2in !important;
+    /* height: 4.2in !important; */
     max-width: 3.2in;
     max-height: 4.2in;
     padding: 0.15in;
@@ -520,7 +520,7 @@
 
 .print-preview-header {
   padding: 15px 20px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid #000000;
   display: flex;
   justify-content: space-between;
   align-items: center;

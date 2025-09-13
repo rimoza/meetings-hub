@@ -11,9 +11,11 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { ViewToggle } from '@/components/view-toggle';
-import { Search, Plus, Calendar, Users, CheckCircle, Clock, Printer, CalendarDays, History } from 'lucide-react';
+import { BarcodeScanner } from '@/components/barcode-scanner';
+import { Search, Plus, Calendar, Users, CheckCircle, Clock, Printer, CalendarDays, History, Scan } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import AppointmentForm from './appointment-form';
 import AppointmentTable from './appointment-table';
@@ -77,6 +79,7 @@ export default function AppointmentsPageClient() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [printFilter, setPrintFilter] = useState<string>('all');
   const [activeTab, setActiveTab] = useState<'today' | 'upcoming' | 'past'>('today');
+  const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
 
   // Categorize appointments
   const today = new Date();
@@ -90,17 +93,15 @@ export default function AppointmentsPageClient() {
     appointments.forEach(apt => {
       const aptDateStr = apt.date;
       
-      // Check if appointment is completed or cancelled - goes to past
-      if (apt.status === 'completed' || apt.status === 'cancelled') {
-        pastAppts.push(apt);
-      } else if (aptDateStr === todayStr) {
-        // Today's appointments
+      // First check the date, then consider status
+      if (aptDateStr === todayStr) {
+        // Today's appointments (including completed ones)
         todaysAppts.push(apt);
       } else if (aptDateStr > todayStr) {
-        // Future appointments
+        // Future appointments (including completed ones)
         upcomingAppts.push(apt);
       } else {
-        // Past date appointments
+        // Past date appointments (all go here regardless of status)
         pastAppts.push(apt);
       }
     });
@@ -275,6 +276,15 @@ export default function AppointmentsPageClient() {
         
         <div className="flex items-center gap-3">
           <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setShowBarcodeScanner(true)}
+            className="gap-2"
+          >
+            <Scan className="h-4 w-4" />
+            Scanner
+          </Button>
           {filteredAppointments.length > 0 && (
             <Button 
               variant="outline" 
@@ -459,6 +469,27 @@ export default function AppointmentsPageClient() {
         isOpen={showPreview}
         onClose={closePreview}
       />
+      
+      {/* Barcode Scanner Modal */}
+      <Dialog open={showBarcodeScanner} onOpenChange={setShowBarcodeScanner}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Barcode Scanner</DialogTitle>
+          </DialogHeader>
+          <div className="flex justify-center py-4">
+            <BarcodeScanner
+              onScanSuccess={(appointmentId, meetingId) => {
+                console.log(`Successfully scanned appointment: ${meetingId} (ID: ${appointmentId})`);
+                // Optionally close the scanner after successful scan
+                // setShowBarcodeScanner(false);
+              }}
+              onScanError={(error) => {
+                console.error('Scan error:', error);
+              }}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
