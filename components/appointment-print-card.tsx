@@ -94,7 +94,7 @@ export function AppointmentPrintCard({ appointment }: Readonly<AppointmentPrintC
       <div className="card-footer">
         <p className="thanks-message">Ku mahadsanid sugitaankaaga.<br/>Gacmo furan ku soo dhawoow.</p>
         <div className="contact-section">
-          <p className="contact-info">+252634118949 (Call & WhatsApp)</p>
+          <p className="contact-info text-black">+252634118949 (Call & WhatsApp)</p>
         </div>
       </div>
     </div>
