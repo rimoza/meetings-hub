@@ -12,10 +12,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { ViewToggle } from '@/components/view-toggle';
 import { BarcodeScanner } from '@/components/barcode-scanner';
-import { Search, Plus, Calendar, Users, CheckCircle, Clock, Printer, CalendarDays, History, Scan } from 'lucide-react';
+import { Search, Plus, Calendar, Users, CheckCircle, Clock, Printer, CalendarDays, History } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import AppointmentForm from './appointment-form';
 import AppointmentTable from './appointment-table';

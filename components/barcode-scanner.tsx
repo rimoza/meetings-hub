@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useBarcodeScanner } from '@/hooks/use-barcode-scanner';
 import { toast } from 'sonner';
 
@@ -26,7 +26,7 @@ export function BarcodeScanner({ onScanSuccess, onScanError }: BarcodeScannerPro
 
     setIsProcessing(true);
     console.log('🔄 Processing started for:', barcodeValue);
-    
+    console.log('⏳ Current processing state:', isProcessing ? 'BUSY' : 'IDLE');
     try {
       // Support multiple barcode formats
       let appointmentId: string;

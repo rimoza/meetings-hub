@@ -89,7 +89,6 @@ export function AppointmentPrintCard({ appointment }: Readonly<AppointmentPrintC
       <PrintOptimizedBarcode 
         value={barcodeValue}
         meetingId={meetingId}
-        appointmentId={appointment.id}
       />
       
       <div className="card-footer">

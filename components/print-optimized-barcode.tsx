@@ -8,10 +8,9 @@ const Barcode = dynamic(() => import("react-barcode"), { ssr: false });
 interface PrintOptimizedBarcodeProps {
   value: string;
   meetingId: string;
-  appointmentId?: string;
 }
 
-export function PrintOptimizedBarcode({ value, meetingId, appointmentId }: PrintOptimizedBarcodeProps) {
+export function PrintOptimizedBarcode({ value, meetingId }: Readonly<PrintOptimizedBarcodeProps>) {
   return (
     <div 
       className="print-barcode-container"
