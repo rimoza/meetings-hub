@@ -8,8 +8,10 @@ import {
   XCircle,
   PlayCircle,
   Flag,
+  ChevronDown,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -18,15 +20,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { Task } from "@/types/task";
 
 interface TaskTableProps {
   tasks: Task[];
+  onChangeStatus: (taskId: string, status: Task["status"]) => void;
 }
 
 
 export function TaskTable({
   tasks,
+  onChangeStatus,
 }: Readonly<TaskTableProps>) {
 
   const getStatusIcon = (status: Task["status"]) => {
@@ -110,12 +120,45 @@ export function TaskTable({
                   } ${!isLast ? "border-b" : ""}`}
                 >
                   <TableCell>
-                    <div className="flex items-center gap-2">
-                      {getStatusIcon(task.status)}
-                      <span className="text-sm capitalize">
-                        {task.status.replace("_", " ")}
-                      </span>
-                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-auto p-0 hover:bg-transparent">
+                          <div className="flex items-center gap-2">
+                            {getStatusIcon(task.status)}
+                            <span className="text-sm capitalize">
+                              {task.status.replace("_", " ")}
+                            </span>
+                            <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                          </div>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start">
+                        <DropdownMenuItem
+                          onClick={() => onChangeStatus(task.id, "pending")}
+                        >
+                          <Clock className="h-4 w-4 mr-2" />
+                          Mark as Pending
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => onChangeStatus(task.id, "in_progress")}
+                        >
+                          <PlayCircle className="h-4 w-4 mr-2" />
+                          Mark as In Progress
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => onChangeStatus(task.id, "completed")}
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Mark as Completed
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => onChangeStatus(task.id, "cancelled")}
+                        >
+                          <XCircle className="h-4 w-4 mr-2" />
+                          Mark as Cancelled
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">

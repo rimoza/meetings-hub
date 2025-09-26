@@ -145,6 +145,17 @@ export function TasksPageClient() {
     }
   };
 
+  const handleStatusChange = async (taskId: string, newStatus: Task["status"]) => {
+    try {
+      await updateTaskFirebase(taskId, { status: newStatus });
+      updateTask(taskId, { status: newStatus });
+      toast.success("Task status updated successfully");
+    } catch (error) {
+      console.error("Error updating task status:", error);
+      toast.error("Failed to update task status");
+    }
+  };
+
   if (isLoading) {
     return <TasksLoading />;
   }
@@ -278,6 +289,7 @@ export function TasksPageClient() {
           ) : (
             <TaskTable
               tasks={filteredTasks}
+              onChangeStatus={handleStatusChange}
             />
           )}
         </main>
