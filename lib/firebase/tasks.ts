@@ -143,8 +143,28 @@ export const createTaskFromMeetingNote = async (
   }
 
   try {
+    console.log("Creating task from meeting note:", {
+      userId,
+      meetingId,
+      meetingTitle,
+      noteContent,
+      priority,
+      assignee,
+      dueDate
+    });
+
     // Extract todo items from the note content
     const todoList = extractTodoList(noteContent);
+    console.log("Extracted todo items:", todoList);
+
+    // Convert string array to TodoItem array
+    const todoItems: TodoItem[] = todoList.length > 0
+      ? todoList.map((text, index) => ({
+          id: `todo-${Date.now()}-${index}`,
+          text,
+          status: "pending" as const,
+        }))
+      : [];
 
     const taskData = {
       title: `Follow-up: ${meetingTitle}`,
@@ -154,8 +174,8 @@ export const createTaskFromMeetingNote = async (
       type: "follow_up" as const,
       meetingId,
       priority,
-      assignee: assignee || null,
-      todoList: todoList.length > 0 ? todoList : [],
+      assignee: assignee || undefined,
+      todoList: todoItems,
       labels: [],
       tags: [],
       userId,
@@ -163,8 +183,12 @@ export const createTaskFromMeetingNote = async (
       updatedAt: serverTimestamp(),
     };
 
-    const docRef = await addDoc(collection(db, COLLECTION_NAME), taskData);
-    return docRef.id;
+    console.log("Task data to be created:", taskData);
+
+    // Use the regular createTask function to ensure consistency
+    const taskId = await createTask(userId, taskData);
+    console.log("Task created successfully with ID:", taskId);
+    return taskId;
   } catch (error) {
     console.error("Error creating task from meeting note:", error);
     throw error;

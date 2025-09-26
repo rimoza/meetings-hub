@@ -302,9 +302,14 @@ export function useMeetings() {
     noteId: string,
     newType: "regular" | "follow-up",
   ) => {
+    if (!user?.uid) {
+      setError("User not authenticated");
+      return;
+    }
+
     try {
       setError(null);
-      await updateMeetingNoteTypeFirebase(meetingId, noteId, newType);
+      await updateMeetingNoteTypeFirebase(user.uid, meetingId, noteId, newType);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);

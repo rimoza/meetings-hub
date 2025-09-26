@@ -385,6 +385,7 @@ export const addMeetingNote = async (
 
 // Update a note type in a meeting
 export const updateMeetingNoteType = async (
+  userId: string,
   meetingId: string,
   noteId: string,
   newType: "regular" | "follow-up",
@@ -394,7 +395,7 @@ export const updateMeetingNoteType = async (
   }
 
   try {
-    // First, get the current meeting to access its notes
+    // First, get the current meeting to access its notes and title
     const meetingRef = doc(db, COLLECTION_NAME, meetingId);
     const meetingDoc = await getDoc(meetingRef);
 
@@ -404,6 +405,14 @@ export const updateMeetingNoteType = async (
 
     const meetingData = meetingDoc.data();
     const currentNotes = meetingData.meetingNotes || [];
+
+    // Find the note being updated
+    const noteToUpdate = currentNotes.find((note: MeetingNote) => note.id === noteId);
+    if (!noteToUpdate) {
+      throw new Error("Note not found");
+    }
+
+    const oldType = noteToUpdate.type;
 
     // Find and update the specific note
     const updatedNotes = currentNotes.map((note: MeetingNote) => {
@@ -421,6 +430,21 @@ export const updateMeetingNoteType = async (
       meetingNotes: updatedNotes,
       updatedAt: serverTimestamp(),
     });
+
+    // If changing TO follow-up, create a task
+    if (newType === "follow-up" && oldType !== "follow-up") {
+      console.log("Creating follow-up task for note:", noteToUpdate.content);
+      await createTaskFromMeetingNote(
+        userId,
+        meetingId,
+        meetingData.title,
+        noteToUpdate.content,
+        meetingData.priority || "medium",
+        undefined, // assignee
+        undefined, // dueDate
+      );
+      console.log("Follow-up task created successfully");
+    }
 
     return noteId;
   } catch (error) {

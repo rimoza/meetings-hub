@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   ArrowLeft,
   Edit,
@@ -149,7 +150,13 @@ export default function MeetingDetailsPage() {
 
     try {
       await updateMeetingNoteType(meeting.id, noteId, newType);
-      toast.success(`Note type updated to ${newType}`);
+
+      if (newType === "follow-up") {
+        toast.success("Note updated to follow-up! 📝 A task has been created and added to your Tasks page.");
+      } else {
+        toast.success(`Note type updated to ${newType}`);
+      }
+
       // Let the real-time subscription handle the UI update naturally
       // The subscription will automatically update the meeting data
     } catch (error) {
@@ -625,6 +632,21 @@ export default function MeetingDetailsPage() {
                   {/* Notes list */}
                   {meeting.meetingNotes && meeting.meetingNotes.length > 0 ? (
                     <div className="space-y-3">
+                      {/* Quick link to tasks if there are follow-up notes */}
+                      {meeting.meetingNotes.some(note => note.type === "follow-up") && (
+                        <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-blue-700 dark:text-blue-300">
+                              📋 You have follow-up tasks from this meeting
+                            </span>
+                          </div>
+                          <Link href="/tasks">
+                            <Button variant="outline" size="sm" className="text-blue-700 border-blue-300 hover:bg-blue-100">
+                              View Tasks →
+                            </Button>
+                          </Link>
+                        </div>
+                      )}
                       {meeting.meetingNotes.map((note) => (
                         <div
                           key={note.id}
@@ -657,10 +679,16 @@ export default function MeetingDetailsPage() {
                                       <div className="flex items-center gap-2">
                                         <span>🔄</span>
                                         <span>Follow-up</span>
+                                        <span className="text-xs opacity-70">(Creates Task)</span>
                                       </div>
                                     </SelectItem>
                                   </SelectContent>
                                 </Select>
+                                {note.type === "follow-up" && (
+                                  <Badge variant="outline" className="text-xs px-1 py-0 h-5 bg-green-50 text-green-700 border-green-200">
+                                    📋 Task Created
+                                  </Badge>
+                                )}
                               </div>
                             </div>
                           </div>
