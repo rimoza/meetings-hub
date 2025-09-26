@@ -107,9 +107,9 @@ export function UpcomingMeetings({
       ) : (
         <MeetingTable
           meetings={sortedMeetings}
+          onChangeStatus={toggleMeetingCompletion}
           onEdit={onEditMeeting}
           onDelete={deleteMeeting}
-          onToggleComplete={toggleMeetingCompletion}
           nextMeetingId={nextMeeting?.id}
         />
       )}

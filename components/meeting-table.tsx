@@ -9,6 +9,8 @@ import {
   AlertCircle,
   ChevronDown,
   MoreHorizontal,
+  Edit,
+  Trash2,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,6 +41,8 @@ import Link from "next/link";
 interface MeetingTableProps {
   meetings: Meeting[];
   onChangeStatus: (meetingId: string, completed: boolean) => void;
+  onEdit?: (meeting: Meeting) => void;
+  onDelete?: (meetingId: string) => void;
   nextMeetingId?: string;
 }
 
@@ -69,6 +73,8 @@ const typeIcons = {
 export function MeetingTable({
   meetings,
   onChangeStatus,
+  onEdit,
+  onDelete,
   nextMeetingId,
 }: MeetingTableProps) {
 
@@ -105,6 +111,7 @@ export function MeetingTable({
               Priority
             </TableHead>
             <TableHead className="font-semibold text-center">Status</TableHead>
+            <TableHead className="font-semibold text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -294,6 +301,32 @@ export function MeetingTable({
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
+                </TableCell>
+
+                {/* Actions */}
+                <TableCell className="text-center">
+                  <div className="flex items-center justify-center gap-1">
+                    {onEdit && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onEdit(meeting)}
+                        className="h-8 w-8 p-0 hover:bg-blue-100 hover:text-blue-600"
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                    )}
+                    {onDelete && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onDelete(meeting.id)}
+                        className="h-8 w-8 p-0 hover:bg-red-100 hover:text-red-600"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
                 </TableCell>
 
               </TableRow>

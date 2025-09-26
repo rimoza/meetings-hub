@@ -159,6 +159,8 @@ export function MeetingsPageClient() {
           <MeetingTable
             meetings={filteredMeetings}
             onChangeStatus={handleToggleComplete}
+            onEdit={handleEditMeeting}
+            onDelete={handleDeleteMeeting}
             nextMeetingId={nextMeetingId}
           />
         ) : (
