@@ -382,3 +382,49 @@ export const addMeetingNote = async (
     throw error;
   }
 };
+
+// Update a note type in a meeting
+export const updateMeetingNoteType = async (
+  meetingId: string,
+  noteId: string,
+  newType: "regular" | "follow-up",
+) => {
+  if (!db) {
+    throw new Error("Firebase is not properly configured");
+  }
+
+  try {
+    // First, get the current meeting to access its notes
+    const meetingRef = doc(db, COLLECTION_NAME, meetingId);
+    const meetingDoc = await getDoc(meetingRef);
+
+    if (!meetingDoc.exists()) {
+      throw new Error("Meeting not found");
+    }
+
+    const meetingData = meetingDoc.data();
+    const currentNotes = meetingData.meetingNotes || [];
+
+    // Find and update the specific note
+    const updatedNotes = currentNotes.map((note: MeetingNote) => {
+      if (note.id === noteId) {
+        return {
+          ...note,
+          type: newType,
+        };
+      }
+      return note;
+    });
+
+    // Update meeting with updated notes
+    await updateDoc(meetingRef, {
+      meetingNotes: updatedNotes,
+      updatedAt: serverTimestamp(),
+    });
+
+    return noteId;
+  } catch (error) {
+    console.error("Error updating meeting note type:", error);
+    throw error;
+  }
+};

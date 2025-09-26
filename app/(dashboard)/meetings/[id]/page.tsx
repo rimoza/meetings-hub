@@ -70,7 +70,7 @@ export default function MeetingDetailsPage() {
   const meetingId = params.id as string;
 
   const { user, logout } = useAuth();
-  const { meetings, deleteMeeting, toggleMeetingCompletion, addMeetingNote } = useMeetings();
+  const { meetings, deleteMeeting, toggleMeetingCompletion, addMeetingNote, updateMeetingNoteType } = useMeetings();
 
   const [meeting, setMeeting] = useState<Meeting | null>(null);
   const [newNoteText, setNewNoteText] = useState("");
@@ -148,9 +148,10 @@ export default function MeetingDetailsPage() {
     if (!meeting) return;
 
     try {
-      // For now, we'll need to implement this in the Firebase functions
-      // This would require updating the specific note in the meetingNotes array
-      toast.info(`Note type updated to ${newType}`);
+      await updateMeetingNoteType(meeting.id, noteId, newType);
+      toast.success(`Note type updated to ${newType}`);
+      // Let the real-time subscription handle the UI update naturally
+      // The subscription will automatically update the meeting data
     } catch (error) {
       console.error("Error updating note type:", error);
       toast.error("Failed to update note type");

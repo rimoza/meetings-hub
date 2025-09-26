@@ -11,6 +11,7 @@ import {
   deleteMeeting as deleteMeetingFirebase,
   toggleMeetingCompletion as toggleMeetingFirebase,
   addMeetingNote as addMeetingNoteFirebase,
+  updateMeetingNoteType as updateMeetingNoteTypeFirebase,
 } from "@/lib/firebase/meetings";
 
 export function useMeetings() {
@@ -295,6 +296,26 @@ export function useMeetings() {
     }
   };
 
+  // Update a note type in a meeting
+  const updateMeetingNoteType = async (
+    meetingId: string,
+    noteId: string,
+    newType: "regular" | "follow-up",
+  ) => {
+    try {
+      setError(null);
+      await updateMeetingNoteTypeFirebase(meetingId, noteId, newType);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+        throw err;
+      } else {
+        setError("An unknown error occurred");
+        throw err;
+      }
+    }
+  };
+
   return {
     meetings,
     filteredMeetings,
@@ -309,6 +330,7 @@ export function useMeetings() {
     deleteMeeting,
     toggleMeetingCompletion,
     addMeetingNote,
+    updateMeetingNoteType,
     isLoading,
     error,
   };
