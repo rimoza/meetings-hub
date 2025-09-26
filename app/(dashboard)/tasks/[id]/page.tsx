@@ -76,6 +76,8 @@ export default function TaskDetailsPage() {
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const [newTodoText, setNewTodoText] = useState("");
   const [isAddingTodo, setIsAddingTodo] = useState(false);
+  const [updatingTodoIds, setUpdatingTodoIds] = useState<Set<string>>(new Set());
+  const [deletingTodoIds, setDeletingTodoIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const foundTask = tasks.find((t) => t.id === taskId);
@@ -127,18 +129,25 @@ export default function TaskDetailsPage() {
   ) => {
     if (!task) return;
 
+    // Prevent multiple rapid updates to the same todo
+    if (updatingTodoIds.has(todoId)) return;
+
+    setUpdatingTodoIds(prev => new Set(prev).add(todoId));
+
     try {
       await updateTodoStatus(task.id, todoId, status);
       toast.success(`Todo item status updated to ${status}`);
-
-      // Refresh the task data
-      const updatedTask = tasks.find((t) => t.id === taskId);
-      if (updatedTask) {
-        setTask(updatedTask);
-      }
+      // Let the real-time subscription handle the UI update naturally
+      // No need to manually refresh - the subscription will update the task data
     } catch (error) {
       console.error("Error updating todo status:", error);
       toast.error("Failed to update todo status");
+    } finally {
+      setUpdatingTodoIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(todoId);
+        return newSet;
+      });
     }
   };
 
@@ -146,16 +155,14 @@ export default function TaskDetailsPage() {
     if (!task || !newTodoText.trim()) return;
 
     setIsAddingTodo(true);
+    const todoText = newTodoText.trim(); // Store the text before clearing
+
     try {
-      await addTodoItem(task.id, newTodoText.trim());
+      await addTodoItem(task.id, todoText);
       toast.success("Todo item added successfully");
       setNewTodoText("");
-
-      // Refresh the task data
-      const updatedTask = tasks.find((t) => t.id === taskId);
-      if (updatedTask) {
-        setTask(updatedTask);
-      }
+      // Let the real-time subscription handle the UI update naturally
+      // The subscription will automatically add the new todo to the task
     } catch (error) {
       console.error("Error adding todo item:", error);
       toast.error("Failed to add todo item");
@@ -167,18 +174,25 @@ export default function TaskDetailsPage() {
   const handleDeleteTodo = async (todoId: string) => {
     if (!task) return;
 
+    // Prevent multiple rapid deletions of the same todo
+    if (deletingTodoIds.has(todoId)) return;
+
+    setDeletingTodoIds(prev => new Set(prev).add(todoId));
+
     try {
       await deleteTodoItem(task.id, todoId);
       toast.success("Todo item deleted successfully");
-
-      // Refresh the task data
-      const updatedTask = tasks.find((t) => t.id === taskId);
-      if (updatedTask) {
-        setTask(updatedTask);
-      }
+      // Let the real-time subscription handle the UI update naturally
+      // The subscription will automatically remove the todo from the task
     } catch (error) {
       console.error("Error deleting todo item:", error);
       toast.error("Failed to delete todo item");
+    } finally {
+      setDeletingTodoIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(todoId);
+        return newSet;
+      });
     }
   };
 
@@ -612,7 +626,11 @@ export default function TaskDetailsPage() {
                     disabled={isAddingTodo || !newTodoText.trim()}
                     size="icon"
                   >
-                    <Plus className="h-4 w-4" />
+                    {isAddingTodo ? (
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                    ) : (
+                      <Plus className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
 
@@ -651,6 +669,7 @@ export default function TaskDetailsPage() {
                           onValueChange={(
                             status: "pending" | "in_progress" | "completed",
                           ) => handleTodoStatusChange(todo.id, status)}
+                          disabled={updatingTodoIds.has(todo.id)}
                         >
                           <SelectTrigger className="w-32">
                             <SelectValue />
@@ -668,8 +687,13 @@ export default function TaskDetailsPage() {
                           size="icon"
                           className="opacity-0 group-hover:opacity-100 transition-opacity"
                           onClick={() => handleDeleteTodo(todo.id)}
+                          disabled={deletingTodoIds.has(todo.id)}
                         >
-                          <Trash2 className="h-4 w-4 text-destructive" />
+                          {deletingTodoIds.has(todo.id) ? (
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-destructive border-t-transparent" />
+                          ) : (
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          )}
                         </Button>
                       </div>
                     ))}
