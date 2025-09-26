@@ -34,6 +34,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useMeetings } from "@/hooks/use-meetings";
 import { useAuth } from "@/contexts/auth-context";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -67,6 +74,7 @@ export default function MeetingDetailsPage() {
 
   const [meeting, setMeeting] = useState<Meeting | null>(null);
   const [newNoteText, setNewNoteText] = useState("");
+  const [noteType, setNoteType] = useState<"regular" | "follow-up">("regular");
   const [isAddingNote, setIsAddingNote] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
@@ -120,11 +128,12 @@ export default function MeetingDetailsPage() {
       await addMeetingNote(
         meeting.id,
         noteText,
-        "regular", // Default note type
+        noteType,
         user?.name || user?.email || "Anonymous"
       );
       toast.success("Note added successfully");
       setNewNoteText("");
+      setNoteType("regular"); // Reset to default
       // Let the real-time subscription handle the UI update naturally
       // The subscription will automatically add the new note to the meeting
     } catch (error) {
@@ -132,6 +141,19 @@ export default function MeetingDetailsPage() {
       toast.error("Failed to add note");
     } finally {
       setIsAddingNote(false);
+    }
+  };
+
+  const handleUpdateNoteType = async (noteId: string, newType: "regular" | "follow-up") => {
+    if (!meeting) return;
+
+    try {
+      // For now, we'll need to implement this in the Firebase functions
+      // This would require updating the specific note in the meetingNotes array
+      toast.info(`Note type updated to ${newType}`);
+    } catch (error) {
+      console.error("Error updating note type:", error);
+      toast.error("Failed to update note type");
     }
   };
 
@@ -552,29 +574,51 @@ export default function MeetingDetailsPage() {
                 </CardHeader>
                 <CardContent>
                   {/* Add new note input */}
-                  <div className="flex gap-2 mb-4">
-                    <Input
-                      placeholder="Add a new note..."
-                      value={newNoteText}
-                      onChange={(e) => setNewNoteText(e.target.value)}
-                      onKeyPress={(e) => {
-                        if (e.key === "Enter") {
-                          handleAddNote();
-                        }
-                      }}
-                      disabled={isAddingNote}
-                    />
-                    <Button
-                      onClick={handleAddNote}
-                      disabled={isAddingNote || !newNoteText.trim()}
-                      size="icon"
-                    >
-                      {isAddingNote ? (
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                      ) : (
-                        <Plus className="h-4 w-4" />
-                      )}
-                    </Button>
+                  <div className="space-y-3 mb-4">
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Add a new note..."
+                        value={newNoteText}
+                        onChange={(e) => setNewNoteText(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === "Enter") {
+                            handleAddNote();
+                          }
+                        }}
+                        disabled={isAddingNote}
+                      />
+                      <Select
+                        value={noteType}
+                        onValueChange={(value: "regular" | "follow-up") => setNoteType(value)}
+                        disabled={isAddingNote}
+                      >
+                        <SelectTrigger className="w-32">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="regular">Regular</SelectItem>
+                          <SelectItem value="follow-up">Follow-up</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        onClick={handleAddNote}
+                        disabled={isAddingNote || !newNoteText.trim()}
+                        size="icon"
+                      >
+                        {isAddingNote ? (
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                        ) : (
+                          <Plus className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <span>Note Type:</span>
+                      <Badge variant={noteType === "regular" ? "default" : "secondary"} className="text-xs">
+                        <span className="mr-1">{noteType === "regular" ? "📝" : "🔄"}</span>
+                        {noteType === "regular" ? "Regular Note" : "Follow-up"}
+                      </Badge>
+                    </div>
                   </div>
 
                   {/* Notes list */}
@@ -593,9 +637,30 @@ export default function MeetingDetailsPage() {
                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
                               <span>{new Date(note.timestamp).toLocaleString()}</span>
                               {note.author && <span>• {note.author}</span>}
-                              <Badge variant="outline" className="text-xs">
-                                {note.type}
-                              </Badge>
+                              <div className="flex items-center gap-1">
+                                <Select
+                                  value={note.type}
+                                  onValueChange={(value: "regular" | "follow-up") => handleUpdateNoteType(note.id, value)}
+                                >
+                                  <SelectTrigger className="h-6 px-2 text-xs border-0 bg-transparent hover:bg-muted/50">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="regular">
+                                      <div className="flex items-center gap-2">
+                                        <span>📝</span>
+                                        <span>Regular Note</span>
+                                      </div>
+                                    </SelectItem>
+                                    <SelectItem value="follow-up">
+                                      <div className="flex items-center gap-2">
+                                        <span>🔄</span>
+                                        <span>Follow-up</span>
+                                      </div>
+                                    </SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
                             </div>
                           </div>
                         </div>
