@@ -158,9 +158,7 @@ export function MeetingsPageClient() {
         {viewMode === "table" ? (
           <MeetingTable
             meetings={filteredMeetings}
-            onEdit={handleEditMeeting}
-            onDelete={handleDeleteMeeting}
-            onToggleComplete={handleToggleComplete}
+            onChangeStatus={handleToggleComplete}
             nextMeetingId={nextMeetingId}
           />
         ) : (

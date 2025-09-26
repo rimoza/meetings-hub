@@ -5,13 +5,10 @@ import {
   Clock,
   MapPin,
   Users,
-  Edit,
-  Trash2,
   CheckCircle2,
-  XCircle,
-  MoreHorizontal,
   AlertCircle,
-  Eye,
+  ChevronDown,
+  MoreHorizontal,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,30 +20,25 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { DeleteConfirmDialog } from "@/components/ui/confirm-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
-import { useRouter } from "next/navigation";
 import type { Meeting } from "@/types/meeting";
 import { format } from "date-fns";
 import Link from "next/link";
 
 interface MeetingTableProps {
   meetings: Meeting[];
-  onEdit: (meeting: Meeting) => void;
-  onDelete: (id: string) => void;
-  onToggleComplete: (id: string) => void;
+  onChangeStatus: (meetingId: string, completed: boolean) => void;
   nextMeetingId?: string;
 }
 
@@ -76,12 +68,9 @@ const typeIcons = {
 
 export function MeetingTable({
   meetings,
-  onEdit,
-  onDelete,
-  onToggleComplete,
+  onChangeStatus,
   nextMeetingId,
 }: MeetingTableProps) {
-  const router = useRouter();
 
   return (
     <div className="rounded-lg border bg-card overflow-hidden">
@@ -116,9 +105,6 @@ export function MeetingTable({
               Priority
             </TableHead>
             <TableHead className="font-semibold text-center">Status</TableHead>
-            <TableHead className="font-semibold text-center w-[120px]">
-              Actions
-            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -266,94 +252,50 @@ export function MeetingTable({
 
                 {/* Status */}
                 <TableCell className="text-center">
-                  {meeting.completed ? (
-                    <Badge
-                      variant="default"
-                      className="text-xs bg-emerald-500 hover:bg-emerald-600"
-                    >
-                      <CheckCircle2 className="h-3 w-3 mr-1" />
-                      Done
-                    </Badge>
-                  ) : isOverdue ? (
-                    <Badge variant="destructive" className="text-xs">
-                      <AlertCircle className="h-3 w-3 mr-1" />
-                      Overdue
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="text-xs">
-                      <Clock className="h-3 w-3 mr-1" />
-                      Pending
-                    </Badge>
-                  )}
-                </TableCell>
-
-                {/* Actions */}
-                <TableCell>
-                  <div className="flex items-center justify-center gap-2">
-                    {/* Actions Dropdown Menu */}
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0 hover:bg-muted"
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-40">
-                        <DropdownMenuItem
-                          onClick={() => router.push(`/meetings/${meeting.id}`)}
-                          className="cursor-pointer"
-                        >
-                          <Eye className="h-4 w-4 mr-2" />
-                          View Details
-                        </DropdownMenuItem>
-
-                        <DropdownMenuItem
-                          onClick={() => onEdit(meeting)}
-                          className="cursor-pointer"
-                        >
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit Meeting
-                        </DropdownMenuItem>
-
-                        <DropdownMenuItem
-                          onClick={() => onToggleComplete(meeting.id)}
-                          className="cursor-pointer"
-                        >
-                          {meeting.completed ? (
-                            <>
-                              <XCircle className="h-4 w-4 mr-2" />
-                              Mark as Pending
-                            </>
-                          ) : (
-                            <>
-                              <CheckCircle2 className="h-4 w-4 mr-2" />
-                              Mark as Complete
-                            </>
-                          )}
-                        </DropdownMenuItem>
-
-                        <DropdownMenuSeparator />
-
-                        <DeleteConfirmDialog
-                          itemName={meeting.title}
-                          itemType="meeting"
-                          onConfirm={() => onDelete(meeting.id)}
-                        >
-                          <DropdownMenuItem
-                            className="cursor-pointer text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400"
-                            onSelect={(e) => e.preventDefault()}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-auto p-0 hover:bg-transparent">
+                        {meeting.completed ? (
+                          <Badge
+                            variant="default"
+                            className="text-xs bg-emerald-500 hover:bg-emerald-600 cursor-pointer"
                           >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete Meeting
-                          </DropdownMenuItem>
-                        </DeleteConfirmDialog>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
+                            <CheckCircle2 className="h-3 w-3 mr-1" />
+                            Done
+                            <ChevronDown className="h-3 w-3 ml-1" />
+                          </Badge>
+                        ) : isOverdue ? (
+                          <Badge variant="destructive" className="text-xs cursor-pointer">
+                            <AlertCircle className="h-3 w-3 mr-1" />
+                            Overdue
+                            <ChevronDown className="h-3 w-3 ml-1" />
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-xs cursor-pointer">
+                            <Clock className="h-3 w-3 mr-1" />
+                            Pending
+                            <ChevronDown className="h-3 w-3 ml-1" />
+                          </Badge>
+                        )}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="center">
+                      <DropdownMenuItem
+                        onClick={() => onChangeStatus(meeting.id, true)}
+                      >
+                        <CheckCircle2 className="h-4 w-4 mr-2" />
+                        Mark as Complete
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => onChangeStatus(meeting.id, false)}
+                      >
+                        <Clock className="h-4 w-4 mr-2" />
+                        Mark as Pending
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
+
               </TableRow>
             );
           })}
