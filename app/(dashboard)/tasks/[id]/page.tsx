@@ -59,6 +59,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { ProtectedRoute } from "@/components/protected-route";
 import type { Task } from "@/types/task";
 import { toast } from "sonner";
@@ -78,6 +86,7 @@ export default function TaskDetailsPage() {
   const [isAddingTodo, setIsAddingTodo] = useState(false);
   const [updatingTodoIds, setUpdatingTodoIds] = useState<Set<string>>(new Set());
   const [deletingTodoIds, setDeletingTodoIds] = useState<Set<string>>(new Set());
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     const foundTask = tasks.find((t) => t.id === taskId);
@@ -91,11 +100,20 @@ export default function TaskDetailsPage() {
   };
 
   const handleDelete = () => {
-    if (task && confirm("Are you sure you want to delete this task?")) {
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (task) {
       deleteTask(task.id);
       toast.success("Task deleted successfully");
       router.push("/tasks");
     }
+    setIsDeleteDialogOpen(false);
+  };
+
+  const handleCancelDelete = () => {
+    setIsDeleteDialogOpen(false);
   };
 
   const handleToggleComplete = () => {
@@ -940,6 +958,55 @@ export default function TaskDetailsPage() {
           </div>
         </main>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <Trash2 className="h-5 w-5" />
+              Delete Task
+            </DialogTitle>
+            <DialogDescription className="text-left">
+              Are you sure you want to delete this task? This action cannot be undone and will permanently remove the task and all its associated data.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4">
+            <div className="rounded-lg bg-muted/50 p-4 border border-destructive/20">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
+                  <AlertCircle className="h-5 w-5 text-destructive" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium text-foreground">{task?.title}</p>
+                  <p className="text-sm text-muted-foreground">
+                    This task will be permanently deleted
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={handleCancelDelete}
+              className="hover:bg-muted/80"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmDelete}
+              className="hover:bg-destructive/90"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete Task
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Edit Task Form */}
       <TaskForm
