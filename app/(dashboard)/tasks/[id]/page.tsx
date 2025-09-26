@@ -10,7 +10,6 @@ import {
   Clock,
   AlertCircle,
   Calendar,
-  User,
   Tag,
   Hash,
   LogOut,
@@ -18,6 +17,18 @@ import {
   CheckCircle,
   X,
   Plus,
+  Target,
+  Award,
+  Zap,
+  Flame,
+  Sparkles,
+  Timer,
+  Activity,
+  BarChart3,
+  CalendarDays,
+  Users,
+  FileText,
+  Link as LinkIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -236,51 +247,113 @@ export default function TaskDetailsPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen w-full max-w-4xl mx-auto bg-background">
-        {/* Header with Back Button */}
-        <header className="border-b bg-card sticky top-0 z-50">
-          <div className="px-6 py-4">
-            <div className="flex items-center justify-between">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+        {/* Modern Header with Glass Effect */}
+        <header className="sticky top-0 z-50 backdrop-blur-md bg-background/80 border-b border-border/50">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              {/* Left Section - Navigation */}
               <div className="flex items-center gap-4">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => router.push("/tasks")}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 hover:bg-muted/50 transition-colors"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  <span className="hidden sm:inline">Back to Tasks</span>
+                  <span className="hidden sm:inline font-medium">Back to Tasks</span>
                   <span className="sm:hidden">Back</span>
                 </Button>
-                <div className="flex-1 min-w-0">
-                  <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground truncate">
-                    {task.title}
-                  </h1>
-                  <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
-                    Task Details
-                  </p>
+
+                {/* Task Title with Creative Badge */}
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-1 bg-gradient-to-b from-primary to-primary/50 rounded-full"></div>
+                  <div>
+                    <h1 className="text-xl font-bold text-foreground truncate max-w-md">
+                      {task.title}
+                    </h1>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Badge
+                        variant="secondary"
+                        className={`${getStatusColor(task.status)} border-0 text-xs font-medium animate-pulse`}
+                      >
+                        {getStatusIcon(task.status)}
+                        <span className="ml-1 capitalize">
+                          {task.status.replace("_", " ")}
+                        </span>
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        className={`${getPriorityColor(task.priority)} border-0 text-xs`}
+                      >
+                        {task.priority === "high" && <Flame className="h-3 w-3 mr-1" />}
+                        {task.priority === "medium" && <Zap className="h-3 w-3 mr-1" />}
+                        {task.priority === "low" && <Target className="h-3 w-3 mr-1" />}
+                        {task.priority} priority
+                      </Badge>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Action buttons and User Menu */}
+              {/* Right Section - Actions */}
               <div className="flex items-center gap-2">
-                <Button
-                  onClick={handleEdit}
-                  size="sm"
-                  variant="outline"
-                  className="hidden sm:inline-flex"
-                >
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit
-                </Button>
-                <Button
-                  onClick={handleEdit}
-                  size="icon"
-                  variant="outline"
-                  className="sm:hidden h-8 w-8"
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
+                {/* Quick Actions */}
+                <div className="hidden sm:flex items-center gap-1">
+                  <Button
+                    onClick={handleToggleComplete}
+                    variant={task.status === "completed" ? "default" : "outline"}
+                    size="sm"
+                    className="hover:scale-105 transition-transform"
+                  >
+                    {task.status === "completed" ? (
+                      <>
+                        <Award className="h-4 w-4 mr-2" />
+                        Completed!
+                      </>
+                    ) : (
+                      <>
+                        <CheckSquare className="h-4 w-4 mr-2" />
+                        Complete
+                      </>
+                    )}
+                  </Button>
+
+                  <Button
+                    onClick={handleEdit}
+                    variant="outline"
+                    size="sm"
+                    className="hover:scale-105 transition-transform"
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit
+                  </Button>
+                </div>
+
+                {/* Mobile Actions */}
+                <div className="sm:hidden flex items-center gap-1">
+                  <Button
+                    onClick={handleToggleComplete}
+                    variant={task.status === "completed" ? "default" : "outline"}
+                    size="icon"
+                    className="h-8 w-8"
+                  >
+                    {task.status === "completed" ? (
+                      <Award className="h-4 w-4" />
+                    ) : (
+                      <CheckSquare className="h-4 w-4" />
+                    )}
+                  </Button>
+
+                  <Button
+                    onClick={handleEdit}
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                </div>
 
                 <ThemeToggle />
 
@@ -290,7 +363,7 @@ export default function TaskDetailsPage() {
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="ghost"
-                        className="relative h-9 w-9 rounded-full bg-primary/10"
+                        className="relative h-9 w-9 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 hover:from-primary/30 hover:to-primary/10 transition-all"
                       >
                         <UserIcon className="h-4 w-4" />
                         <span className="sr-only">Toggle user menu</span>
@@ -323,96 +396,191 @@ export default function TaskDetailsPage() {
           </div>
         </header>
 
-        {/* Main Content Area */}
-        <main className="w-full max-w-4xl mx-auto my-4">
-          <div className="w-full space-y-6">
-            {/* Task Overview Card */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="space-y-2">
-                    <CardTitle className="text-2xl">{task.title}</CardTitle>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Badge
-                        variant="secondary"
-                        className={`${getStatusColor(task.status)} border-0`}
-                      >
-                        {getStatusIcon(task.status)}
-                        <span className="ml-1 capitalize">
-                          {task.status.replace("_", " ")}
+        {/* Hero Section with Task Overview */}
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Progress Overview Hero */}
+          <div className="mb-8">
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 via-background to-secondary/5 border border-border/50">
+              <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+              <div className="relative p-8">
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                  {/* Left Side - Task Info */}
+                  <div className="flex-1 space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                          task.status === "completed" ? "bg-green-500/20" :
+                          task.status === "in_progress" ? "bg-blue-500/20" :
+                          task.status === "cancelled" ? "bg-red-500/20" :
+                          "bg-yellow-500/20"
+                        }`}>
+                          {getStatusIcon(task.status)}
+                        </div>
+                        {task.status === "completed" && (
+                          <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                            <Sparkles className="w-3 h-3 text-white" />
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <h2 className="text-3xl font-bold text-foreground">{task.title}</h2>
+                        <p className="text-muted-foreground flex items-center gap-2">
+                          <Activity className="h-4 w-4" />
+                          Task Overview & Progress
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="font-medium">Progress</span>
+                        <span className="text-muted-foreground">
+                          {task.todoList ? `${task.todoList.filter(t => t.status === "completed").length}/${task.todoList.length}` : "0/0"} completed
                         </span>
-                      </Badge>
-                      <Badge
-                        variant="outline"
-                        className={`${getPriorityColor(task.priority)} border-0`}
-                      >
-                        {task.priority} priority
-                      </Badge>
-                      <Badge variant="outline">
-                        {task.type === "follow_up" ? "Follow Up" : "Task"}
-                      </Badge>
+                      </div>
+                      <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
+                        <div
+                          className={`h-full transition-all duration-1000 ease-out ${
+                            task.status === "completed" ? "bg-green-500" :
+                            task.status === "in_progress" ? "bg-blue-500" :
+                            task.status === "cancelled" ? "bg-red-500" :
+                            "bg-yellow-500"
+                          }`}
+                          style={{
+                            width: task.todoList && task.todoList.length > 0
+                              ? `${(task.todoList.filter(t => t.status === "completed").length / task.todoList.length) * 100}%`
+                              : task.status === "completed" ? "100%" : "0%"
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={handleToggleComplete}
-                      variant={
-                        task.status === "completed" ? "default" : "outline"
-                      }
-                      size="sm"
-                    >
-                      <CheckSquare className="h-4 w-4 mr-2" />
-                      {task.status === "completed"
-                        ? "Completed"
-                        : "Mark Complete"}
-                    </Button>
-                    <Button
-                      onClick={handleDelete}
-                      variant="destructive"
-                      size="sm"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+
+                  {/* Right Side - Quick Stats */}
+                  <div className="flex flex-col sm:flex-row lg:flex-col gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-4">
+                      <div className="text-center p-4 rounded-xl bg-card border border-border/50">
+                        <div className="text-2xl font-bold text-primary">
+                          {task.todoList ? task.todoList.filter(t => t.status === "completed").length : 0}
+                        </div>
+                        <div className="text-xs text-muted-foreground">Completed</div>
+                      </div>
+                      <div className="text-center p-4 rounded-xl bg-card border border-border/50">
+                        <div className="text-2xl font-bold text-orange-500">
+                          {task.todoList ? task.todoList.filter(t => t.status === "in_progress").length : 0}
+                        </div>
+                        <div className="text-xs text-muted-foreground">In Progress</div>
+                      </div>
+                      <div className="text-center p-4 rounded-xl bg-card border border-border/50">
+                        <div className="text-2xl font-bold text-blue-500">
+                          {task.todoList ? task.todoList.filter(t => t.status === "pending").length : 0}
+                        </div>
+                        <div className="text-xs text-muted-foreground">Pending</div>
+                      </div>
+                      <div className="text-center p-4 rounded-xl bg-card border border-border/50">
+                        <div className="text-2xl font-bold text-purple-500">
+                          {task.priority === "high" ? "🔥" : task.priority === "medium" ? "⚡" : "🎯"}
+                        </div>
+                        <div className="text-xs text-muted-foreground">Priority</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {task.description && (
-                  <div>
-                    <h3 className="font-semibold mb-2">Description</h3>
-                    <p className="text-muted-foreground">{task.description}</p>
-                  </div>
-                )}
+              </div>
+            </div>
+          </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">
-                      Due: {new Date(task.date).toLocaleDateString()}
-                    </span>
-                  </div>
-                  {task.assignee && (
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">Assignee: {task.assignee}</span>
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column - Main Content */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Task Details Card */}
+              <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-2 text-xl">
+                    <FileText className="h-5 w-5 text-primary" />
+                    Task Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {task.description && (
+                    <div className="space-y-3">
+                      <h3 className="font-semibold text-foreground flex items-center gap-2">
+                        <FileText className="h-4 w-4" />
+                        Description
+                      </h3>
+                      <p className="text-muted-foreground leading-relaxed bg-muted/30 p-4 rounded-lg">
+                        {task.description}
+                      </p>
                     </div>
                   )}
-                </div>
 
-                {relatedMeeting && (
-                  <div>
-                    <h3 className="font-semibold mb-2">Related Meeting</h3>
-                    <Card className="p-3">
-                      <p className="font-medium">{relatedMeeting.title}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(relatedMeeting.date).toLocaleDateString()} at{" "}
-                        {relatedMeeting.time}
-                      </p>
-                    </Card>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <h4 className="font-medium text-foreground flex items-center gap-2">
+                        <CalendarDays className="h-4 w-4 text-primary" />
+                        Schedule
+                      </h4>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Timer className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-muted-foreground">Due Date:</span>
+                          <span className="font-medium">{new Date(task.date).toLocaleDateString()}</span>
+                        </div>
+                        {task.assignee && (
+                          <div className="flex items-center gap-2 text-sm">
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-muted-foreground">Assignee:</span>
+                            <span className="font-medium">{task.assignee}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <h4 className="font-medium text-foreground flex items-center gap-2">
+                        <BarChart3 className="h-4 w-4 text-primary" />
+                        Status & Priority
+                      </h4>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Badge className={`${getStatusColor(task.status)} border-0`}>
+                            {getStatusIcon(task.status)}
+                            <span className="ml-1 capitalize">
+                              {task.status.replace("_", " ")}
+                            </span>
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge className={`${getPriorityColor(task.priority)} border-0`}>
+                            {task.priority === "high" && <Flame className="h-3 w-3" />}
+                            {task.priority === "medium" && <Zap className="h-3 w-3" />}
+                            {task.priority === "low" && <Target className="h-3 w-3" />}
+                            {task.priority} priority
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
+
+                  {relatedMeeting && (
+                    <div className="space-y-3">
+                      <h3 className="font-semibold text-foreground flex items-center gap-2">
+                        <LinkIcon className="h-4 w-4 text-primary" />
+                        Related Meeting
+                      </h3>
+                      <Card className="p-4 bg-muted/30 border-dashed">
+                        <p className="font-medium text-foreground">{relatedMeeting.title}</p>
+                        <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
+                          <Calendar className="h-3 w-3" />
+                          {new Date(relatedMeeting.date).toLocaleDateString()} at {relatedMeeting.time}
+                        </p>
+                      </Card>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
             {/* Todo List */}
             <Card>
@@ -593,6 +761,158 @@ export default function TaskDetailsPage() {
                 </div>
               </CardContent>
             </Card>
+            </div>
+
+            {/* Right Column - Sidebar */}
+            <div className="space-y-6">
+              {/* Labels and Tags Card */}
+              {((task.labels && task.labels.length > 0) ||
+                (task.tags && task.tags.length > 0)) && (
+                <Card className="border-border/50 shadow-sm">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Tag className="h-5 w-5 text-primary" />
+                      Labels & Tags
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {task.labels && task.labels.length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-3">
+                          <Tag className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm font-medium">Labels</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {task.labels.map((label) => (
+                            <Badge key={label} variant="secondary" className="hover:scale-105 transition-transform">
+                              {label}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {task.tags && task.tags.length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-3">
+                          <Hash className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm font-medium">Tags</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {task.tags.map((tag) => (
+                            <Badge key={tag} variant="outline" className="hover:scale-105 transition-transform">
+                              #{tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Task Information Card */}
+              <Card className="border-border/50 shadow-sm">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Activity className="h-5 w-5 text-primary" />
+                    Task Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4 text-sm">
+                    <div className="flex justify-between items-center p-3 rounded-lg bg-muted/30">
+                      <span className="font-medium flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-primary" />
+                        Created
+                      </span>
+                      <span className="text-muted-foreground">
+                        {new Date(task.createdAt).toLocaleString()}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center p-3 rounded-lg bg-muted/30">
+                      <span className="font-medium flex items-center gap-2">
+                        <Timer className="h-4 w-4 text-primary" />
+                        Last Updated
+                      </span>
+                      <span className="text-muted-foreground">
+                        {new Date(task.updatedAt).toLocaleString()}
+                      </span>
+                    </div>
+
+                    {task.completedAt && (
+                      <div className="flex justify-between items-center p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+                        <span className="font-medium flex items-center gap-2 text-green-700 dark:text-green-300">
+                          <Award className="h-4 w-4" />
+                          Completed
+                        </span>
+                        <span className="text-green-600 dark:text-green-400">
+                          {new Date(task.completedAt).toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="flex justify-between items-center p-3 rounded-lg bg-muted/30">
+                      <span className="font-medium flex items-center gap-2">
+                        <Hash className="h-4 w-4 text-primary" />
+                        Task ID
+                      </span>
+                      <span className="text-muted-foreground font-mono text-xs">
+                        {task.id}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Quick Actions Card */}
+              <Card className="border-border/50 shadow-sm">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Zap className="h-5 w-5 text-primary" />
+                    Quick Actions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button
+                    onClick={handleToggleComplete}
+                    variant={task.status === "completed" ? "default" : "outline"}
+                    className="w-full justify-start hover:scale-[1.02] transition-all"
+                  >
+                    {task.status === "completed" ? (
+                      <>
+                        <Award className="h-4 w-4 mr-2" />
+                        Task Completed! 🎉
+                      </>
+                    ) : (
+                      <>
+                        <CheckSquare className="h-4 w-4 mr-2" />
+                        Mark as Complete
+                      </>
+                    )}
+                  </Button>
+
+                  <Button
+                    onClick={handleEdit}
+                    variant="outline"
+                    className="w-full justify-start hover:scale-[1.02] transition-all"
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit Task
+                  </Button>
+
+                  <Button
+                    onClick={handleDelete}
+                    variant="destructive"
+                    className="w-full justify-start hover:scale-[1.02] transition-all"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Task
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </main>
       </div>
