@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  MoreHorizontal,
   Calendar,
   User,
   CheckCircle,
@@ -9,10 +8,7 @@ import {
   XCircle,
   PlayCircle,
   Flag,
-  Eye,
 } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -22,29 +18,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import type { Task } from "@/types/task";
 
 interface TaskTableProps {
   tasks: Task[];
-  onEdit: (task: Task) => void;
-  onDelete: (taskId: string) => void;
-  onToggleComplete: (taskId: string) => void;
-  onChangeStatus?: (taskId: string, status: Task["status"]) => void;
 }
 
 
 export function TaskTable({
   tasks,
-  onEdit,
-  onDelete,
-  onChangeStatus,
 }: Readonly<TaskTableProps>) {
 
   const getStatusIcon = (status: Task["status"]) => {
@@ -77,11 +59,6 @@ export function TaskTable({
     return new Date(dateString).toLocaleDateString();
   };
 
-  const handleStatusChange = (taskId: string, newStatus: Task["status"]) => {
-    if (onChangeStatus) {
-      onChangeStatus(taskId, newStatus);
-    }
-  };
 
   return (
     <div className="rounded-lg border bg-card overflow-hidden">
@@ -120,7 +97,6 @@ export function TaskTable({
               </div>
             </TableHead>
             <TableHead className="font-semibold">Labels</TableHead>
-            <TableHead className="font-semibold text-center w-[120px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
             <TableBody>
@@ -143,16 +119,15 @@ export function TaskTable({
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
-                      <Link
-                        href={`/tasks/${task.id}`}
-                        className={`font-medium text-sm hover:underline ${
+                      <div
+                        className={`font-medium text-sm ${
                           task.status === "completed"
                             ? "line-through text-muted-foreground"
                             : ""
                         }`}
                       >
                         {task.title}
-                      </Link>
+                      </div>
                       {task.description && (
                         <div className="text-xs text-muted-foreground line-clamp-1">
                           {task.description}
@@ -226,60 +201,6 @@ export function TaskTable({
                         </Badge>
                       )}
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild>
-                          <Link href={`/tasks/${task.id}`}>
-                            <Eye className="h-4 w-4 mr-2" />
-                            View Details
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onEdit(task)}>
-                          Edit Task
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => handleStatusChange(task.id, "pending")}
-                        >
-                          Mark as Pending
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() =>
-                            handleStatusChange(task.id, "in_progress")
-                          }
-                        >
-                          Mark as In Progress
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() =>
-                            handleStatusChange(task.id, "completed")
-                          }
-                        >
-                          Mark as Completed
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() =>
-                            handleStatusChange(task.id, "cancelled")
-                          }
-                        >
-                          Mark as Cancelled
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => onDelete(task.id)}
-                          className="text-red-600 dark:text-red-400"
-                        >
-                          Delete Task
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
                 );

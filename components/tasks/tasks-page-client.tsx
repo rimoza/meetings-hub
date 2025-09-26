@@ -278,9 +278,6 @@ export function TasksPageClient() {
           ) : (
             <TaskTable
               tasks={filteredTasks}
-              onEdit={handleEditTask}
-              onDelete={handleDeleteTask}
-              onToggleComplete={handleToggleCompletion}
             />
           )}
         </main>
