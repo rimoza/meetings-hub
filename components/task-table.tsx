@@ -10,6 +10,7 @@ import {
   Flag,
   ChevronDown,
 } from "lucide-react";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -162,15 +163,16 @@ export function TaskTable({
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
-                      <div
-                        className={`font-medium text-sm ${
+                      <Link
+                        href={`/tasks/${task.id}`}
+                        className={`font-medium text-sm hover:underline ${
                           task.status === "completed"
                             ? "line-through text-muted-foreground"
-                            : ""
+                            : "text-foreground"
                         }`}
                       >
                         {task.title}
-                      </div>
+                      </Link>
                       {task.description && (
                         <div className="text-xs text-muted-foreground line-clamp-1">
                           {task.description}
